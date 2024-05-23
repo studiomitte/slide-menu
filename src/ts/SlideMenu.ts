@@ -54,6 +54,7 @@ class SlideMenu {
     control: `${SlideMenu.NAMESPACE}__control`,
     decorator: `${SlideMenu.NAMESPACE}__decorator`,
     wrapper: `${SlideMenu.NAMESPACE}__slider`,
+    item: `${SlideMenu.NAMESPACE}__item`,
   };
 
   private level: number = 0;
@@ -422,7 +423,7 @@ class SlideMenu {
 
         const backLink = document.createElement('a');
         backLink.innerHTML = backLinkBefore + anchorText + backLinkAfter;
-        backLink.classList.add(SlideMenu.CLASS_NAMES.backlink, SlideMenu.CLASS_NAMES.control);
+        backLink.classList.add(SlideMenu.CLASS_NAMES.backlink, SlideMenu.CLASS_NAMES.control, SlideMenu.CLASS_NAMES.item);
         backLink.setAttribute('data-action', Action.Back);
 
         const backLinkLi = document.createElement('li');

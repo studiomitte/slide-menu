@@ -25,26 +25,26 @@ $sm-transition-easing: ease-in-out !default;
     will-change: transform;
   }
 
-  ul {
+  &__list {
     position: relative;
     width: 100%;
     margin: 0;
     padding-left: 0;
     list-style: none;
 
-    ul {
+    .slide-menu__list {
       position: absolute;
       top: 0;
       left: 100%;
       display: none;
     }
 
-    a {
+    .slide-menu__item {
       display: block;
     }
   }
 
-  a {
+  &__item {
     cursor: pointer;
   }
 }
