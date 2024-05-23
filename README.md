@@ -159,14 +159,16 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 ## Development
 
 ```sh
+ddev start
+ddev ssh -s frontend
 yarn install
-yarn start:dev
+npx vite --port 8080
 ```
 
-Open http://localhost:9000/.
+Open https://slide-menu.frontend.ddev.site:9999/.
 
 To create a production build:
 
 ```sh
-yarn build
+npx vite build
 ```
