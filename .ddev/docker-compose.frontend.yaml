@@ -1,0 +1,33 @@
+##############################
+# service used for frontend build
+###############################
+
+version: '3.6'
+services:
+  frontend: 
+      container_name: ddev-${DDEV_SITENAME}-frontend
+      image: node:20-alpine
+      working_dir: /home/node/app
+      labels:
+        com.ddev.site-name: ${DDEV_SITENAME}
+        com.ddev.approot: $DDEV_APPROOT
+      volumes:
+        - ../:/home/node/app:delegated
+        - type: "bind"
+          source: "."
+          target: "/mnt/ddev_config"
+        
+
+      # need running process to prevent stopping of container
+      stdin_open: true
+      tty: true
+
+      expose: 
+        - 8080
+
+      environment:
+        - VIRTUAL_HOST=slide-menu.frontend.ddev.site
+        - HTTP_EXPOSE=9998:8080
+        - HTTPS_EXPOSE=9999:8080
+        - NODE_ENV=development
+
