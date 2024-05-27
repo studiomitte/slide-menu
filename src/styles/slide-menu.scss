@@ -18,33 +18,42 @@ $sm-transition-easing: ease-in-out !default;
   will-change: transform;
   z-index: 1000;
 
-  .slide-menu__slider {
+  &--fold-open {
+    overflow-y: visible;
+  }
+
+  &__slider {
     width: 100%;
     transition: transform $sm-transition-dur $sm-transition-easing;
     transform: translateX(0);
     will-change: transform;
   }
 
-  &__list {
+  ul {
     position: relative;
     width: 100%;
     margin: 0;
     padding-left: 0;
     list-style: none;
+    // display: none;
 
-    .slide-menu__list {
+    ul {
       position: absolute;
       top: 0;
       left: 100%;
       display: none;
     }
+    
+    &.slide-menu--active {
+      display: block;
+    }
 
-    .slide-menu__item {
+    a {
       display: block;
     }
   }
 
-  &__item {
+  a {
     cursor: pointer;
   }
 }

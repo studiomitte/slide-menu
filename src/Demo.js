@@ -33,6 +33,10 @@ document.addEventListener('DOMContentLoaded', function () {
         position: 'left',
         submenuLinkAfter: ' ⮞',
         backLinkBefore: '⮜ ',
+        keyClose: 'Escape',
+        showBackLink: true,
+        closeOnClickOutside: false,
+        onlyNavigateOnDecorator: false,
     });
 
     const menuRight = new SlideMenu(menuRightElem, {

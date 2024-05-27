@@ -3,7 +3,7 @@ $color-danger: hsl(356, 62%, 38%);
 
 *:active,
 *:focus {
-  outline: none !important;
+  // outline: none !important;  
 }
 
 html {
@@ -175,9 +175,27 @@ main {
     }
   }
 
-  .slide-menu__backlink {
+  &__backlink {
     text-transform: uppercase;
   }
+  
+  &__submenu--foldable {
+    background-color: $color-primary;
+    height: 100vh;
+  }
+
+  &--active .slide-menu__submenu--foldable.slide-menu--active {
+    top: -64px;
+
+    & .slide-menu--active {
+      top: 0;
+    }
+  }
+
+  &__item--active {
+    background-color: darken($color-primary, 6%);
+  }
+  
 }
 
 #test-menu-left p {
