@@ -1,6 +1,6 @@
 # Slide Menu
 
-> ⚠️ This project is unmaintained. Feel free to fork it.
+> ℹ️ This project is a fork from https://github.com/grubersjoe/slide-menu.
 
 *A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions and various options.*
 
@@ -14,7 +14,7 @@ Version 1.0 has been released and includes breaking changes: SlideMenu no longer
 
 ## Install
 ```sh
-npm install @grubersjoe/slide-menu
+npm install studiomitte/slide-menu
 ``` 
 
 Now import `dist/slide-menu.js` and `dist/slide-menu.css` in your bundler or build system of choice or use a 1998 `<script>` and `<link>` tag. Afterwards `SlideMenu` will be available in the global namespace (`window.SlideMenu`).
@@ -161,14 +161,30 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 ```sh
 ddev start
 ddev ssh -s frontend
-yarn install
+npm install
 npm run watch
 ```
 
-Open https://slide-menu.frontend.ddev.site:9999/.
+Open https://slide-menu.frontend.ddev.site:9999/
 
 To create a production build:
 
 ```sh
+# outside of ddev container
 npx vite build
+```
+
+### Publish Package Release
+https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages
+
+```sh
+npm login
+npm publish
+```
+
+#### Testing Package - Install locally
+
+Test package in a project and install it locally:
+```sh
+npm install path/to/my-package
 ```
