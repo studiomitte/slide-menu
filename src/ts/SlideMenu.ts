@@ -244,7 +244,6 @@ class SlideMenu {
     ) as HTMLElement[];
 
     activeMenus.forEach(activeElem => {
-      // activeElem.style.display = 'none';
       activeElem.classList.remove(SlideMenu.CLASS_NAMES.active);
     });
 
@@ -258,7 +257,6 @@ class SlideMenu {
     }
 
     parentUl.forEach((ul: HTMLElement) => {
-      // ul.style.display = 'block';
       ul.classList.add(SlideMenu.CLASS_NAMES.active);
     });
   }
@@ -340,7 +338,6 @@ class SlideMenu {
       ) as HTMLUListElement;
 
       if (lastActiveUl) {
-        // lastActiveUl.style.display = 'none';
         lastActiveUl.classList.remove(SlideMenu.CLASS_NAMES.active);
       }
     });
@@ -399,7 +396,6 @@ class SlideMenu {
       });
 
       ul.classList.add(SlideMenu.CLASS_NAMES.active);
-      // ul.style.display = 'block';
 
       // Position Fold Submenu
       if (isFoldableSubmenu) {
