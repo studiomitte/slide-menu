@@ -423,6 +423,7 @@ class SlideMenu {
       this.level = this.level + dir;
       this.moveSlider(this.wrapperElem, offset);
 
+      // Wait for anmiation to finish to focus next link in nav
       setTimeout(() => {
         // @ts-ignore
         this.menuElem.querySelector(TABABLE_LINK)?.focus();
