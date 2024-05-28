@@ -1,6 +1,6 @@
 import '../styles/slide-menu.scss';
 
-import { focusNext, focusPrevious, getDistanceFromTop, parents, parentsOne, tabableSelector, unwrapElement, wrapElement } from './utils/dom';
+import { getDistanceFromTop, parents, parentsOne, unwrapElement, wrapElement } from './utils/dom';
 
 interface MenuHTMLElement extends HTMLElement {
   _slideMenu: SlideMenu;
@@ -18,6 +18,7 @@ interface SlideMenuOptions {
   closeOnClickOutside: boolean;
   onlyNavigateDecorator: boolean;
   minWidthFold: number;
+  transitionDuration: number;
   alignFoldTop: boolean;
 }
 
@@ -50,10 +51,13 @@ const DEFAULT_OPTIONS = {
   submenuLinkBefore: '',
   closeOnClickOutside: false,
   onlyNavigateDecorator: false,
-  minWidthFold: 640,
+  minWidthFold: 640, // px
+  transitionDuration: 300, // ms
   alignFoldTop: false,
 };
 
+const TABABLE_LINK = 'a[href][tabindex]:not([tabindex="-1"])';
+  
 class SlideMenu {
   public static readonly NAMESPACE = 'slide-menu';
   public static readonly CLASS_NAMES = {
@@ -121,7 +125,7 @@ class SlideMenu {
 
       // Focus first focusable Item in menu
       // @ts-ignore
-      this.menuElem.querySelector(tabableSelector)?.focus();
+      this.menuElem.querySelector(TABABLE_LINK)?.focus();
     } else {
       
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
@@ -368,6 +372,14 @@ class SlideMenu {
     // Only show fold if isFoldableSubmenu
     this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
 
+    // Set tabindex previous menu for keyboard navigation
+    const tabIndexPreviousMenu = dir === Direction.Forward ? '-1' : '0';
+    this.menuElem.querySelectorAll('a').forEach(link => {
+      if (!isFoldableSubmenu) {
+        link.setAttribute('tabindex', tabIndexPreviousMenu);
+      }
+    });
+
     if (anchor && anchor.parentElement !== null && dir === Direction.Forward) {
       const ul = anchor.parentElement.querySelector('ul');
 
@@ -400,14 +412,26 @@ class SlideMenu {
       } else {
         ul.style.left = '100%';
       }
-    }
 
+      // Set tabindex next menu for keyboard navigation
+      const tabIndexNextMenu = dir === Direction.Forward ? '0' : '-1';
+      ul.querySelectorAll('a').forEach(link => {
+        link.setAttribute('tabindex', tabIndexNextMenu);
+      })
+    }
+    
     const action = dir === Direction.Forward ? Action.Forward : Action.Back;
     this.triggerEvent(action);
 
     if (!isFoldableSubmenu) {
       this.level = this.level + dir;
       this.moveSlider(this.wrapperElem, offset);
+
+      setTimeout(() => {
+        // @ts-ignore
+        this.menuElem.querySelector(TABABLE_LINK)?.focus();
+      }, this.options.transitionDuration);
+
     } else {
       this.menuElem.classList.add(SlideMenu.CLASS_NAMES.foldOpen);
     }
@@ -448,18 +472,19 @@ class SlideMenu {
       }
 
       this.menuElem.style.display = 'block';
+      this.menuElem.querySelectorAll('a').forEach(link => {
+        link.classList.add(SlideMenu.CLASS_NAMES.item);
+        link.setAttribute('tabindex', '0');
+      });
 
       this.menuElem.addEventListener('keydown', event => {
         const focusedElement = document.activeElement;
 
-        // if(focusedElement?.tagName === 'A') {
+        if (
+            focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.hasSubMenu) || 
+            focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.backlink)
+          ) {
           switch (event.key) {
-            case 'ArrowUp':
-              focusPrevious();
-              break;
-            case 'ArrowDown':
-              focusNext();
-              break;
             case 'ArrowLeft':
               this.navigate(Direction.Backward)
               break;
@@ -467,8 +492,10 @@ class SlideMenu {
               // @ts-ignore
               this.navigate(Direction.Forward, focusedElement)
               break;
+            default: 
+              break;
           }
-        // }
+        }
 
       });
     });
