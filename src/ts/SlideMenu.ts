@@ -1,6 +1,6 @@
 import '../styles/slide-menu.scss';
 
-import { focusNext, focusPrevious, parents, parentsOne, tabableSelector, unwrapElement, wrapElement } from './utils/dom';
+import { focusNext, focusPrevious, getDistanceFromTop, parents, parentsOne, tabableSelector, unwrapElement, wrapElement } from './utils/dom';
 
 interface MenuHTMLElement extends HTMLElement {
   _slideMenu: SlideMenu;
@@ -123,8 +123,9 @@ class SlideMenu {
       // @ts-ignore
       this.menuElem.querySelector(tabableSelector)?.focus();
     } else {
+      
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
-
+      
       // Deaktivate all submenus & fold
       this.menuElem.querySelectorAll('.' + SlideMenu.CLASS_NAMES.foldableSubmenu).forEach(foldable => {
         foldable.classList.remove(SlideMenu.CLASS_NAMES.active);
@@ -364,6 +365,9 @@ class SlideMenu {
     const offset = (this.level + dir) * -100;
     const isFoldableSubmenu = window.innerWidth >= this.options.minWidthFold && anchor?.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu);
 
+    // Only show fold if isFoldableSubmenu
+    this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
+
     if (anchor && anchor.parentElement !== null && dir === Direction.Forward) {
       const ul = anchor.parentElement.querySelector('ul');
 
@@ -388,14 +392,18 @@ class SlideMenu {
       // Position Fold Submenu
       if (isFoldableSubmenu) {
         ul.style.left = this.options.position === MenuPosition.Left ? '100%' : '-100%';
+
+        const dy = getDistanceFromTop(ul);
+        if (this.options.alignFoldTop && dy > 0) {
+          ul.style.top = `-${dy}px`;
+        }
+      } else {
+        ul.style.left = '100%';
       }
     }
 
     const action = dir === Direction.Forward ? Action.Forward : Action.Back;
     this.triggerEvent(action);
-
-    // Only show fold if isFoldableSubmenu
-    this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
 
     if (!isFoldableSubmenu) {
       this.level = this.level + dir;
@@ -503,7 +511,7 @@ class SlideMenu {
       anchor.classList.add(SlideMenu.CLASS_NAMES.hasSubMenu);
       submenu.classList.add(SlideMenu.CLASS_NAMES.submenu)
 
-      const isFoldableSubmenu = window.innerWidth >= this.options.minWidthFold && anchor.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu);
+      const isFoldableSubmenu = anchor.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu);
 
       if (this.options.onlyNavigateDecorator) {
         // Prevent default only on Decorator
@@ -522,7 +530,7 @@ class SlideMenu {
       }
 
       // Add back links
-      if (this.options.showBackLink && !isFoldableSubmenu) {
+      if (this.options.showBackLink) {
         const { backLinkBefore, backLinkAfter } = this.options;
 
         const backLink = document.createElement('a');

@@ -184,13 +184,15 @@ main {
     height: 100vh;
   }
 
-  // &--active .slide-menu__submenu--foldable.slide-menu--active {
-  //   top: -64px;
-
-  //   & .slide-menu--active {
-  //     top: 0;
-  //   }
-  // }
+  @media (min-width: 640px) {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    & {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  }
 
   &__item--active {
     background-color: darken($color-primary, 6%);
