@@ -45,3 +45,50 @@ export function parentsOne(elem: Node, selector: string): HTMLElement | null {
 
   return matches.length ? matches[0] : null;
 }
+
+export const tabableSelector = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+export function getFocusableElements() {
+  return Array.from(document.querySelectorAll(tabableSelector)).filter(el => !el.hasAttribute('disabled'));
+}
+
+export function focusNext() {
+  const focusableElements = getFocusableElements();
+  const activeElement = document.activeElement;
+  // @ts-ignore
+  const currentIndex = focusableElements.indexOf(activeElement);
+
+  if (currentIndex !== -1) {
+    const nextIndex = (currentIndex + 1) % focusableElements.length;
+    // @ts-ignore
+    focusableElements[nextIndex].focus();
+  } else {
+    // @ts-ignore
+    focusableElements[0].focus();
+  }
+}
+
+export function focusPrevious() {
+  const focusableElements = getFocusableElements();
+  const activeElement = document.activeElement;
+  // @ts-ignore
+  const currentIndex = focusableElements.indexOf(activeElement);
+
+  if (currentIndex !== -1) {
+    const previousIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+    // @ts-ignore
+    focusableElements[previousIndex].focus();
+  } else {
+    // @ts-ignore
+    focusableElements[focusableElements.length - 1].focus();
+  }
+}
+
+export function getDistanceFromTop(element: Element) {
+  if (!element) {
+    throw new Error('Element is not defined');
+  }
+  const rect = element.getBoundingClientRect();
+  const distance = rect.top;
+  return distance;
+}

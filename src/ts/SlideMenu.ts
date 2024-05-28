@@ -1,6 +1,6 @@
 import '../styles/slide-menu.scss';
 
-import { parents, parentsOne, unwrapElement, wrapElement } from './utils/dom';
+import { focusNext, focusPrevious, parents, parentsOne, tabableSelector, unwrapElement, wrapElement } from './utils/dom';
 
 interface MenuHTMLElement extends HTMLElement {
   _slideMenu: SlideMenu;
@@ -15,6 +15,10 @@ interface SlideMenuOptions {
   showBackLink: boolean;
   submenuLinkBefore: string;
   submenuLinkAfter: string;
+  closeOnClickOutside: boolean;
+  onlyNavigateDecorator: boolean;
+  minWidthFold: number;
+  alignFoldTop: boolean;
 }
 
 enum Direction {
@@ -44,6 +48,10 @@ const DEFAULT_OPTIONS = {
   showBackLink: true,
   submenuLinkAfter: '',
   submenuLinkBefore: '',
+  closeOnClickOutside: false,
+  onlyNavigateDecorator: false,
+  minWidthFold: 640,
+  alignFoldTop: false,
 };
 
 class SlideMenu {
@@ -55,6 +63,12 @@ class SlideMenu {
     decorator: `${SlideMenu.NAMESPACE}__decorator`,
     wrapper: `${SlideMenu.NAMESPACE}__slider`,
     item: `${SlideMenu.NAMESPACE}__item`,
+    submenu: `${SlideMenu.NAMESPACE}__submenu`,
+    hasSubMenu: `${SlideMenu.NAMESPACE}__item--has-submenu`,
+    activeItem: `${SlideMenu.NAMESPACE}__item--active`,
+    hasFoldableSubmenu: `${SlideMenu.NAMESPACE}__item--has-foldable-submenu`,
+    foldableSubmenu: `${SlideMenu.NAMESPACE}__submenu--foldable`,
+    foldOpen: `${SlideMenu.NAMESPACE}--fold-open`,
   };
 
   private level: number = 0;
@@ -104,8 +118,18 @@ class SlideMenu {
       return this.isOpen ? this.close(animate) : this.open(animate);
     } else if (show) {
       offset = 0;
+
+      // Focus first focusable Item in menu
+      // @ts-ignore
+      this.menuElem.querySelector(tabableSelector)?.focus();
     } else {
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
+
+      // Deaktivate all submenus & fold
+      this.menuElem.querySelectorAll('.' + SlideMenu.CLASS_NAMES.foldableSubmenu).forEach(foldable => {
+        foldable.classList.remove(SlideMenu.CLASS_NAMES.active);
+      });
+      this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
     }
 
     this.isOpen = show;
@@ -185,6 +209,7 @@ class SlideMenu {
 
     // Delete the reference to *this* instance
     // NOTE: Garbage collection is not possible, as long as other references to this object exist
+    // @ts-ignore
     delete this.menuElem._slideMenu;
   }
 
@@ -193,6 +218,11 @@ class SlideMenu {
    */
   public navigateTo(target: HTMLElement | string): void {
     this.triggerEvent(Action.Navigate);
+
+    // Open Menu if still closed
+    if(!this.isOpen) {
+      this.open()
+    }
 
     if (typeof target === 'string') {
       const elem = document.querySelector(target);
@@ -209,7 +239,7 @@ class SlideMenu {
     ) as HTMLElement[];
 
     activeMenus.forEach(activeElem => {
-      activeElem.style.display = 'none';
+      // activeElem.style.display = 'none';
       activeElem.classList.remove(SlideMenu.CLASS_NAMES.active);
     });
 
@@ -223,7 +253,7 @@ class SlideMenu {
     }
 
     parentUl.forEach((ul: HTMLElement) => {
-      ul.style.display = 'block';
+      // ul.style.display = 'block';
       ul.classList.add(SlideMenu.CLASS_NAMES.active);
     });
   }
@@ -249,6 +279,16 @@ class SlideMenu {
     // Handler for end of CSS transition
     this.menuElem.addEventListener('transitionend', this.onTransitionEnd.bind(this));
     this.wrapperElem.addEventListener('transitionend', this.onTransitionEnd.bind(this));
+
+    // Hide menu on click outside menu
+    if (this.options.closeOnClickOutside) {
+      document.addEventListener('click', event => {
+        // @ts-ignore
+        if (this.isOpen && !this.isAnimating && !this.menuElem.contains(event.target)) {
+          this.close();
+        };
+      });
+    }
 
     this.initKeybindings();
     this.initSubmenuVisibility();
@@ -295,7 +335,7 @@ class SlideMenu {
       ) as HTMLUListElement;
 
       if (lastActiveUl) {
-        lastActiveUl.style.display = 'none';
+        // lastActiveUl.style.display = 'none';
         lastActiveUl.classList.remove(SlideMenu.CLASS_NAMES.active);
       }
     });
@@ -322,6 +362,7 @@ class SlideMenu {
     }
 
     const offset = (this.level + dir) * -100;
+    const isFoldableSubmenu = window.innerWidth >= this.options.minWidthFold && anchor?.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu);
 
     if (anchor && anchor.parentElement !== null && dir === Direction.Forward) {
       const ul = anchor.parentElement.querySelector('ul');
@@ -330,15 +371,38 @@ class SlideMenu {
         return;
       }
 
+      // Mark Selected Menu Item
+      this.menuElem.querySelectorAll('.' + SlideMenu.CLASS_NAMES.activeItem).forEach(elem => {
+        elem.classList.remove(SlideMenu.CLASS_NAMES.activeItem);
+      });
+      anchor.classList.add(SlideMenu.CLASS_NAMES.activeItem);
+
+      // Show Sub Menu
+      anchor.closest('ul')?.querySelectorAll('.' + SlideMenu.CLASS_NAMES.active).forEach(elem => {
+        elem.classList.remove(SlideMenu.CLASS_NAMES.active);
+      });
+
       ul.classList.add(SlideMenu.CLASS_NAMES.active);
-      ul.style.display = 'block';
+      // ul.style.display = 'block';
+
+      // Position Fold Submenu
+      if (isFoldableSubmenu) {
+        ul.style.left = this.options.position === MenuPosition.Left ? '100%' : '-100%';
+      }
     }
 
     const action = dir === Direction.Forward ? Action.Forward : Action.Back;
     this.triggerEvent(action);
 
-    this.level = this.level + dir;
-    this.moveSlider(this.wrapperElem, offset);
+    // Only show fold if isFoldableSubmenu
+    this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
+
+    if (!isFoldableSubmenu) {
+      this.level = this.level + dir;
+      this.moveSlider(this.wrapperElem, offset);
+    } else {
+      this.menuElem.classList.add(SlideMenu.CLASS_NAMES.foldOpen);
+    }
   }
 
   /**
@@ -376,6 +440,29 @@ class SlideMenu {
       }
 
       this.menuElem.style.display = 'block';
+
+      this.menuElem.addEventListener('keydown', event => {
+        const focusedElement = document.activeElement;
+
+        // if(focusedElement?.tagName === 'A') {
+          switch (event.key) {
+            case 'ArrowUp':
+              focusPrevious();
+              break;
+            case 'ArrowDown':
+              focusNext();
+              break;
+            case 'ArrowLeft':
+              this.navigate(Direction.Backward)
+              break;
+            case 'ArrowRight':
+              // @ts-ignore
+              this.navigate(Direction.Forward, focusedElement)
+              break;
+          }
+        // }
+
+      });
     });
   }
 
@@ -409,22 +496,41 @@ class SlideMenu {
         return;
       }
 
-      // Prevent default behaviour (use link just to navigate)
-      anchor.addEventListener('click', event => {
-        event.preventDefault();
-      });
-
       const anchorText = anchor.textContent;
       this.addLinkDecorators(anchor);
 
+
+      anchor.classList.add(SlideMenu.CLASS_NAMES.hasSubMenu);
+      submenu.classList.add(SlideMenu.CLASS_NAMES.submenu)
+
+      const isFoldableSubmenu = window.innerWidth >= this.options.minWidthFold && anchor.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu);
+
+      if (this.options.onlyNavigateDecorator) {
+        // Prevent default only on Decorator
+        anchor.querySelector('.' + SlideMenu.CLASS_NAMES.decorator)?.addEventListener('click', event => {
+          event.preventDefault();
+        });
+      } else {
+        // Prevent default behaviour (use link just to navigate)
+        anchor.addEventListener('click', event => {
+          event.preventDefault();
+        });
+      }
+
+      if (isFoldableSubmenu) {
+        submenu.classList.add(SlideMenu.CLASS_NAMES.foldableSubmenu)
+      }
+
       // Add back links
-      if (this.options.showBackLink) {
+      if (this.options.showBackLink && !isFoldableSubmenu) {
         const { backLinkBefore, backLinkAfter } = this.options;
 
         const backLink = document.createElement('a');
         backLink.innerHTML = backLinkBefore + anchorText + backLinkAfter;
         backLink.classList.add(SlideMenu.CLASS_NAMES.backlink, SlideMenu.CLASS_NAMES.control, SlideMenu.CLASS_NAMES.item);
         backLink.setAttribute('data-action', Action.Back);
+        backLink.setAttribute('tabindex', '0');
+        backLink.setAttribute('href', '#');
 
         const backLinkLi = document.createElement('li');
         backLinkLi.appendChild(backLink);

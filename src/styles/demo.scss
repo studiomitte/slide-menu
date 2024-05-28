@@ -184,13 +184,13 @@ main {
     height: 100vh;
   }
 
-  &--active .slide-menu__submenu--foldable.slide-menu--active {
-    top: -64px;
+  // &--active .slide-menu__submenu--foldable.slide-menu--active {
+  //   top: -64px;
 
-    & .slide-menu--active {
-      top: 0;
-    }
-  }
+  //   & .slide-menu--active {
+  //     top: 0;
+  //   }
+  // }
 
   &__item--active {
     background-color: darken($color-primary, 6%);

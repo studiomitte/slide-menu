@@ -19,6 +19,7 @@ $sm-transition-easing: ease-in-out !default;
   z-index: 1000;
 
   &--fold-open {
+    overflow: visible;
     overflow-y: visible;
   }
 
@@ -44,7 +45,7 @@ $sm-transition-easing: ease-in-out !default;
       display: none;
     }
     
-    &.slide-menu--active {
+    &.slide-menu__submenu--active {
       display: block;
     }
 
