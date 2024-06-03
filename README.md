@@ -1,16 +1,10 @@
 # Slide Menu
 
-> ℹ️ This project is a fork from https://github.com/grubersjoe/slide-menu.
+> ℹ️ This project is a fork from https://github.com/grubersjoe/slide-menu. **[Demo](https://grubersjoe.github.io/slide-menu)**
 
 *A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions and various options.*
 
 Support: All current browsers and IE11+ (if using `dist/slide-menu.ie.js`).
-
-**[Demo](https://grubersjoe.github.io/slide-menu)**
-
-## Breaking changes
-
-Version 1.0 has been released and includes breaking changes: SlideMenu no longer depends on jQuery and the library has been rewritten in TypeScript. See below instructions how to use the current version. 
 
 ## Install
 ```sh
@@ -227,19 +221,22 @@ The following default CSS colors can be overwritten as needed:
 ## Development
 
 ```sh
+# if using with ddev first do
 ddev start
 ddev ssh -s frontend
+# then open https://slide-menu.frontend.ddev.site:9999/
+
+# for development run
 npm install
 npm run watch
 ```
 
-Open https://slide-menu.frontend.ddev.site:9999/
-
+### Build
 To create a production build:
 
 ```sh
 # outside of ddev container
-npx vite build
+npm run build
 ```
 
 ### Publish Package Release

@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', function () {
     backLinkBefore: '⮜ ',
     keyClose: 'Escape',
     showBackLink: true,
-    closeOnClickOutside: false,
+    closeOnClickOutside: true,
     onlyNavigateOnDecorator: false,
-    // alignFoldTop: true,
+    alignFoldTop: false,
   });
 
   if (window.innerWidth > 767) {

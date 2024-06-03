@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/prefer-ts-expect-error */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/non-nullable-type-assertion-style */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import '../styles/slide-menu.scss';
 
-import { getDistanceFromTop, parents, parentsOne, unwrapElement, wrapElement } from './utils/dom';
+import { getDistanceFromTop, parents, parentsOne, wrapElement } from './utils/dom';
 
 interface MenuHTMLElement extends HTMLElement {
   _slideMenu: SlideMenu;
@@ -44,7 +49,7 @@ const DEFAULT_OPTIONS = {
   backLinkAfter: '',
   backLinkBefore: '',
   showBackLink: true,
-  keyClose: '',
+  keyClose: 'Escape',
   keyOpen: '',
   position: 'right',
   submenuLinkAfter: '',
@@ -122,7 +127,8 @@ class SlideMenu {
     let offset;
 
     if (show === undefined) {
-      return this.isOpen ? this.close(animate) : this.open(animate);
+      this.isOpen ? this.close(animate) : this.open(animate);
+      return;
     } else if (show) {
       offset = 0;
 
@@ -225,7 +231,7 @@ class SlideMenu {
     // Ordinary links inside the menu
     const anchors = Array.from(this.menuElem.querySelectorAll('a'));
 
-    anchors.forEach((anchor: HTMLAnchorElement) =>
+    anchors.forEach((anchor: HTMLAnchorElement) => {
       anchor.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
         const targetAnchor = target.matches('a') ? target : parentsOne(target, 'a');
@@ -233,8 +239,8 @@ class SlideMenu {
         if (targetAnchor) {
           this.navigate(Direction.Forward, targetAnchor);
         }
-      }),
-    );
+      })
+    });
 
     // Handler for end of CSS transition
     this.menuElem.addEventListener('transitionend', this.onTransitionEnd.bind(this));
@@ -323,8 +329,8 @@ class SlideMenu {
     const offset = (this.level + dir) * -100;
     const isFoldableSubmenu =
       window.innerWidth >= this.options.minWidthFold &&
-      (anchor?.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu) ||
-        (Direction.Backward && this.foldLevel > 0));
+      (anchor?.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu) ??
+      (Direction.Backward && this.foldLevel > 0));
 
     // Only show fold if isFoldableSubmenu
     this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
@@ -337,6 +343,7 @@ class SlideMenu {
       });
     }
 
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
     if (anchor && anchor.parentElement !== null && dir === Direction.Forward) {
       const ul = anchor.parentElement.querySelector('ul');
 
@@ -390,7 +397,7 @@ class SlideMenu {
     }
   }
 
-  positionFoldableSubmenu(ul: HTMLElement) {
+  positionFoldableSubmenu(ul: HTMLElement): void {
     ul.style.left = this.options.position === MenuPosition.Left ? '100%' : '-100%';
 
     const dy = getDistanceFromTop(ul);
@@ -400,7 +407,7 @@ class SlideMenu {
     }
   }
 
-  navigateFoldableSubmenu(dir: Direction) {
+  navigateFoldableSubmenu(dir: Direction): void {
     this.foldLevel += dir;
 
     if (this.foldLevel > 0) {
@@ -459,7 +466,7 @@ class SlideMenu {
         const focusedElement = document.activeElement;
 
         if (
-          focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.hasSubMenu) ||
+          focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.hasSubMenu) ??
           focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.backlink)
         ) {
           switch (event.key) {
@@ -487,6 +494,7 @@ class SlideMenu {
 
     action();
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.menuElem.offsetHeight; // Trigger a reflow, flushing the CSS changes
     transitionElems.forEach((elem) => elem.style.removeProperty('transition'));
 
