@@ -145,6 +145,7 @@ class SlideMenu {
           foldable.classList.remove(SlideMenu.CLASS_NAMES.active);
         });
       this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
+      this.foldLevel = 0;
     }
 
     this.isOpen = show;
