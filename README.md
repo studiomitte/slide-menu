@@ -192,6 +192,19 @@ Any arbitrary additonal content (e.g. search input fields, detail info,...) can 
 </nav>
 ```
 
+#### Close Menu Links in the End of Submenus
+
+To add Links for closing the menu in the end of Submenus for convenient keyboard navigation you can add additional navigation items in the HTML with `class="slide-menu__control"` and a ``data-action="close"`` like the following example:
+
+```html
+<ul>
+  <li>...Menu item 1...</li>
+  <li>...Menu item 2...</li>
+  <li>...Menu item 3...</li>
+  <li><a href="#" data-action="close" class="slide-menu__control">X Close</a></li>
+</ul>
+```
+
 ### Styling the Menu
 
 Basic Styling is provided by `slide-menu`. To adjust it to your theme select the elements by the classes slide menu applied to the elements.
