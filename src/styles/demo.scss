@@ -7,7 +7,7 @@ html {
 
 body {
   font-family: 'Lato', sans-serif;
-  line-height: 1.4;
+
   color: fade_out(#000, 0.06);
 }
 
@@ -118,85 +118,13 @@ main {
   }
 }
 
-.slide-menu {
-  width: 340px;
-  background-color: $color-primary;
-
-  &,
-  a {
-    font-size: 0.8rem;
-    color: #fff;
-  }
-
-  a {
-    padding: 0.9rem 1.5rem;
-    border-bottom: solid 1px darken($color-primary, 8%);
-    text-decoration: none;
-
-    &:hover {
-      background-color: darken($color-primary, 6%);
-    }
-  }
-
-  .controls {
-    display: flex;
-    margin-bottom: 1rem;
-  }
-
-  .btn {
-    padding: 0.75rem 1.5rem;
-    flex: 1 0 auto;
-    font-size: 90%;
-    color: #fff;
-    background-color: darken($color-primary, 6%);
-    text-transform: uppercase;
-
-    &:first-of-type {
-      text-align: left;
-
-      &:before {
-        content: '⮜';
-        margin-right: 0.5rem;
-      }
-    }
-
-    &:last-of-type {
-      text-align: right;
-
-      &:before {
-        content: '✕';
-        margin-right: 0.5rem;
-      }
-    }
-  }
-
-  &__backlink {
-    text-transform: uppercase;
-  }
-  
-  &__submenu--foldable {
-    background-color: $color-primary;
-    height: 100vh;
-  }
-
-  @media (min-width: 640px) {
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    & {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
-    }
-  }
-
-  &__item--active {
-    background-color: darken($color-primary, 6%);
-  }
-  
-}
-
 #test-menu-left p {
   font-size: 110%;
   padding-left: 1.25rem;
   padding-right: 1.25rem;
+}
+
+.slide-menu .slide-menu--additional-content {
+  padding: 0.9rem 1.5rem;
+  border-bottom: solid 1px var(--smdm-sm-color-active);
 }

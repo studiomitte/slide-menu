@@ -65,14 +65,18 @@ Option | Description | Valid values | Default
 --- | --- | --- | ---
 `backLinkAfter` | HTML to append to back link in submenus | HTML code |  `''`
 `backLinkBefore` | HTML to prepend to back link in submenus | HTML code |  `''`
-`keycodeClose` | Key used to close the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `undefined`
-`keycodeOpen` | Key used to open the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `undefined`
+`keyClose` | Key used to close the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `undefined`
+`keyOpen` | Key used to open the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `undefined`
 `position` | Position of the menu | `'left'` or `'right'` | `'right'`
 `showBackLink` | Add a link to navigate back in submenus (first entry) | *boolean* | `true`
 `submenuLinkBefore` | HTML to prepend to links with a submenu | HTML code |  `''`
 `submenuLinkAfter` | HTML to append to links with a submenu | HTML code |  `''`
- 
- Example:
+`closeOnClickOutside` | Menu closes when clicked outside menu  element | *boolean* | `false`
+`onlyNavigateDecorator` | Prevents navigation when clicking the link directly, triggers menu slide navigation only when clicking the link decorator elements  | *boolean* | `false`
+`minWidthFold` | Minimum window width in pixel for fold menu to be shown as fold not as slide | *number* | `640`
+`alignFoldTop` | Aligns fold with window top | *boolean* | `false`
+
+Example:
  
  ```javascript
 document.addEventListener("DOMContentLoaded", function () {
@@ -154,6 +158,57 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 ```html
 <a class="slide-menu-control" data-action="close">Close this menu</a>
 <a class="slide-menu-control" data-target="this" data-action="close">Close this menu</a>
+```
+
+### Foldable Submenus
+
+Foldable submenus can be created using the class `slide-menu__item--has-foldable-submenu` on the item that precedes the submenu.
+
+```html
+<a class="slide-menu__item--has-foldable-submenu" href="#"><span>Foldable</span></a>
+<ul>
+  ...foldable submenu items go here...
+</ul>
+```
+
+Foldable Submenus will only fold open to the left/right side if the window width is bigger than `minWidthFold`.
+
+### Additonal Content Within the Menu
+
+Any arbitrary additonal content (e.g. search input fields, detail info,...) can be inserted anywhere in the menu structure. The class `slide-menu--additional-content` provides standard padding like it is used for the menu ítems. Example:
+
+```html
+<nav class="slide-menu" id="test-menu-left">
+  <div class="controls">
+    ...
+  </div>
+  <div class="slide-menu--additional-content">
+    <img src="https://studiomitte.com/build/images/logo/logo-white.svg" alt="Studiomitte Logo">
+    <p>Some detail text</p>
+  </div>
+  <ul>
+    ...
+  </ul>
+</nav>
+```
+
+### Styling the Menu
+
+Basic Styling is provided by `slide-menu`. To adjust it to your theme select the elements by the classes slide menu applied to the elements.
+
+The following default CSS colors can be overwritten as needed:
+
+```css
+:root {
+  --smdm-sm-menu-width: 320px;
+  --smdm-sm-transition-duration: 300ms;
+  --smdm-sm-transition-easing: ease-in-out;
+  --smdm-sm-color-bg: ghostwhite;
+  --smdm-sm-color-text: black;
+  --smdm-sm-color-active: grey;
+  --smdm-sm-color-hover: lightgrey;
+  --smdm-sm-color-controls: grey;
+}
 ```
 
 ## Development

@@ -46,10 +46,13 @@ export function parentsOne(elem: Node, selector: string): HTMLElement | null {
   return matches.length ? matches[0] : null;
 }
 
-export const tabableSelector = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+export const tabableSelector =
+  'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 export function getFocusableElements() {
-  return Array.from(document.querySelectorAll(tabableSelector)).filter(el => !el.hasAttribute('disabled'));
+  return Array.from(document.querySelectorAll(tabableSelector)).filter(
+    (el) => !el.hasAttribute('disabled'),
+  );
 }
 
 export function focusNext() {

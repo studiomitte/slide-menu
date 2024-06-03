@@ -43,10 +43,10 @@ enum Action {
 const DEFAULT_OPTIONS = {
   backLinkAfter: '',
   backLinkBefore: '',
+  showBackLink: true,
   keyClose: '',
   keyOpen: '',
   position: 'right',
-  showBackLink: true,
   submenuLinkAfter: '',
   submenuLinkBefore: '',
   closeOnClickOutside: false,
@@ -57,7 +57,7 @@ const DEFAULT_OPTIONS = {
 };
 
 const TABABLE_LINK = 'a[href][tabindex]:not([tabindex="-1"])';
-  
+
 class SlideMenu {
   public static readonly NAMESPACE = 'slide-menu';
   public static readonly CLASS_NAMES = {
@@ -72,10 +72,13 @@ class SlideMenu {
     activeItem: `${SlideMenu.NAMESPACE}__item--active`,
     hasFoldableSubmenu: `${SlideMenu.NAMESPACE}__item--has-foldable-submenu`,
     foldableSubmenu: `${SlideMenu.NAMESPACE}__submenu--foldable`,
+    foldableSubmenuAlignTop: `${SlideMenu.NAMESPACE}__submenu--foldable-align-top`,
     foldOpen: `${SlideMenu.NAMESPACE}--fold-open`,
   };
 
   private level: number = 0;
+  private foldLevel: number = 0;
+  private activeFoldableSubmenu: Element | null = null;
   private isOpen: boolean = false;
   private isAnimating: boolean = false;
   private lastAction: Action | null = null;
@@ -127,13 +130,14 @@ class SlideMenu {
       // @ts-ignore
       this.menuElem.querySelector(TABABLE_LINK)?.focus();
     } else {
-      
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
-      
+
       // Deaktivate all submenus & fold
-      this.menuElem.querySelectorAll('.' + SlideMenu.CLASS_NAMES.foldableSubmenu).forEach(foldable => {
-        foldable.classList.remove(SlideMenu.CLASS_NAMES.active);
-      });
+      this.menuElem
+        .querySelectorAll('.' + SlideMenu.CLASS_NAMES.foldableSubmenu)
+        .forEach((foldable) => {
+          foldable.classList.remove(SlideMenu.CLASS_NAMES.active);
+        });
       this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
     }
 
@@ -172,61 +176,14 @@ class SlideMenu {
   }
 
   /**
-   * Destroy the SlideMenu
-   */
-  public destroy(): void {
-    const { submenuLinkAfter, submenuLinkBefore, showBackLink } = this.options;
-
-    // Remove link decorators
-    if (submenuLinkAfter || submenuLinkBefore) {
-      const linkDecorators = Array.from(
-        this.wrapperElem.querySelectorAll(`.${SlideMenu.CLASS_NAMES.decorator}`),
-      ) as HTMLElement[];
-
-      linkDecorators.forEach((decorator: HTMLElement) => {
-        if (decorator.parentElement) {
-          decorator.parentElement.removeChild(decorator);
-        }
-      });
-    }
-
-    // Remove back links
-    if (showBackLink) {
-      const backLinks = Array.from(
-        this.wrapperElem.querySelectorAll(`.${SlideMenu.CLASS_NAMES.control}`),
-      ) as HTMLElement[];
-
-      backLinks.forEach((backlink: HTMLElement) => {
-        const parentLi = parentsOne(backlink, 'li');
-
-        if (parentLi && parentLi.parentElement) {
-          parentLi.parentElement.removeChild(parentLi);
-        }
-      });
-    }
-
-    // Remove the wrapper element
-    unwrapElement(this.wrapperElem);
-
-    // Remove inline styles
-    this.menuElem.style.cssText = '';
-    this.menuElem.querySelectorAll('ul').forEach((ul: HTMLElement) => (ul.style.cssText = ''));
-
-    // Delete the reference to *this* instance
-    // NOTE: Garbage collection is not possible, as long as other references to this object exist
-    // @ts-ignore
-    delete this.menuElem._slideMenu;
-  }
-
-  /**
    * Navigate to a specific link on any level (useful to open the correct hierarchy directly)
    */
   public navigateTo(target: HTMLElement | string): void {
     this.triggerEvent(Action.Navigate);
 
     // Open Menu if still closed
-    if(!this.isOpen) {
-      this.open()
+    if (!this.isOpen) {
+      this.open();
     }
 
     if (typeof target === 'string') {
@@ -243,7 +200,7 @@ class SlideMenu {
       this.wrapperElem.querySelectorAll(`.${SlideMenu.CLASS_NAMES.active}`),
     ) as HTMLElement[];
 
-    activeMenus.forEach(activeElem => {
+    activeMenus.forEach((activeElem) => {
       activeElem.classList.remove(SlideMenu.CLASS_NAMES.active);
     });
 
@@ -269,7 +226,7 @@ class SlideMenu {
     const anchors = Array.from(this.menuElem.querySelectorAll('a'));
 
     anchors.forEach((anchor: HTMLAnchorElement) =>
-      anchor.addEventListener('click', event => {
+      anchor.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
         const targetAnchor = target.matches('a') ? target : parentsOne(target, 'a');
 
@@ -285,11 +242,11 @@ class SlideMenu {
 
     // Hide menu on click outside menu
     if (this.options.closeOnClickOutside) {
-      document.addEventListener('click', event => {
+      document.addEventListener('click', (event) => {
         // @ts-ignore
         if (this.isOpen && !this.isAnimating && !this.menuElem.contains(event.target)) {
           this.close();
-        };
+        }
       });
     }
 
@@ -313,7 +270,7 @@ class SlideMenu {
   }
 
   private initKeybindings(): void {
-    document.addEventListener('keydown', event => {
+    document.addEventListener('keydown', (event) => {
       switch (event.key) {
         case this.options.keyClose:
           this.close();
@@ -364,18 +321,21 @@ class SlideMenu {
     }
 
     const offset = (this.level + dir) * -100;
-    const isFoldableSubmenu = window.innerWidth >= this.options.minWidthFold && anchor?.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu);
+    const isFoldableSubmenu =
+      window.innerWidth >= this.options.minWidthFold &&
+      (anchor?.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu) ||
+        (Direction.Backward && this.foldLevel > 0));
 
     // Only show fold if isFoldableSubmenu
     this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
 
-    // Set tabindex previous menu for keyboard navigation
-    const tabIndexPreviousMenu = dir === Direction.Forward ? '-1' : '0';
-    this.menuElem.querySelectorAll('a').forEach(link => {
-      if (!isFoldableSubmenu) {
+    // Remove tabindex from previous menu for keyboard navigation
+    if (!isFoldableSubmenu) {
+      const tabIndexPreviousMenu = dir === Direction.Forward ? '-1' : '0';
+      this.menuElem.querySelectorAll('a').forEach((link) => {
         link.setAttribute('tabindex', tabIndexPreviousMenu);
-      }
-    });
+      });
+    }
 
     if (anchor && anchor.parentElement !== null && dir === Direction.Forward) {
       const ul = anchor.parentElement.querySelector('ul');
@@ -385,52 +345,73 @@ class SlideMenu {
       }
 
       // Mark Selected Menu Item
-      this.menuElem.querySelectorAll('.' + SlideMenu.CLASS_NAMES.activeItem).forEach(elem => {
+      this.menuElem.querySelectorAll('.' + SlideMenu.CLASS_NAMES.activeItem).forEach((elem) => {
         elem.classList.remove(SlideMenu.CLASS_NAMES.activeItem);
       });
       anchor.classList.add(SlideMenu.CLASS_NAMES.activeItem);
 
       // Show Sub Menu
-      anchor.closest('ul')?.querySelectorAll('.' + SlideMenu.CLASS_NAMES.active).forEach(elem => {
-        elem.classList.remove(SlideMenu.CLASS_NAMES.active);
-      });
-
+      anchor
+        .closest('ul')
+        ?.querySelectorAll('.' + SlideMenu.CLASS_NAMES.active)
+        .forEach((elem) => {
+          elem.classList.remove(SlideMenu.CLASS_NAMES.active);
+        });
       ul.classList.add(SlideMenu.CLASS_NAMES.active);
 
-      // Position Fold Submenu
       if (isFoldableSubmenu) {
-        ul.style.left = this.options.position === MenuPosition.Left ? '100%' : '-100%';
-
-        const dy = getDistanceFromTop(ul);
-        if (this.options.alignFoldTop && dy > 0) {
-          ul.style.top = `-${dy}px`;
-        }
+        this.activeFoldableSubmenu = ul;
+        this.positionFoldableSubmenu(ul);
       } else {
         ul.style.left = '100%';
       }
 
       // Set tabindex next menu for keyboard navigation
       const tabIndexNextMenu = dir === Direction.Forward ? '0' : '-1';
-      ul.querySelectorAll('a').forEach(link => {
+      ul.querySelectorAll('a').forEach((link) => {
         link.setAttribute('tabindex', tabIndexNextMenu);
-      })
+      });
     }
-    
+
     const action = dir === Direction.Forward ? Action.Forward : Action.Back;
     this.triggerEvent(action);
 
     if (!isFoldableSubmenu) {
-      this.level = this.level + dir;
+      this.level += dir;
       this.moveSlider(this.wrapperElem, offset);
 
-      // Wait for anmiation to finish to focus next link in nav
+      // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
       setTimeout(() => {
         // @ts-ignore
         this.menuElem.querySelector(TABABLE_LINK)?.focus();
       }, this.options.transitionDuration);
-
     } else {
+      this.navigateFoldableSubmenu(dir);
+    }
+  }
+
+  positionFoldableSubmenu(ul: HTMLElement) {
+    ul.style.left = this.options.position === MenuPosition.Left ? '100%' : '-100%';
+
+    const dy = getDistanceFromTop(ul);
+    if (this.options.alignFoldTop && dy > 0) {
+      ul.style.top = `-${dy}px`;
+      ul.classList.add(SlideMenu.CLASS_NAMES.foldableSubmenuAlignTop);
+    }
+  }
+
+  navigateFoldableSubmenu(dir: Direction) {
+    this.foldLevel += dir;
+
+    if (this.foldLevel > 0) {
       this.menuElem.classList.add(SlideMenu.CLASS_NAMES.foldOpen);
+    }
+
+    if (dir === Direction.Backward && this.activeFoldableSubmenu) {
+      this.activeFoldableSubmenu?.classList.remove(SlideMenu.CLASS_NAMES.active);
+      this.activeFoldableSubmenu = this.activeFoldableSubmenu.closest(
+        '.' + SlideMenu.CLASS_NAMES.foldableSubmenu,
+      );
     }
   }
 
@@ -469,31 +450,30 @@ class SlideMenu {
       }
 
       this.menuElem.style.display = 'block';
-      this.menuElem.querySelectorAll('a').forEach(link => {
+      this.menuElem.querySelectorAll('a').forEach((link) => {
         link.classList.add(SlideMenu.CLASS_NAMES.item);
         link.setAttribute('tabindex', '0');
       });
 
-      this.menuElem.addEventListener('keydown', event => {
+      this.menuElem.addEventListener('keydown', (event) => {
         const focusedElement = document.activeElement;
 
         if (
-            focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.hasSubMenu) || 
-            focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.backlink)
-          ) {
+          focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.hasSubMenu) ||
+          focusedElement?.classList.contains(SlideMenu.CLASS_NAMES.backlink)
+        ) {
           switch (event.key) {
             case 'ArrowLeft':
-              this.navigate(Direction.Backward)
+              this.navigate(Direction.Backward);
               break;
             case 'ArrowRight':
               // @ts-ignore
-              this.navigate(Direction.Forward, focusedElement)
+              this.navigate(Direction.Forward, focusedElement);
               break;
-            default: 
+            default:
               break;
           }
         }
-
       });
     });
   }
@@ -503,12 +483,12 @@ class SlideMenu {
    */
   private runWithoutAnimation(action: () => void): void {
     const transitionElems = [this.menuElem, this.wrapperElem];
-    transitionElems.forEach(elem => (elem.style.transition = 'none'));
+    transitionElems.forEach((elem) => (elem.style.transition = 'none'));
 
     action();
 
     this.menuElem.offsetHeight; // Trigger a reflow, flushing the CSS changes
-    transitionElems.forEach(elem => elem.style.removeProperty('transition'));
+    transitionElems.forEach((elem) => elem.style.removeProperty('transition'));
 
     this.isAnimating = false;
   }
@@ -531,26 +511,27 @@ class SlideMenu {
       const anchorText = anchor.textContent;
       this.addLinkDecorators(anchor);
 
-
       anchor.classList.add(SlideMenu.CLASS_NAMES.hasSubMenu);
-      submenu.classList.add(SlideMenu.CLASS_NAMES.submenu)
+      submenu.classList.add(SlideMenu.CLASS_NAMES.submenu);
 
       const isFoldableSubmenu = anchor.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu);
 
       if (this.options.onlyNavigateDecorator) {
         // Prevent default only on Decorator
-        anchor.querySelector('.' + SlideMenu.CLASS_NAMES.decorator)?.addEventListener('click', event => {
-          event.preventDefault();
-        });
+        anchor
+          .querySelector('.' + SlideMenu.CLASS_NAMES.decorator)
+          ?.addEventListener('click', (event) => {
+            event.preventDefault();
+          });
       } else {
         // Prevent default behaviour (use link just to navigate)
-        anchor.addEventListener('click', event => {
+        anchor.addEventListener('click', (event) => {
           event.preventDefault();
         });
       }
 
       if (isFoldableSubmenu) {
-        submenu.classList.add(SlideMenu.CLASS_NAMES.foldableSubmenu)
+        submenu.classList.add(SlideMenu.CLASS_NAMES.foldableSubmenu);
       }
 
       // Add back links
@@ -559,7 +540,11 @@ class SlideMenu {
 
         const backLink = document.createElement('a');
         backLink.innerHTML = backLinkBefore + anchorText + backLinkAfter;
-        backLink.classList.add(SlideMenu.CLASS_NAMES.backlink, SlideMenu.CLASS_NAMES.control, SlideMenu.CLASS_NAMES.item);
+        backLink.classList.add(
+          SlideMenu.CLASS_NAMES.backlink,
+          SlideMenu.CLASS_NAMES.control,
+          SlideMenu.CLASS_NAMES.item,
+        );
         backLink.setAttribute('data-action', Action.Back);
         backLink.setAttribute('tabindex', '0');
         backLink.setAttribute('href', '#');
@@ -597,7 +582,7 @@ class SlideMenu {
 }
 
 // Link control buttons with the API
-document.addEventListener('click', event => {
+document.addEventListener('click', (event) => {
   if (!(event.target instanceof HTMLElement)) {
     return;
   }
