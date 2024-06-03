@@ -208,13 +208,18 @@ The following default CSS colors can be overwritten as needed:
 ```css
 :root {
   --smdm-sm-menu-width: 320px;
+  --smdm-sm-min-width-fold: 640px;
   --smdm-sm-transition-duration: 300ms;
   --smdm-sm-transition-easing: ease-in-out;
-  --smdm-sm-color-bg: ghostwhite;
-  --smdm-sm-color-text: black;
-  --smdm-sm-color-active: grey;
-  --smdm-sm-color-hover: lightgrey;
-  --smdm-sm-color-controls: grey;
+  --smdm-sm-color-bg: rgb(10 10 9);
+  --smdm-sm-color-text: rgb(238 237 235);
+  --smdm-sm-color-active: rgb(32 31 29);
+  --smdm-sm-color-hover: rgb(20 20 19);
+  --smdm-sm-color-controls: rgb(20 20 19);
+  --smdm-sm-control-content-next: '⮞';
+  --smdm-sm-control-content-back: '⮜';
+  --smdm-sm-control-content-close: '✕';
+  --smdm-sm-item-padding: 0.9rem 1.5rem;
 }
 ```
 
