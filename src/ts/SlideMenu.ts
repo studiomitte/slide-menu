@@ -247,6 +247,7 @@ class SlideMenu {
       
       const navigationHandler = (event: Event) => {
         const target = event.target as HTMLElement;
+        // @ts-ignore
         const targetAnchor = target?.parentElement?.matches('a') ? target?.parentElement : parentsOne(target?.parentElement, 'a');
         if (targetAnchor && !target.dataset.action) {
           this.navigate(Direction.Forward, targetAnchor);

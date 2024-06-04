@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
     submenuLinkAfter: ' ⮞',
     backLinkBefore: '⮜ ',
     keyClose: 'Escape',
-    showBackLink: true,
+    showBackLink: false,
     closeOnClickOutside: true,
     onlyNavigateDecorator: false,
     alignFoldTop: false,
