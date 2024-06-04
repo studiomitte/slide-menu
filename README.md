@@ -8,7 +8,7 @@ Support: All current browsers and IE11+ (if using `dist/slide-menu.ie.js`).
 
 ## Install
 ```sh
-npm install studiomitte/slide-menu
+npm install smdm-slide-menu
 ``` 
 
 Now import `dist/slide-menu.js` and `dist/slide-menu.css` in your bundler or build system of choice or use a 1998 `<script>` and `<link>` tag. Afterwards `SlideMenu` will be available in the global namespace (`window.SlideMenu`).
