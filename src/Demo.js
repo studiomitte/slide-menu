@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
     keyClose: 'Escape',
     showBackLink: true,
     closeOnClickOutside: true,
-    onlyNavigateOnDecorator: false,
+    onlyNavigateDecorator: false,
     alignFoldTop: false,
   });
 
