@@ -82,6 +82,7 @@ class SlideMenu {
   private level: number = 0;
   private foldLevel: number = 0;
   private activeSubmenu: HTMLElement | null = null;
+  private lastFocusedElement: Element | null = null;
   private isOpen: boolean = false;
   private isAnimating: boolean = false;
   private lastAction: Action | null = null;
@@ -130,6 +131,8 @@ class SlideMenu {
     } else if (show) {
       offset = 0;
 
+      this.lastFocusedElement = document.activeElement;
+
       this.focusFirstElemInSubmenu(this.activeSubmenu);
     } else {
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
@@ -142,6 +145,10 @@ class SlideMenu {
         });
       this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
       this.foldLevel = 0;
+
+      // @ts-ignore
+      this.lastFocusedElement?.focus();
+      this.lastFocusedElement?.scrollIntoView({ behavior: "smooth" });
     }
 
     this.isOpen = show;
