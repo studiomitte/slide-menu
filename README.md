@@ -247,6 +247,7 @@ npm run build
 https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages
 
 ```sh
+# increment version number in package.json
 npm login
 npm publish
 ```
