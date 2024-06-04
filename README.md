@@ -103,11 +103,11 @@ You can call the API in two different ways:
 
 * `close(animate = true)` - Close the menu
 * `back()` - Navigate on level back if possible
-* `destroy()` - revert all DOM changes made by SlideMenu. This includes inline styles, but not the `slide-menu` class name for the container element.
 * `navigateTo(target)`
     Open the menu level which contains specified menu element. `target` can either be a `document.querySelector` compatible string selector or the the DOM element (inside the menu). The first found element (if any) will be used.
 * `open(animate = true)` - Open the menu
 * `toggle(animate = true)` - Toggle the menu
+* `openCurrentPage()` - Opens the Submenu matching the current page (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
 
 ### Events
 

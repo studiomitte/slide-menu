@@ -240,7 +240,7 @@ class SlideMenu {
     const currentHash = location.hash;
     const currentHashItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentHash));
     const currentPathItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentPath));
-    const currentPageItem = currentHashItem ?? currentPathItem;
+    const currentPageItem = currentPathItem ?? currentHashItem;
     const target = this.getNextSubmenu(currentPageItem) ?? currentPageItem as HTMLElement;
 
     if (target) {
