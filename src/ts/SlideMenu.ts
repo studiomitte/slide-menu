@@ -235,6 +235,23 @@ class SlideMenu {
     }, this.options.transitionDuration);
   }
 
+  public openCurrentPage(): void {
+    const currentPath = location.pathname;
+    const currentHash = location.hash;
+    const currentHashItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentHash));
+    const currentPathItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentPath));
+    const currentPageItem = currentHashItem ?? currentPathItem;
+    const target = this.getNextSubmenu(currentPageItem) ?? currentPageItem as HTMLElement;
+
+    if (target) {
+      // @ts-ignore
+      this.navigateTo(target);
+      return;
+    }
+
+    this.open();
+  }
+
   /**
    * Set up all event handlers
    */
@@ -418,26 +435,26 @@ class SlideMenu {
     }, this.options.transitionDuration);
   }
 
-  getParentSubmenuOfAnchor(anchor: HTMLElement): HTMLElement | null {
+  private getParentSubmenuOfAnchor(anchor: HTMLElement): HTMLElement | null {
     return anchor.closest('ul');
   }
 
-  getPreviousSubmenu(activeSubmenu: HTMLElement | null): HTMLElement | null | undefined {
+  private getPreviousSubmenu(activeSubmenu: HTMLElement | null): HTMLElement | null | undefined {
     return activeSubmenu?.parentElement?.closest('ul');
   }
 
-  getNextSubmenu(anchor: HTMLElement | undefined): HTMLElement | null | undefined {
+  private getNextSubmenu(anchor: HTMLElement | undefined): HTMLElement | null | undefined {
     return anchor?.parentElement?.querySelector('ul');
   }
 
-  markSelectedItem(anchor: HTMLElement): void {
+  private markSelectedItem(anchor: HTMLElement): void {
     this.menuElem.querySelectorAll('.' + SlideMenu.CLASS_NAMES.activeItem).forEach((elem) => {
       elem.classList.remove(SlideMenu.CLASS_NAMES.activeItem);
     });
     anchor.classList.add(SlideMenu.CLASS_NAMES.activeItem);
   }
 
-  setTabIndex(
+  private setTabIndex(
     currentActiveMenu: HTMLElement | undefined | null,
     isFoldableSubmenu: boolean,
   ): void {
@@ -456,13 +473,13 @@ class SlideMenu {
     });
   }
 
-  focusFirstElemInSubmenu(submenu: HTMLElement | null): void {
+  private focusFirstElemInSubmenu(submenu: HTMLElement | null): void {
     const tabableLink = 'a[href][tabindex]:not([tabindex="-1"])';
     // @ts-ignore
     submenu?.querySelector(tabableLink)?.focus();
   }
 
-  positionFoldableSubmenu(ul: HTMLElement): void {
+  private positionFoldableSubmenu(ul: HTMLElement): void {
     ul.style.left = this.options.position === MenuPosition.Left ? '100%' : '-100%';
 
     const dy = getDistanceFromTop(ul);
