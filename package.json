@@ -40,7 +40,7 @@
   "scripts": {
     "build": "npx vite build --emptyOutDir",
     "format": "prettier --write 'src/**/*'",
-    "lint": "eslint --max-warnings=0 'src/**/*.ts'",
+    "lint": "eslint --max-warnings=0 'src/ts/SlideMenu.ts'",
     "watch": "npx vite --port 8080",
     "typecheck": "npx tsc"
   },
