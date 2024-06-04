@@ -240,7 +240,7 @@ class SlideMenu {
         if (targetAnchor) {
           this.navigate(Direction.Forward, targetAnchor);
         }
-      })
+      });
     });
 
     // Handler for end of CSS transition
@@ -331,7 +331,7 @@ class SlideMenu {
     const isFoldableSubmenu =
       window.innerWidth >= this.options.minWidthFold &&
       (anchor?.classList.contains(SlideMenu.CLASS_NAMES.hasFoldableSubmenu) ??
-      (Direction.Backward && this.foldLevel > 0));
+        (Direction.Backward && this.foldLevel > 0));
 
     // Only show fold if isFoldableSubmenu
     this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);

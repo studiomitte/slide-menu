@@ -216,7 +216,6 @@ The following default CSS colors can be overwritten as needed:
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
-  --smdm-sm-control-content-next: '⮞';
   --smdm-sm-control-content-back: '⮜';
   --smdm-sm-control-content-close: '✕';
   --smdm-sm-item-padding: 0.9rem 1.5rem;

@@ -8,7 +8,6 @@
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
-  --smdm-sm-control-content-next: '⮞';
   --smdm-sm-control-content-back: '⮜';
   --smdm-sm-control-content-close: '✕';
   --smdm-sm-item-padding: 0.9rem 1.5rem;
@@ -98,19 +97,19 @@
       background-color: var(--smdm-sm-color-controls);
       text-transform: uppercase;
       border: none;
-  
+
       &[data-action='back'] {
         text-align: left;
-  
+
         &:before {
           content: var(--smdm-sm-control-content-back);
           margin-right: 0.5rem;
         }
       }
-  
+
       &[data-action='close'] {
         text-align: right;
-  
+
         &:before {
           content: var(--smdm-sm-control-content-close);
           margin-right: 0.5rem;
