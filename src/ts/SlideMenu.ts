@@ -333,8 +333,14 @@ class SlideMenu {
     // Hide menu on click outside menu
     if (this.options.closeOnClickOutside) {
       document.addEventListener('click', (event) => {
-        // @ts-ignore
-        if (this.isOpen && !this.isAnimating && !this.menuElem.contains(event.target)) {
+        if (
+          this.isOpen && 
+          !this.isAnimating && 
+          // @ts-ignore
+          !this.menuElem.contains(event.target) && 
+          // @ts-ignore
+          !event.target?.classList?.contains(SlideMenu.CLASS_NAMES.control)
+        ) {
           this.close();
         }
       });
