@@ -25,7 +25,7 @@ All you need is the traditional CSS menu HTML markup and a wrapper with the clas
 <nav class="slide-menu" id="example-menu">
   <ul>
     <li>
-      <a href="#">Home</a>
+      <a href="/">Home</a>
       <ul>
         <li><a href="#">Submenu entry 1</a></li>
         <li><a href="#">Submenu entry 2</a></li>
@@ -69,6 +69,7 @@ Option | Description | Valid values | Default
 `onlyNavigateDecorator` | Prevents navigation when clicking the link directly, triggers menu slide navigation only when clicking the link decorator elements  | *boolean* | `false`
 `minWidthFold` | Minimum window width in pixel for fold menu to be shown as fold not as slide | *number* | `640`
 `alignFoldTop` | Aligns fold with window top | *boolean* | `false`
+`dynamicOpenDefault` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` | *boolean* | `false`
 
 Example:
  
@@ -105,9 +106,9 @@ You can call the API in two different ways:
 * `back()` - Navigate on level back if possible
 * `navigateTo(target)`
     Open the menu level which contains specified menu element. `target` can either be a `document.querySelector` compatible string selector or the the DOM element (inside the menu). The first found element (if any) will be used.
-* `open(animate = true)` - Open the menu
+* `show(animate = true)` - Opens the menu
+* `open(animate = true)` - Open the menu on the default level. If option ``dynamicallyOpenDefault`` is true opens submenu matching the current page (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
 * `toggle(animate = true)` - Toggle the menu
-* `openCurrentPage()` - Opens the Submenu matching the current page (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
 
 ### Events
 
@@ -136,6 +137,32 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log('The menu has opened');
   });
 });
+```
+
+### Define default submenu
+
+To open a specific submenu with the `open` action you can give the slide menu element the attribute `data-open-target` and pass the slug or a selector for the desired target submenu item. Example:
+
+```html
+<nav class="slide-menu" id="example-menu" data-open-target="/submenu">
+  <ul>
+    <li>
+      <a href="/blog">Blog</a>
+    </li>
+    <li>
+      <a href="/submenu">Submenu</a>
+      <ul>
+        <!-- this submenu wil be opened as default -->
+        <li><a href="#">Submenu entry 1</a></li>
+        <li><a href="#">Submenu entry 2</a></li>
+        <li><a href="#">Submenu entry 3</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="/about">About</a>
+    </li>
+  </ul>
+</nav>
 ```
 
 ### Control buttons

@@ -25,6 +25,7 @@ interface SlideMenuOptions {
   minWidthFold: number;
   transitionDuration: number;
   alignFoldTop: boolean;
+  dynamicOpenDefault: boolean;
 }
 
 enum Direction {
@@ -59,6 +60,7 @@ const DEFAULT_OPTIONS = {
   minWidthFold: 640, // px
   transitionDuration: 300, // ms
   alignFoldTop: false,
+  dynamicOpenDefault: false,
 };
 
 class SlideMenu {
@@ -86,6 +88,7 @@ class SlideMenu {
   private isOpen: boolean = false;
   private isAnimating: boolean = false;
   private lastAction: Action | null = null;
+  private defaultOpenTarget: HTMLElement | null = null;
 
   private readonly options: SlideMenuOptions;
 
@@ -126,7 +129,7 @@ class SlideMenu {
     let offset;
 
     if (show === undefined) {
-      this.isOpen ? this.close(animate) : this.open(animate);
+      this.isOpen ? this.close(animate) : this.show(animate);
       return;
     } else if (show) {
       offset = 0;
@@ -146,6 +149,7 @@ class SlideMenu {
       this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
       this.foldLevel = 0;
 
+      // Refocus last focused element before opening menu
       // @ts-ignore
       this.lastFocusedElement?.focus();
     }
@@ -161,15 +165,15 @@ class SlideMenu {
   }
 
   /**
-   * Open the menu
+   * Show the menu
    */
-  public open(animate: boolean = true): void {
+  public show(animate: boolean = true): void {
     this.triggerEvent(Action.Open);
     this.toggle(true, animate);
   }
 
   /**
-   * Close the menu
+   * Hide / Close the menu
    */
   public close(animate: boolean = true): void {
     this.triggerEvent(Action.Close);
@@ -192,7 +196,7 @@ class SlideMenu {
 
     // Open Menu if still closed
     if (!this.isOpen) {
-      this.open();
+      this.show();
     }
 
     if (typeof target === 'string') {
@@ -234,21 +238,28 @@ class SlideMenu {
     }, this.options.transitionDuration);
   }
 
-  public openCurrentPage(): void {
-    const currentPath = location.pathname;
-    const currentHash = location.hash;
-    const currentHashItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentHash));
-    const currentPathItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentPath));
-    const currentPageItem = currentPathItem ?? currentHashItem;
-    const target = this.getNextSubmenu(currentPageItem) ?? currentPageItem as HTMLElement;
+  public open(animate: boolean = true): void {
+    if(this.options.dynamicOpenDefault) {
+      const currentPath = location.pathname;
+      const currentHash = location.hash;
+      const currentHashItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentHash));
+      const currentPathItem = Array.from(this.menuElem.querySelectorAll('a')).find(item => item.href.includes(currentPath));
+      const currentPageItem = currentPathItem ?? currentHashItem;
+      const target = this.getNextSubmenu(currentPageItem) ?? currentPageItem;
+  
+      if (target) {
+        this.navigateTo(target);
+        return;
+      }
+    }
 
-    if (target) {
-      // @ts-ignore
+    if (this.defaultOpenTarget) {
+      const target = this.getNextSubmenu(this.defaultOpenTarget) ?? this.defaultOpenTarget as HTMLElement;
       this.navigateTo(target);
       return;
     }
 
-    this.open();
+    this.show(animate);
   }
 
   /**
@@ -337,7 +348,7 @@ class SlideMenu {
           this.close();
           break;
         case this.options.keyOpen:
-          this.open();
+          this.show();
           break;
         default:
           return;
@@ -521,13 +532,16 @@ class SlideMenu {
           });
           break;
       }
-
-      this.menuElem.style.display = 'block';
-      this.menuElem.querySelectorAll('a').forEach((link) => {
-        link.classList.add(SlideMenu.CLASS_NAMES.item);
-        link.setAttribute('tabindex', '0');
-      });
     });
+
+    this.menuElem.style.display = 'block';
+    this.menuElem.querySelectorAll('a').forEach((link) => {
+      link.classList.add(SlideMenu.CLASS_NAMES.item);
+      link.setAttribute('tabindex', '0');
+    });
+
+    const defaultTargetSelector = this.menuElem.dataset.openTarget ?? 'smdm-sm-no-default-provided';
+    this.defaultOpenTarget = this.menuElem.querySelector(`a[href="${defaultTargetSelector}"]`) ?? this.menuElem.querySelector(defaultTargetSelector);
   }
 
   /**
