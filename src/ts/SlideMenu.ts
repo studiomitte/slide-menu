@@ -25,7 +25,7 @@ interface SlideMenuOptions {
   minWidthFold: number;
   transitionDuration: number;
   alignFoldTop: boolean;
-  dynamicOpenDefault: boolean;
+  dynamicOpenTarget: boolean;
 }
 
 enum Direction {
@@ -60,7 +60,7 @@ const DEFAULT_OPTIONS = {
   minWidthFold: 640, // px
   transitionDuration: 300, // ms
   alignFoldTop: false,
-  dynamicOpenDefault: false,
+  dynamicOpenTarget: false,
 };
 
 class SlideMenu {
@@ -254,7 +254,7 @@ class SlideMenu {
   }
 
   public open(animate: boolean = true): void {
-    if (this.options.dynamicOpenDefault) {
+    if (this.options.dynamicOpenTarget) {
       const currentPath = location.pathname;
       const currentHash = location.hash;
       const currentHashItem = Array.from(this.menuElem.querySelectorAll('a')).find((item) =>

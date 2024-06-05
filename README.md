@@ -69,11 +69,11 @@ Option | Description | Valid values | Default
 `onlyNavigateDecorator` | Prevents navigation when clicking the link directly, triggers menu slide navigation only when clicking the link decorator elements  | *boolean* | `false`
 `minWidthFold` | Minimum window width in pixel for fold menu to be shown as fold not as slide | *number* | `640`
 `alignFoldTop` | Aligns fold with window top | *boolean* | `false`
-`dynamicOpenDefault` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` | *boolean* | `false`
+`dynamicOpenTarget` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` | *boolean* | `false`
 
 Example:
  
- ```javascript
+```javascript
 document.addEventListener("DOMContentLoaded", function () {
   const menu = new SlideMenu(document.getElementById('example-menu'),{
       showBackLink: false,
@@ -107,7 +107,7 @@ You can call the API in two different ways:
 * `navigateTo(target)`
     Open the menu level which contains specified menu element. `target` can either be a `document.querySelector` compatible string selector or the the DOM element (inside the menu). The first found element (if any) will be used.
 * `show(animate = true)` - Shows the menu if closed
-* `open(animate = true)` - Opens the menu. If attribute `data-open-target="..."` is provided in the menu navigates to that target per default. If option ``dynamicallyOpenDefault`` is true opens submenu matching the currently active slug or hash in the browser URL (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
+* `open(animate = true)` - Opens the menu. If attribute `data-open-target="..."` is provided in the menu navigates to that target per default. If option ``dynamicOpenTarget`` is true opens submenu matching the currently active slug or hash in the browser URL (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
 * `toggle(animate = true)` - Toggle the menu
 
 ### Events
