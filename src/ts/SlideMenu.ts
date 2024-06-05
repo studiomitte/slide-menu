@@ -427,15 +427,24 @@ class SlideMenu {
     const previousMenu = this.getPreviousSubmenu(this.activeSubmenu);
 
     if (anchor && nextMenu && dir === Direction.Forward) {
-      this.activeSubmenu = nextMenu;
-
       this.markSelectedItem(anchor);
-
+      
       if (isFoldableSubmenu) {
+
+        // Hide previous foldable if it is not the parent menu
+        if (
+          this.activeSubmenu?.classList.contains(SlideMenu.CLASS_NAMES.foldableSubmenu) && 
+          this.activeSubmenu !== this.getPreviousSubmenu(nextMenu)
+        ) {
+          this.activeSubmenu?.classList.remove(SlideMenu.CLASS_NAMES.active);
+          this.foldLevel--;
+        }
+        
         this.positionFoldableSubmenu(nextMenu);
       } else {
         nextMenu.style.left = '100%';
       }
+      this.activeSubmenu = nextMenu;
     } else if (previousMenu && dir === Direction.Backward) {
       this.activeSubmenu = previousMenu;
     }
@@ -451,6 +460,8 @@ class SlideMenu {
       this.moveSlider(this.wrapperElem, offset);
     } else {
       this.foldLevel += dir;
+
+      console.log(this.foldLevel);
 
       if (this.foldLevel > 0) {
         this.menuElem.classList.add(SlideMenu.CLASS_NAMES.foldOpen);
