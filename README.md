@@ -106,8 +106,8 @@ You can call the API in two different ways:
 * `back(closeFold = false)` - Navigate on level back if possible. Additionally closes fold
 * `navigateTo(target)`
     Open the menu level which contains specified menu element. `target` can either be a `document.querySelector` compatible string selector or the the DOM element (inside the menu). The first found element (if any) will be used.
-* `show(animate = true)` - Opens the menu
-* `open(animate = true)` - Open the menu on the default level. If option ``dynamicallyOpenDefault`` is true opens submenu matching the current page (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
+* `show(animate = true)` - Shows the menu if closed
+* `open(animate = true)` - Opens the menu. If `data-open-target` is provided navigates to target per default. If option ``dynamicallyOpenDefault`` is true opens submenu matching the currently active slug or hash in the browser URL (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
 * `toggle(animate = true)` - Toggle the menu
 
 ### Events
@@ -227,7 +227,7 @@ To add Links for closing the menu in the end of Submenus for convenient keyboard
 
 #### Manually created Backlinks in Submenus
 
-Backlinks can be generated automatically with the option `showBackLink` and the contents `backLinkAfter` / `backLinkBefore`. If you want to be more flexible you can insert backlinks manually like in the following example:
+If you want to insert backlinks manually like in the following example use the attribute `data-action="back"`. Additonally, if you intend to close all the currently open foldable submenus use the attribute `data-arg="close-fold"` on the backlink.
 
 ```html
 <ul>
@@ -237,7 +237,7 @@ Backlinks can be generated automatically with the option `showBackLink` and the 
 </ul>
 ```
 
-If you want to close the foldable content in back navigation use the attribute `data-arg="close-fold"` on the backlink.
+> 💡 Backlinks can also be generated automatically with the option `showBackLink` and the contents `backLinkAfter` / `backLinkBefore`.
 
 ### Styling the Menu
 
