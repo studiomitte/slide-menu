@@ -103,7 +103,7 @@ You can call the API in two different ways:
 ### Methods
 
 * `close(animate = true)` - Close the menu
-* `back()` - Navigate on level back if possible
+* `back(closeFold = false)` - Navigate on level back if possible. Additionally closes fold
 * `navigateTo(target)`
     Open the menu level which contains specified menu element. `target` can either be a `document.querySelector` compatible string selector or the the DOM element (inside the menu). The first found element (if any) will be used.
 * `show(animate = true)` - Opens the menu
