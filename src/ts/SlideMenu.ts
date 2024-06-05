@@ -148,7 +148,6 @@ class SlideMenu {
 
       // @ts-ignore
       this.lastFocusedElement?.focus();
-      this.lastFocusedElement?.scrollIntoView({ behavior: "smooth" });
     }
 
     this.isOpen = show;
