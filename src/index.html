@@ -54,18 +54,9 @@
           class="btn slide-menu__control"
           data-target="test-menu-left"
           data-action="navigateTo"
-          data-arg="#special-link-1"
+          data-arg="#about-1-2"
         >
-          Jump to specific link (1)
-        </button>
-        <button
-          type="button"
-          class="btn slide-menu__control"
-          data-target="test-menu-left"
-          data-action="navigateTo"
-          data-arg="#special-link-2"
-        >
-          Jump to specific link (2)
+          Jump to specific submenu (About)
         </button>
         <button
           type="button"
@@ -122,6 +113,7 @@
               <a
                 class="slide-menu__item--has-foldable-submenu"
                 href="#/news-1-2"
+                id="news-1-2"
                 aria-label="Open Submenu News 1.2"
                 ><span>News 1.2</span></a
               >
@@ -244,8 +236,8 @@
             <li>
               <a
                 class="slide-menu__item--has-foldable-submenu"
-                href="#/news-1-2"
-                aria-label="Open Submenu News 1.2"
+                href="#/news-1-5"
+                aria-label="Open Submenu News 1.5"
                 ><span>News 1.5</span></a
               >
               <ul>
@@ -373,7 +365,7 @@
               <a href="#">About 1.1</a>
             </li>
             <li>
-              <a href="#" aria-label="Open Submenu About 1.2">About 1.2</a>
+              <a href="#" aria-label="Open Submenu About 1.2" id="about-1-2">About 1.2</a>
               <ul>
                 <li>
                   <a href="#" id="special-link-2">About 1.2.1 - I am Special 2</a>

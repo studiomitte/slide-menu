@@ -201,7 +201,7 @@ class SlideMenu {
   }
 
   /**
-   * Navigate to a specific link on any level (useful to open the correct hierarchy directly)
+   * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
   public navigateTo(target: HTMLElement | string): void {
     this.triggerEvent(Action.Navigate);
@@ -219,6 +219,9 @@ class SlideMenu {
         throw new Error('Invalid parameter `target`. A valid query selector is required.');
       }
     }
+
+    // Get first anchor of submenu if available to oben submenu
+    target = this.getNextSubmenu(target)?.querySelector('a') ?? target;
 
     // Hide other active menus
     const activeMenus = Array.from(
@@ -260,8 +263,7 @@ class SlideMenu {
       const currentPathItem = Array.from(this.menuElem.querySelectorAll('a')).find((item) =>
         item.href.includes(currentPath),
       );
-      const currentMenuItem = currentPathItem ?? currentHashItem;
-      const target = this.getNextSubmenu(currentMenuItem)?.querySelector('a') ?? currentMenuItem;
+      const target = currentPathItem ?? currentHashItem;
 
       if (target) {
         this.navigateTo(target);
@@ -270,10 +272,7 @@ class SlideMenu {
     }
 
     if (this.defaultOpenTarget) {
-      const target =
-        this.getNextSubmenu(this.defaultOpenTarget)?.querySelector('a') ??
-        (this.defaultOpenTarget as HTMLElement);
-      this.navigateTo(target);
+      this.navigateTo(this.defaultOpenTarget);
       return;
     }
 
