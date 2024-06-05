@@ -339,7 +339,7 @@ class SlideMenu {
           // @ts-ignore
           !this.menuElem.contains(event.target) && 
           // @ts-ignore
-          !event.target?.classList?.contains(SlideMenu.CLASS_NAMES.control)
+            !event.target?.closest('.' + SlideMenu.CLASS_NAMES.control)
         ) {
           this.close();
         }
