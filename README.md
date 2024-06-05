@@ -221,10 +221,23 @@ To add Links for closing the menu in the end of Submenus for convenient keyboard
 <ul>
   <li>...Menu item 1...</li>
   <li>...Menu item 2...</li>
-  <li>...Menu item 3...</li>
   <li><a href="#" data-action="close" class="slide-menu__control">X Close</a></li>
 </ul>
 ```
+
+#### Manually created Backlinks in Submenus
+
+Backlinks can be generated automatically with the option `showBackLink` and the contents `backLinkAfter` / `backLinkBefore`. If you want to be more flexible you can insert backlinks manually like in the following example:
+
+```html
+<ul>
+  <li><a href="#" data-action="back" class="slide-menu__control">🔙 Backlink</a></li>
+  <li>...Menu item 1...</li>
+  <li>...Menu item 2...</li>
+</ul>
+```
+
+If you want to close the foldable content in back navigation use the attribute `data-arg="close-fold"` on the backlink.
 
 ### Styling the Menu
 
