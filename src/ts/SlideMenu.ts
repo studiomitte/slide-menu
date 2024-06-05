@@ -462,8 +462,6 @@ class SlideMenu {
     } else {
       this.foldLevel += dir;
 
-      console.log(this.foldLevel);
-
       if (this.foldLevel > 0) {
         this.menuElem.classList.add(SlideMenu.CLASS_NAMES.foldOpen);
       }
