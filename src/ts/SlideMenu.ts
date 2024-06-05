@@ -193,14 +193,10 @@ class SlideMenu {
   }
 
   private closeFold(): void {
-    while (
-      this.activeSubmenu?.classList.contains(SlideMenu.CLASS_NAMES.active) &&
-      this.activeSubmenu?.classList.contains(SlideMenu.CLASS_NAMES.foldableSubmenu)
-    ) {
-      this.activeSubmenu.classList.remove(SlideMenu.CLASS_NAMES.active);
-      this.foldLevel--;
-      this.activeSubmenu = this.getPreviousSubmenu(this.activeSubmenu);
-    }
+    this.menuElem.querySelectorAll(`.${SlideMenu.CLASS_NAMES.foldableSubmenu}.${SlideMenu.CLASS_NAMES.active}`).forEach(openFoldable => {
+      openFoldable.classList.remove(SlideMenu.CLASS_NAMES.active);
+    })
+    this.foldLevel = 0;
     this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
   }
 
