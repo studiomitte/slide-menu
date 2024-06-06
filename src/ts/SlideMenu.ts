@@ -125,7 +125,7 @@ class SlideMenu {
   /**
    * Toggle the menu
    */
-  public toggle(show?: boolean, animate: boolean = true): void {
+  public toggleVisibility(show?: boolean, animate: boolean = true): void {
     let offset;
 
     if (show === undefined) {
@@ -141,11 +141,13 @@ class SlideMenu {
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
 
       // Deaktivate all submenus & fold
-      this.menuElem
-        .querySelectorAll('.' + SlideMenu.CLASS_NAMES.foldableSubmenu)
-        .forEach((foldable) => {
-          foldable.classList.remove(SlideMenu.CLASS_NAMES.active);
-        });
+      setTimeout(() => {
+        this.menuElem
+          .querySelectorAll('.' + SlideMenu.CLASS_NAMES.foldableSubmenu)
+          .forEach((foldable) => {
+            foldable.classList.remove(SlideMenu.CLASS_NAMES.active);
+          });
+      }, this.options.transitionDuration);
       this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
       this.foldLevel = 0;
 
@@ -164,12 +166,21 @@ class SlideMenu {
     }
   }
 
+  public toggle(animate: boolean = true): void {
+    if(this.isOpen) {
+      this.close(animate);
+      return;
+    }
+
+    this.open(animate);
+  }
+
   /**
    * Show the menu
    */
   public show(animate: boolean = true): void {
     this.triggerEvent(Action.Open);
-    this.toggle(true, animate);
+    this.toggleVisibility(true, animate);
   }
 
   /**
@@ -177,7 +188,7 @@ class SlideMenu {
    */
   public close(animate: boolean = true): void {
     this.triggerEvent(Action.Close);
-    this.toggle(false, animate);
+    this.toggleVisibility(false, animate);
   }
 
   /**
