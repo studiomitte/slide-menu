@@ -1,6 +1,6 @@
 {
   "name": "smdm-slide-menu",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "author": "Jakob Osterberger <jo@studiomitte.com>",
   "license": "MIT",
   "type": "module",
@@ -45,9 +45,10 @@
     "lint": "eslint --max-warnings=0 'src/ts/SlideMenu.ts'",
     "watch": "npx vite --port 8080",
     "typecheck": "npx tsc --noEmit",
-    "deploy": "npm run lint && npm run typecheck && npm run format && npm run build",
-    "deploy-patch": "npm run deploy && npm version patch --force -m \"[RELEASE] %s\" && npm publish",
-    "deploy-minor": "npm run deploy && npm version minor --force -m \"[RELEASE] %s\" && npm publish"
+    "pre-version": "npm run lint && npm run typecheck && npm run format && npm run build",
+    "post-version": "git push && git push --tags && npm publish",
+    "deploy-patch": "npm run pre-version && npm version patch --force -m \"[RELEASE] patch version %s\" && npm run post-version",
+    "deploy-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\" && npm run post-version"
   },
   "dependencies": {
     "custom-event-polyfill": "1.0.7"
