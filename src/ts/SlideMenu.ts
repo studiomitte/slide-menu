@@ -73,6 +73,7 @@ class SlideMenu {
     wrapper: `${SlideMenu.NAMESPACE}__slider`,
     item: `${SlideMenu.NAMESPACE}__item`,
     submenu: `${SlideMenu.NAMESPACE}__submenu`,
+    submenuWrapper: `${SlideMenu.NAMESPACE}__submenu__wrapper`,
     hasSubMenu: `${SlideMenu.NAMESPACE}__item--has-submenu`,
     activeItem: `${SlideMenu.NAMESPACE}__item--active`,
     hasFoldableSubmenu: `${SlideMenu.NAMESPACE}__item--has-foldable-submenu`,
@@ -111,6 +112,7 @@ class SlideMenu {
 
     const firstUl = this.menuElem.querySelector('ul');
     if (firstUl) {
+      firstUl.classList.add(SlideMenu.CLASS_NAMES.submenuWrapper)
       wrapElement(firstUl, this.wrapperElem);
     }
 

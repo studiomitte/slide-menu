@@ -46,34 +46,31 @@
     will-change: transform;
   }
 
-  ul {
-    position: relative;
+  &__submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    display: none;
     width: 100%;
     margin: 0;
     padding-left: 0;
     list-style: none;
 
-    ul {
-      position: absolute;
-      top: 0;
-      left: 100%;
-      display: none;
-    }
-
-    &.slide-menu__submenu--active {
+    &--active {
       display: block;
     }
 
-    a {
-      display: block;
+    &__wrapper {
+      position: relative;
+      width: 100%;
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
     }
   }
 
-  button {
-    cursor: pointer;
-  }
-
-  a {
+  &__item {
+    display: block;
     font-size: 0.8rem;
     color: var(--smdm-sm-color-text);
     cursor: pointer;
@@ -86,35 +83,36 @@
     }
   }
 
-  &__controls {
-    display: flex;
+  &__control {
+    cursor: pointer;
+    padding: 0.75rem 1.5rem;
+    flex: 1 0 auto;
+    font-size: 90%;
+    color: var(--smdm-sm-color-text);
+    background-color: var(--smdm-sm-color-controls);
+    text-transform: uppercase;
+    border: none;
 
-    & .slide-menu__control {
-      padding: 0.75rem 1.5rem;
-      flex: 1 0 auto;
-      font-size: 90%;
-      color: var(--smdm-sm-color-text);
-      background-color: var(--smdm-sm-color-controls);
-      text-transform: uppercase;
-      border: none;
+    &[data-action='back'] {
+      text-align: left;
 
-      &[data-action='back'] {
-        text-align: left;
-
-        &:before {
-          content: var(--smdm-sm-control-content-back);
-          margin-right: 0.5rem;
-        }
+      &:before {
+        content: var(--smdm-sm-control-content-back);
+        margin-right: 0.5rem;
       }
+    }
 
-      &[data-action='close'] {
-        text-align: right;
+    &[data-action='close'] {
+      text-align: right;
 
-        &:before {
-          content: var(--smdm-sm-control-content-close);
-          margin-right: 0.5rem;
-        }
+      &:before {
+        content: var(--smdm-sm-control-content-close);
+        margin-right: 0.5rem;
       }
+    }
+
+    &s {
+      display: flex;
     }
   }
 
