@@ -730,7 +730,7 @@ document.addEventListener('click', (event) => {
   const instance = (menu as MenuHTMLElement)._slideMenu;
   const method = btn.getAttribute('data-action');
 
-  const daraArg = btn.getAttribute('data-arg');
+  const dataArg = btn.getAttribute('data-arg');
   const dataArgMapping = {
     false: false,
     true: true,
@@ -738,11 +738,11 @@ document.addEventListener('click', (event) => {
     undefined,
   };
 
-  // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const arg = Object.keys(dataArgMapping).includes(dataArg?.toString() ?? '')
-    ? dataArgMapping[dataArg]
-    : daraArg;
+    ? // @ts-ignore
+      dataArgMapping[dataArg]
+    : dataArg;
 
   // @ts-ignore
   if (instance && method && typeof instance[method] === 'function') {

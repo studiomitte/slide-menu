@@ -47,8 +47,8 @@
     "typecheck": "npx tsc --noEmit",
     "pre-version": "npm run lint && npm run typecheck && npm run format && npm run build",
     "post-version": "git push && git push --tags && npm publish",
-    "deploy-patch": "npm run pre-version && npm version patch --force -m \"[RELEASE] patch version %s\" && npm run post-version",
-    "deploy-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\" && npm run post-version"
+    "version-patch": "npm run pre-version && npm version patch --force -m \"[RELEASE] patch version %s\"",
+    "version-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\""
   },
   "dependencies": {
     "custom-event-polyfill": "1.0.7"
