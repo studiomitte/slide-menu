@@ -290,15 +290,14 @@ npm run pre-version # includes linting & checks
 https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages
 
 ```sh
-# increment version number in package.json
 npm login
 
 npm run pre-version
 # commit changes
 
-npm run version-patch
+npm run version-patch # increments & commits patch version number
 # or
-npm run version-minor
+npm run version-minor # increments & commits minor version number
 
 
 npm run post-version
