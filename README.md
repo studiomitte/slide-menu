@@ -68,8 +68,9 @@ Option | Description | Valid values | Default
 `closeOnClickOutside` | Menu closes when clicked outside menu  element | *boolean* | `false`
 `onlyNavigateDecorator` | Prevents navigation when clicking the link directly, triggers menu slide navigation only when clicking the link decorator elements  | *boolean* | `false`
 `minWidthFold` | Minimum window width in pixel for fold menu to be shown as fold not as slide | *number* | `640`
+`transitionDuration` | Duration of slide animation in milliseconds | *number* | `300`
 `alignFoldTop` | Aligns fold with window top | *boolean* | `false`
-`dynamicOpenTarget` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` | *boolean* | `false`
+`dynamicOpenTarget` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` (especially useful for SPAs) | *boolean* | `false`
 
 Example:
  
@@ -141,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 ### Define default submenu
 
-To open a specific submenu with the `open` action you can give the slide menu element the attribute `data-open-target` and pass the slug or a selector for the desired target submenu item. Example:
+To open a specific submenu with the `open` or `toggle` action you can give the slide menu element the attribute `data-open-target` and pass the slug or a selector for the desired target submenu item. Example:
 
 ```html
 <nav class="slide-menu" id="example-menu" data-open-target="/submenu">
@@ -227,7 +228,7 @@ To add Links for closing the menu in the end of Submenus for convenient keyboard
 
 #### Manually created Backlinks in Submenus
 
-If you want to insert backlinks manually like in the following example use the attribute `data-action="back"`. Additonally, if you intend to close all the currently open foldable submenus use the attribute `data-arg="close-fold"` on the backlink.
+If you want to insert backlinks manually like in the following example use the attribute `data-action="back"` on them. Additonally, use the attribute `data-arg="close-fold"` on the backlink, if you intend to close all the currently open foldable submenus.
 
 ```html
 <ul>
@@ -241,22 +242,22 @@ If you want to insert backlinks manually like in the following example use the a
 
 ### Styling the Menu
 
-Basic Styling is provided by `slide-menu`. To adjust it to your theme select the elements by the classes slide menu applied to the elements.
+Basic Styling is provided by `slide-menu`. To adjust it to your theme select the elements by the classes slide menu applies to the elements.
 
-The following default CSS colors can be overwritten as needed:
+The following default CSS variables can be overwritten as needed:
 
 ```css
 :root {
   --smdm-sm-menu-width: 320px;
-  --smdm-sm-min-width-fold: 640px;
-  --smdm-sm-transition-duration: 300ms;
+  --smdm-sm-min-width-fold: 640px; /* make sure to set it to the same value as "minWidthFold" in the menu options */
+  --smdm-sm-transition-duration: 300ms; /* make sure to set it to the same value as "transitionDuration" in the menu options */
   --smdm-sm-transition-easing: ease-in-out;
   --smdm-sm-color-bg: rgb(10 10 9);
   --smdm-sm-color-text: rgb(238 237 235);
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
-  --smdm-sm-control-content-back: '⮜';
+  --smdm-sm-control-content-back: '◄';
   --smdm-sm-control-content-close: '✕';
   --smdm-sm-item-padding: 0.9rem 1.5rem;
 }
@@ -276,11 +277,13 @@ npm run watch
 ```
 
 ### Build
-To create a production build:
+Create a production build for release:
 
 ```sh
 # outside of ddev container
 npm run build
+# or
+npm run pre-version # includes linting & checks
 ```
 
 ### Publish Package Release
@@ -304,6 +307,15 @@ npm run post-version
 #### Testing Package - Install locally
 
 Test package in a project and install it locally:
+
 ```sh
 npm install path/to/my-package
+```
+
+#### Testing Package - Install through NPM
+
+Install package through npm package registry:
+
+```sh
+npm install smdm-slide-menu@latest
 ```
