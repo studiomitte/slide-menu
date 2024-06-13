@@ -46,47 +46,6 @@ export function parentsOne(elem: Node, selector: string): HTMLElement | null {
   return matches.length ? matches[0] : null;
 }
 
-export const tabableSelector =
-  'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-export function getFocusableElements() {
-  return Array.from(document.querySelectorAll(tabableSelector)).filter(
-    (el) => !el.hasAttribute('disabled'),
-  );
-}
-
-export function focusNext() {
-  const focusableElements = getFocusableElements();
-  const activeElement = document.activeElement;
-  // @ts-ignore
-  const currentIndex = focusableElements.indexOf(activeElement);
-
-  if (currentIndex !== -1) {
-    const nextIndex = (currentIndex + 1) % focusableElements.length;
-    // @ts-ignore
-    focusableElements[nextIndex].focus();
-  } else {
-    // @ts-ignore
-    focusableElements[0].focus();
-  }
-}
-
-export function focusPrevious() {
-  const focusableElements = getFocusableElements();
-  const activeElement = document.activeElement;
-  // @ts-ignore
-  const currentIndex = focusableElements.indexOf(activeElement);
-
-  if (currentIndex !== -1) {
-    const previousIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
-    // @ts-ignore
-    focusableElements[previousIndex].focus();
-  } else {
-    // @ts-ignore
-    focusableElements[focusableElements.length - 1].focus();
-  }
-}
-
 export function getDistanceFromTop(element: Element) {
   if (!element) {
     throw new Error('Element is not defined');
@@ -94,4 +53,45 @@ export function getDistanceFromTop(element: Element) {
   const rect = element.getBoundingClientRect();
   const distance = rect.top;
   return distance;
+}
+
+export const TAB_ABLE_SELECTOR =
+  'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
+
+export function focusFirstTabAbleElemIn(elem: HTMLElement | null | undefined): void {
+  // @ts-ignore
+  elem?.querySelector(TAB_ABLE_SELECTOR)?.focus();
+}
+
+export function trapFocus(
+  event: KeyboardEvent,
+  targetElement: HTMLElement,
+  firstElement?: HTMLElement,
+  lastElement?: HTMLElement,
+) {
+  const focusableElements = targetElement.querySelectorAll(TAB_ABLE_SELECTOR);
+  const firstFocusableElement = firstElement ?? focusableElements[0];
+  const lastFocusableElement = lastElement ?? focusableElements[focusableElements.length - 1];
+
+  const KEYCODE_TAB = 9;
+
+  const isTabPressed = event.key === 'Tab' || event.keyCode === KEYCODE_TAB;
+
+  if (!isTabPressed) {
+    return;
+  }
+
+  if (event.shiftKey) {
+    /* shift + tab */ if (document.activeElement === firstFocusableElement) {
+      // @ts-ignore
+      lastFocusableElement.focus();
+      event.preventDefault();
+    }
+  } /* tab */ else {
+    if (document.activeElement === lastFocusableElement) {
+      // @ts-ignore
+      firstFocusableElement.focus();
+      event.preventDefault();
+    }
+  }
 }
