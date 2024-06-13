@@ -167,7 +167,7 @@ class SlideMenu {
   }
 
   public toggle(animate: boolean = true): void {
-    if(this.isOpen) {
+    if (this.isOpen) {
       this.close(animate);
       return;
     }
@@ -204,9 +204,11 @@ class SlideMenu {
   }
 
   private closeFold(): void {
-    this.menuElem.querySelectorAll(`.${SlideMenu.CLASS_NAMES.foldableSubmenu}.${SlideMenu.CLASS_NAMES.active}`).forEach(openFoldable => {
-      openFoldable.classList.remove(SlideMenu.CLASS_NAMES.active);
-    })
+    this.menuElem
+      .querySelectorAll(`.${SlideMenu.CLASS_NAMES.foldableSubmenu}.${SlideMenu.CLASS_NAMES.active}`)
+      .forEach((openFoldable) => {
+        openFoldable.classList.remove(SlideMenu.CLASS_NAMES.active);
+      });
     this.foldLevel = 0;
     this.menuElem.classList.remove(SlideMenu.CLASS_NAMES.foldOpen);
   }
@@ -303,9 +305,9 @@ class SlideMenu {
       const navigationHandler = (event: Event): void => {
         const target = event.target as HTMLElement;
         const targetAnchor = target?.parentElement?.matches('a')
-        ? target?.parentElement
-        // @ts-ignore
-          : parentsOne(target?.parentElement, 'a');
+          ? target?.parentElement
+          : // @ts-ignore
+            parentsOne(target?.parentElement, 'a');
         if (targetAnchor && !target.dataset.action) {
           this.navigate(Direction.Forward, targetAnchor);
         }
@@ -345,12 +347,12 @@ class SlideMenu {
     if (this.options.closeOnClickOutside) {
       document.addEventListener('click', (event) => {
         if (
-          this.isOpen && 
-          !this.isAnimating && 
+          this.isOpen &&
+          !this.isAnimating &&
           // @ts-ignore
-          !this.menuElem.contains(event.target) && 
+          !this.menuElem.contains(event.target) &&
           // @ts-ignore
-            !event.target?.closest('.' + SlideMenu.CLASS_NAMES.control)
+          !event.target?.closest('.' + SlideMenu.CLASS_NAMES.control)
         ) {
           this.close();
         }
@@ -440,18 +442,17 @@ class SlideMenu {
 
     if (anchor && nextMenu && dir === Direction.Forward) {
       this.markSelectedItem(anchor);
-      
-      if (isFoldableSubmenu) {
 
+      if (isFoldableSubmenu) {
         // Hide previous foldable if it is not the parent menu
         if (
-          this.activeSubmenu?.classList.contains(SlideMenu.CLASS_NAMES.foldableSubmenu) && 
+          this.activeSubmenu?.classList.contains(SlideMenu.CLASS_NAMES.foldableSubmenu) &&
           this.activeSubmenu !== this.getPreviousSubmenu(nextMenu)
         ) {
           this.activeSubmenu?.classList.remove(SlideMenu.CLASS_NAMES.active);
           this.foldLevel--;
         }
-        
+
         this.positionFoldableSubmenu(nextMenu);
       } else {
         nextMenu.style.left = '100%';
@@ -731,15 +732,17 @@ document.addEventListener('click', (event) => {
 
   const daraArg = btn.getAttribute('data-arg');
   const dataArgMapping = {
-    'false': false,
-    'true': true,
-    'null': null,
-    'undefined': undefined
+    false: false,
+    true: true,
+    null: null,
+    undefined,
   };
-  
+
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const arg =  Object.keys(dataArgMapping).includes(dataArg?.toString() ?? '') ? dataArgMapping[dataArg] : daraArg;
+  const arg = Object.keys(dataArgMapping).includes(dataArg?.toString() ?? '')
+    ? dataArgMapping[dataArg]
+    : daraArg;
 
   // @ts-ignore
   if (instance && method && typeof instance[method] === 'function') {
