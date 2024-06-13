@@ -2,7 +2,7 @@
 
 > ℹ️ This project is a fork from https://github.com/grubersjoe/slide-menu. See **[ Original Demo](https://grubersjoe.github.io/slide-menu)**
 
-*A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions and various options.*
+*A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions and various options. Allows foldable submenu structures for desktop views.*
 
 Support: All current browsers and IE11+ (if using `dist/slide-menu.ie.js`).
 
@@ -289,7 +289,16 @@ https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages
 ```sh
 # increment version number in package.json
 npm login
-npm publish
+
+npm run pre-version
+# commit changes
+
+npm run version-patch
+# or
+npm run version-minor
+
+
+npm run post-version
 ```
 
 #### Testing Package - Install locally
