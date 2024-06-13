@@ -1,6 +1,6 @@
 # Slide Menu
 
-> ℹ️ This project is a fork from https://github.com/grubersjoe/slide-menu. **[Demo](https://grubersjoe.github.io/slide-menu)**
+> ℹ️ This project is a fork from https://github.com/grubersjoe/slide-menu. See **[ Original Demo](https://grubersjoe.github.io/slide-menu)**
 
 *A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions and various options.*
 
