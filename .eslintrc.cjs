@@ -24,5 +24,12 @@ module.exports = {
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "rules": {},
+  "rules": {
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+    '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/consistent-type-imports': 'off',
+    '@typescript-eslint/prefer-nullish-coalescing': 'off',
+  },
 }
