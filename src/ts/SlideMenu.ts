@@ -280,7 +280,7 @@ export class SlideMenu {
     const navDecrement = !nextMenu.canFold() ? Number(isNavigatingBack) : 0;
     const factor = Math.max(1, level) - 1 - navDecrement;
     const menuWidth = this.options.menuWidth;
-    const offset = - menuWidth * factor;
+    const offset = -menuWidth * factor;
 
     this.moveElem(this.sliderWrapperElem, offset, 'px');
 
@@ -386,7 +386,7 @@ export class SlideMenu {
           break;
         case 'Enter':
           // @ts-expect-error // simulate click event
-          if(elem?.classList.contains(CLASSES.decorator)) elem.click();
+          if (elem?.classList.contains(CLASSES.decorator)) elem.click();
           break;
       }
     });
@@ -520,7 +520,11 @@ document.addEventListener('click', (event) => {
   }
 
   const canControlMenu = (elem: Element): boolean => {
-    return elem.classList.contains(CLASSES.control) || elem.classList.contains(CLASSES.hasSubMenu) || elem.classList.contains(CLASSES.decorator);
+    return (
+      elem.classList.contains(CLASSES.control) ||
+      elem.classList.contains(CLASSES.hasSubMenu) ||
+      elem.classList.contains(CLASSES.decorator)
+    );
   };
 
   const btn = canControlMenu(event.target)

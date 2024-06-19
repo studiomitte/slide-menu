@@ -97,8 +97,8 @@ export class MenuSlide {
       linkBeforeElem.dataset.target = this.options.id;
       linkBeforeElem.dataset.arg = this.id;
 
-      if(this.options.onlyNavigateDecorator) {
-        linkBeforeElem.setAttribute("tabindex", "0");
+      if (this.options.onlyNavigateDecorator) {
+        linkBeforeElem.setAttribute('tabindex', '0');
       }
 
       this.anchorElem?.insertBefore(linkBeforeElem, this.anchorElem?.firstChild);
@@ -113,8 +113,8 @@ export class MenuSlide {
       linkAfterElem.dataset.target = this.options.id;
       linkAfterElem.dataset.arg = this.id;
 
-      if(this.options.onlyNavigateDecorator) {
-        linkAfterElem.setAttribute("tabindex", "0");
+      if (this.options.onlyNavigateDecorator) {
+        linkAfterElem.setAttribute('tabindex', '0');
       }
 
       this.anchorElem?.appendChild(linkAfterElem);
