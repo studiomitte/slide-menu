@@ -95,3 +95,10 @@ export function trapFocus(
     }
   }
 }
+
+export function alignTop(elem: HTMLElement): void {
+  const dy = getDistanceFromTop(elem);
+  if (dy > 0) {
+      elem.style.top = `-${dy}px`;
+  }
+}

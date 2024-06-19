@@ -42,7 +42,7 @@
   "scripts": {
     "build": "npx vite build",
     "format": "prettier --write 'src/**/*'",
-    "lint": "eslint --max-warnings=0 'src/ts/SlideMenu.ts'",
+    "lint": "eslint --max-warnings=0 'src/ts/SlideMenu.ts' 'src/ts/MenuSlide.ts' 'src/ts/SlideMenuOptions.ts'",
     "watch": "npx vite --port 8080",
     "typecheck": "npx tsc --noEmit",
     "pre-version": "npm run lint && npm run typecheck && npm run format && npm run build",
