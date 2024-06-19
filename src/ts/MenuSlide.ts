@@ -36,9 +36,12 @@ export class MenuSlide {
 
     if (anchorElem) {
       anchorElem?.classList.add(CLASSES.hasSubMenu);
-      anchorElem.dataset.action = Action.NavigateTo;
-      anchorElem.dataset.target = this.options.id;
-      anchorElem.dataset.arg = this.id;
+
+      if (!this.options.onlyNavigateDecorator) {
+        anchorElem.dataset.action = Action.NavigateTo;
+        anchorElem.dataset.target = this.options.id;
+        anchorElem.dataset.arg = this.id;
+      }
     }
 
     menuElem.classList.add(CLASSES.submenu);
@@ -82,13 +85,7 @@ export class MenuSlide {
   }
 
   // Add `before` and `after` text
-  private addLinkDecorator(
-    options: {
-      submenuLinkBefore?: string;
-      submenuLinkAfter?: string;
-      onlyNavigateDecorator?: boolean;
-    } = this.options,
-  ): HTMLAnchorElement | undefined {
+  private addLinkDecorator(options: SlideMenuOptions): HTMLAnchorElement | undefined {
     const decoratorTag = 'span';
 
     if (options.submenuLinkBefore) {
@@ -99,6 +96,10 @@ export class MenuSlide {
       linkBeforeElem.dataset.action = Action.NavigateTo;
       linkBeforeElem.dataset.target = this.options.id;
       linkBeforeElem.dataset.arg = this.id;
+
+      if(this.options.onlyNavigateDecorator) {
+        linkBeforeElem.setAttribute("tabindex", "0");
+      }
 
       this.anchorElem?.insertBefore(linkBeforeElem, this.anchorElem?.firstChild);
     }
@@ -111,6 +112,10 @@ export class MenuSlide {
       linkAfterElem.dataset.action = Action.NavigateTo;
       linkAfterElem.dataset.target = this.options.id;
       linkAfterElem.dataset.arg = this.id;
+
+      if(this.options.onlyNavigateDecorator) {
+        linkAfterElem.setAttribute("tabindex", "0");
+      }
 
       this.anchorElem?.appendChild(linkAfterElem);
     }

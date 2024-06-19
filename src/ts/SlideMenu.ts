@@ -94,7 +94,9 @@ export class SlideMenu {
     this.initSlides();
     this.initEventHandlers();
 
-    // Save this instance in menu DOM node
+    this.menuElem.style.display = 'flex';
+
+    // Save this instance in menu to DOM node
     this.menuElem._slideMenu = this;
   }
 
@@ -251,10 +253,6 @@ export class SlideMenu {
       });
     }
 
-    console.log(isNavigatingBack);
-
-    console.log(previousMenu, previousMenu?.isActive, previousMenu?.menuElem.classList.toString());
-
     // Disable all previous acitve menus not active now
     this.slides.forEach((slide) => {
       if (!currentlyVisibleIds.includes(slide.id)) {
@@ -278,11 +276,11 @@ export class SlideMenu {
 
     nextMenu.enableTabbing();
 
-    const level =
-      Math.max(1, this.getSlideLevel()) - 1 - (!nextMenu.canFold() ? Number(isNavigatingBack) : 0);
+    const level = this.getSlideLevel();
+    const navDecrement = !nextMenu.canFold() ? Number(isNavigatingBack) : 0;
+    const factor = Math.max(1, level) - 1 - navDecrement;
     const menuWidth = this.options.menuWidth;
-    const offset =
-      this.options.position === MenuPosition.Left ? -menuWidth * level : menuWidth * level;
+    const offset = - menuWidth * factor;
 
     this.moveElem(this.sliderWrapperElem, offset, 'px');
 
@@ -375,18 +373,22 @@ export class SlideMenu {
 
   private initKeybindings(): void {
     document.addEventListener('keydown', (event) => {
+      const elem = document.activeElement;
+
       switch (event.key) {
         case this.options.keyClose:
+          event.preventDefault();
           this.close();
           break;
         case this.options.keyOpen:
+          event.preventDefault();
           this.show();
           break;
-        default:
-          return;
+        case 'Enter':
+          // @ts-expect-error // simulate click event
+          if(elem?.classList.contains(CLASSES.decorator)) elem.click();
+          break;
       }
-
-      event.preventDefault();
     });
   }
 
@@ -446,16 +448,17 @@ export class SlideMenu {
       }
     });
 
+    this.menuElem.classList.add(this.options.position);
+
     const rootMenu = this.menuElem.querySelector('ul') as SlideHTMLElement | null;
     if (rootMenu) {
       this.slides.push(new MenuSlide(rootMenu, this.options));
     }
 
-    this.menuElem.style.display = 'flex';
-
     const firstControl = this.menuElem.querySelector(
       `.${CLASSES.controls}  .${CLASSES.control}`,
     ) as HTMLElement | undefined;
+
     this.menuElem.addEventListener('keydown', (event) => {
       const openedRootMenu = this.activeSubmenu?.getClosestNotFoldableSlide() ?? this.slides[0];
       if (openedRootMenu) {
@@ -517,12 +520,12 @@ document.addEventListener('click', (event) => {
   }
 
   const canControlMenu = (elem: Element): boolean => {
-    return elem.className.includes(CLASSES.control) || elem.className.includes(CLASSES.hasSubMenu);
+    return elem.classList.contains(CLASSES.control) || elem.classList.contains(CLASSES.hasSubMenu) || elem.classList.contains(CLASSES.decorator);
   };
 
   const btn = canControlMenu(event.target)
     ? event.target
-    : event.target.closest(`.${CLASSES.control}, .${CLASSES.hasSubMenu}`);
+    : event.target.closest(`.${CLASSES.control}, .${CLASSES.hasSubMenu}, .${CLASSES.decorator}`);
   if (!btn || !canControlMenu(btn)) {
     return;
   }
