@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
     'sm.forward-after',
     'sm.navigate',
     'sm.navigate-after',
+    'sm.navigateTo',
+    'sm.navigateTo-after',
     'sm.open',
     'sm.open-after',
   ];

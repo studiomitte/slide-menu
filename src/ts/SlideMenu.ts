@@ -119,7 +119,8 @@ export class SlideMenu {
     } else {
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
 
-      // Deactivae all menus and hide fold
+      // Deactivate all menus and hide fold
+      // Timeout to not mess with animation because of setting the focus
       setTimeout(() => {
         this.slides.forEach((menu) => !menu.isActive && menu.deactivate());
         // Refocus last focused element before opening menu
@@ -195,8 +196,6 @@ export class SlideMenu {
    * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
   public navigateTo(target: HTMLElement | MenuSlide | string): void {
-    this.triggerEvent(Action.NavigateTo);
-
     let nextMenu: MenuSlide;
 
     // Open Menu if still closed
@@ -243,6 +242,20 @@ export class SlideMenu {
       .map((menu) => menu.id)
       .includes(nextMenu.id);
 
+    const isNavigatingForward = nextMenu
+      ?.getAllParents()
+      .map((menu) => menu.id)
+      .includes(previousMenu?.id ?? '');
+
+    this.triggerEvent(Action.Navigate);
+    if (isNavigatingBack) {
+      this.triggerEvent(Action.Back);
+    } else if (isNavigatingForward) {
+      this.triggerEvent(Action.Forward);
+    } else {
+      this.triggerEvent(Action.NavigateTo);
+    }
+
     if (nextMenu.canFold()) {
       this.openFold();
 
@@ -276,8 +289,6 @@ export class SlideMenu {
         slide.disableTabbing();
       }
     });
-
-    console.log(previousMenu, previousMenu?.isActive, previousMenu?.menuElem.classList.toString());
 
     currentlyVisibleMenus.forEach((menu) => {
       if (!menu?.isActive) {
@@ -370,7 +381,12 @@ export class SlideMenu {
   private onTransitionEnd(event: Event): void {
     // Ensure the transitionEnd event was fired by the correct element
     // (elements inside the menu might use CSS transitions as well)
-    if (event.target !== this.menuElem && event.target !== this.sliderElem) {
+    if (
+      event.target !== this.menuElem &&
+      event.target !== this.sliderElem &&
+      event.target !== this.foldableWrapperElem &&
+      event.target !== this.sliderWrapperElem
+    ) {
       return;
     }
 
@@ -432,8 +448,11 @@ export class SlideMenu {
         offset += unit;
       }
 
-      elem.style.transform = `translateX(${offset})`;
-      this.isAnimating = true;
+      const newTranslateX = `translateX(${offset})`;
+      if (elem.style.transform !== newTranslateX) {
+        this.isAnimating = true;
+        elem.style.transform = newTranslateX;
+      }
     }, 0);
   }
 
@@ -466,9 +485,9 @@ export class SlideMenu {
       this.slides.push(new MenuSlide(rootMenu, this.options));
     }
 
-    const firstControl = this.menuElem.querySelector(
-      `.${CLASSES.controls}  .${CLASSES.control}`,
-    ) as HTMLElement | undefined;
+    const firstControl = this.menuElem.querySelector(`.${CLASSES.controls} .${CLASSES.control}`) as
+      | HTMLElement
+      | undefined;
 
     this.menuElem.addEventListener('keydown', (event) => {
       const openedRootMenu = this.activeSubmenu?.getClosestNotFoldableSlide() ?? this.slides[0];
