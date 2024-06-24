@@ -59,8 +59,26 @@ export const TAB_ABLE_SELECTOR =
   'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
 
 export function focusFirstTabAbleElemIn(elem: HTMLElement | null | undefined): void {
-  // @ts-ignore
-  elem?.querySelector(TAB_ABLE_SELECTOR)?.focus();
+  const firstTabbaleElem = Array.from(elem?.querySelectorAll(TAB_ABLE_SELECTOR) ?? []).find(
+    (elem) => {
+      return isVisible(elem);
+    },
+  );
+  console.log(firstTabbaleElem);
+  // @ts-expect-error // possibly undefined element
+  firstTabbaleElem?.focus();
+}
+
+function isVisible(element: Element) {
+  // @ts-expect-error // stop checking when reaching document
+  for (let el = element; el && el !== document; el = el.parentNode) {
+    // If current element has display property 'none', return false
+    // @ts-expect-error // accessing style of Element
+    if (el.style?.display === 'none' || getComputedStyle(el).display === 'none') {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function trapFocus(
