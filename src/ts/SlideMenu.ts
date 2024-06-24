@@ -163,7 +163,7 @@ export class SlideMenu {
    * Navigate one menu hierarchy back if possible
    */
   public back(closeFold: boolean = false): void {
-    const rootSlide =  this.slides[0];
+    const rootSlide = this.slides[0];
     let nextMenu = this.activeSubmenu?.parent ?? rootSlide;
     if (closeFold) {
       this.activeSubmenu = this.activeSubmenu?.getClosestNotFoldableSlide() ?? rootSlide;
@@ -247,8 +247,8 @@ export class SlideMenu {
       this.openFold();
 
       // Enable Tabbing for foldable Parents
-      nextMenu.getAllParents().forEach(menu => {
-        if(menu.canFold()) {
+      nextMenu.getAllParents().forEach((menu) => {
+        if (menu.canFold()) {
           menu.enableTabbing();
         }
       });
