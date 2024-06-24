@@ -158,7 +158,7 @@ export class MenuSlide {
   }
 
   public getClosestNotFoldableSlide(): MenuSlide | undefined {
-    return this.getAllParents().find((p) => !p.isFoldable);
+    return !this.isFoldable ? this : this.getAllParents().find((p) => !p.isFoldable);
   }
 
   /**

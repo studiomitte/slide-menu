@@ -163,10 +163,12 @@ export class SlideMenu {
    * Navigate one menu hierarchy back if possible
    */
   public back(closeFold: boolean = false): void {
-    let nextMenu = this.activeSubmenu?.parent ?? this.slides[0];
+    const rootSlide =  this.slides[0];
+    let nextMenu = this.activeSubmenu?.parent ?? rootSlide;
     if (closeFold) {
+      this.activeSubmenu = this.activeSubmenu?.getClosestNotFoldableSlide() ?? rootSlide;
+      nextMenu = this.activeSubmenu?.parent ?? rootSlide;
       this.closeFold();
-      nextMenu = this.activeSubmenu?.getClosestNotFoldableSlide()?.parent ?? this.slides[0];
     }
 
     // Event is triggered in navigate()
@@ -231,7 +233,7 @@ export class SlideMenu {
 
     const previousMenu = this.activeSubmenu;
     const parents = nextMenu.getAllParents();
-    const firstUnfoldableMenu = parents.find((p) => !p.canFold());
+    const firstUnfoldableParent = parents.find((p) => !p.canFold());
 
     const currentlyVisibleMenus = [nextMenu, ...parents];
     const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu?.id);
@@ -243,7 +245,16 @@ export class SlideMenu {
 
     if (nextMenu.canFold()) {
       this.openFold();
-      firstUnfoldableMenu?.getAllParents().forEach((menu) => {
+
+      // Enable Tabbing for foldable Parents
+      nextMenu.getAllParents().forEach(menu => {
+        if(menu.canFold()) {
+          menu.enableTabbing();
+        }
+      });
+
+      // disable Tabbing for invisible unfoldable parents
+      firstUnfoldableParent?.getAllParents().forEach((menu) => {
         menu.disableTabbing();
       });
     } else if (previousMenu?.canFold() && !nextMenu.canFold()) {
@@ -253,7 +264,7 @@ export class SlideMenu {
       });
     }
 
-    // Disable all previous acitve menus not active now
+    // Disable all previous active menus not active now
     this.slides.forEach((slide) => {
       if (!currentlyVisibleIds.includes(slide.id)) {
         // When navigating backwards deactivate (hide) previous after transition to not mess with animation
