@@ -534,6 +534,8 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  event.preventDefault();
+
   const target = btn.getAttribute('data-target');
   const menu =
     !target || target === 'this'
