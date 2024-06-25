@@ -98,6 +98,10 @@ export class SlideMenu {
 
     // Save this instance in menu to DOM node
     this.menuElem._slideMenu = this;
+
+    if (this.defaultOpenTarget) {
+      this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
+    }
   }
 
   /**
@@ -195,11 +199,14 @@ export class SlideMenu {
   /**
    * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
-  public navigateTo(target: HTMLElement | MenuSlide | string): void {
+  public navigateTo(
+    target: HTMLElement | MenuSlide | string,
+    runInForeground: boolean = true,
+  ): void {
     let nextMenu: MenuSlide;
 
     // Open Menu if still closed
-    if (!this.isOpen) {
+    if (runInForeground && !this.isOpen) {
       this.show();
     }
 
@@ -225,7 +232,7 @@ export class SlideMenu {
       nextMenu = target;
     }
 
-    // @ts-expect-error // can be used befor access -> can be undefined
+    // @ts-expect-error // used before access -> can be undefined
     if (!nextMenu) {
       throw new Error('No valid next slide fund');
     }
@@ -247,13 +254,15 @@ export class SlideMenu {
       .map((menu) => menu.id)
       .includes(previousMenu?.id ?? '');
 
-    this.triggerEvent(Action.Navigate);
-    if (isNavigatingBack) {
-      this.triggerEvent(Action.Back);
-    } else if (isNavigatingForward) {
-      this.triggerEvent(Action.Forward);
-    } else {
-      this.triggerEvent(Action.NavigateTo);
+    if (runInForeground) {
+      this.triggerEvent(Action.Navigate);
+      if (isNavigatingBack) {
+        this.triggerEvent(Action.Back);
+      } else if (isNavigatingForward) {
+        this.triggerEvent(Action.Forward);
+      } else {
+        this.triggerEvent(Action.NavigateTo);
+      }
     }
 
     if (nextMenu.canFold()) {
@@ -310,7 +319,10 @@ export class SlideMenu {
 
     // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
     setTimeout(() => {
-      nextMenu.focusFirstElem();
+      if (runInForeground) {
+        nextMenu.focusFirstElem();
+      }
+
       if (isNavigatingBack) {
         previousMenu?.deactivate();
       }
