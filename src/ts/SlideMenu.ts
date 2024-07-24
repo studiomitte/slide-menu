@@ -23,6 +23,7 @@ const DEFAULT_OPTIONS = {
   minWidthFold: 640, // px
   transitionDuration: 300, // ms
   dynamicOpenTarget: false,
+  debug: false,
   id: '',
 };
 
@@ -90,6 +91,10 @@ export class SlideMenu {
     this.foldableWrapperElem.classList.add(CLASSES.foldableWrapper);
     this.sliderElem.after(this.foldableWrapperElem);
 
+    if(this.options.onlyNavigateDecorator && (!this.options.submenuLinkAfter || !this.options.submenuLinkBefore)) {
+      this.debugLog('Make sure to provide navigation decorators manually! Otherwise `onlyNavigateDecorator` only works with `submenuLinkAfter` and `submenuLinkBefore` options!');
+    }
+
     this.initMenu();
     this.initSlides();
     this.initEventHandlers();
@@ -99,8 +104,19 @@ export class SlideMenu {
     // Save this instance in menu to DOM node
     this.menuElem._slideMenu = this;
 
+    // send event that menu is ready
+    this.triggerEvent(Action.Initialize);
+
     if (this.defaultOpenTarget) {
       this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
+    }
+
+  }
+
+  public debugLog(...args: any[]): void {
+    if(this.options.debug) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log(...args);
     }
   }
 
@@ -617,3 +633,6 @@ document.addEventListener('click', (event) => {
 
 // @ts-expect-error // Expose SlideMenu to the global namespace
 window.SlideMenu = SlideMenu;
+
+// send global event when SlideMenu is ready
+window.dispatchEvent(new Event('sm.ready'));

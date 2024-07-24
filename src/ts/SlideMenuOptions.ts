@@ -13,6 +13,7 @@ export interface SlideMenuOptions {
   minWidthFold: number;
   transitionDuration: number;
   dynamicOpenTarget: boolean;
+  debug: boolean;
   id: string;
 }
 
@@ -33,6 +34,7 @@ export enum Action {
   Navigate = 'navigate',
   NavigateTo = 'navigateTo',
   Open = 'open',
+  Initialize = 'init',
 }
 
 export const NAMESPACE = 'slide-menu';

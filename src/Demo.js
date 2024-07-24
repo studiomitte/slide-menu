@@ -3,7 +3,9 @@ function logEvent(id, event) {
   console.log(id + ': ' + time + ' - ' + event.type);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+const config = () => {
+  console.log('SlideMenu is ready!');
+
   const menuLeftElem = document.getElementById('test-menu-left');
 
   const allEvents = [
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'sm.navigateTo-after',
     'sm.open',
     'sm.open-after',
+    'sm.init',
   ];
 
   allEvents.forEach((eventName) => {
@@ -32,11 +35,16 @@ document.addEventListener('DOMContentLoaded', function () {
     keyClose: 'Escape',
     showBackLink: false,
     closeOnClickOutside: true,
-    onlyNavigateDecorator: false,
-    alignFoldTop: false,
+    onlyNavigateDecorator: true,
   });
 
   if (window.innerWidth > 767) {
     menuLeft.open(false);
   }
-});
+}
+
+if (window.SlideMenu) {
+  config();
+} else {
+  window.addEventListener('sm.ready', config);
+}

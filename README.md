@@ -45,10 +45,16 @@ All you need is the traditional CSS menu HTML markup and a wrapper with the clas
 Create the menu then like this:
 
 ```javascript
-document.addEventListener("DOMContentLoaded", function () {
+const initSlideMenu = () => {
   const menuElement = document.getElementById('example-menu');
   const menu = new SlideMenu(menuElement);
-});
+};
+
+if(window.SlideMenu) {
+  initSlideMenu()
+} else {
+  window.addEventListener("sm.ready", initSlideMenu);
+}
 ```
  
 ## Options
@@ -59,7 +65,7 @@ Option | Description | Valid values | Default
 --- | --- | --- | ---
 `backLinkAfter` | HTML to append to back link in submenus | HTML code |  `''`
 `backLinkBefore` | HTML to prepend to back link in submenus | HTML code |  `''`
-`keyClose` | Key used to close the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `undefined`
+`keyClose` | Key used to close the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `Escape`
 `keyOpen` | Key used to open the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `undefined`
 `position` | Position of the menu | `'left'` or `'right'` | `'right'`
 `showBackLink` | Add a link to navigate back in submenus (first entry) | *boolean* | `true`
@@ -67,20 +73,21 @@ Option | Description | Valid values | Default
 `submenuLinkAfter` | HTML to append to links with a submenu | HTML code |  `''`
 `closeOnClickOutside` | Menu closes when clicked outside menu  element | *boolean* | `false`
 `onlyNavigateDecorator` | Prevents navigation when clicking the link directly, triggers menu slide navigation only when clicking the link decorator elements  | *boolean* | `false`
+`menuWidth` | Width of the menu slider (without fold) | *number* | `320`
 `minWidthFold` | Minimum window width in pixel for fold menu to be shown as fold not as slide | *number* | `640`
 `transitionDuration` | Duration of slide animation in milliseconds | *number* | `300`
-`alignFoldTop` | Aligns fold with window top | *boolean* | `false`
 `dynamicOpenTarget` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` (especially useful for SPAs) | *boolean* | `false`
+`debug` | Shows verbose logs / warnings | *boolean* | `false`
 
 Example:
  
 ```javascript
-document.addEventListener("DOMContentLoaded", function () {
+const initSlideMenu = () => {
   const menu = new SlideMenu(document.getElementById('example-menu'),{
       showBackLink: false,
       submenuLinkAfter: ' <strong>⇒</strong>'
   });
-});
+};
  ```
  
 ## API
@@ -94,7 +101,7 @@ You can call the API in two different ways:
     // ... later
     menu.close();
     ```
-* The `SlideMenu` instance is also added as property of the menu DOM element (I'm still not sure if this might be a really bad idea). So if you need to control an existing menu without a reference to it, you can fetch it any time this way:
+* The `SlideMenu` instance is also added as property of the menu DOM element. So if you need to control an existing menu without a reference to it, you can fetch it any time this way:
 
     ```javascript
     const menu = document.getElementById('example-menu')._slideMenu;
@@ -108,10 +115,14 @@ You can call the API in two different ways:
 * `navigateTo(target)`
     Open the menu level which contains specified menu element. `target` can either be a `document.querySelector` compatible string selector or the the DOM element (inside the menu). The first found element (if any) will be used.
 * `show(animate = true)` - Shows the menu if closed
-* `open(animate = true)` - Opens the menu. If attribute `data-open-target="..."` is provided in the menu navigates to that target per default. If option ``dynamicOpenTarget`` is true opens submenu matching the currently active slug or hash in the browser URL (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
-* `toggle(animate = true)` - Toggle the menu (if defined opens the `data-open-target="..."` by default)
+* `open(animate = true)` - Opens the menu if closed an potentially navigates to target
+  * If attribute `data-open-target="..."` is provided in the root menu element the menu will navigate to that target per default. Target must be a `document.querySelector` compatible string
+  * If option ``dynamicOpenTarget`` is true opens submenu matching the currently active slug or hash in the browser URL (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
+* `toggle(animate = true)` - Toggle the menu (if defined opens the `data-open-target="..."` / `dynamicOpenTarget` by default)
 
 ### Events
+
+As soon as the `SlideMenu` class can be used globally the event `sm.ready` is fired.
 
 `SlideMenu` emits events for all kind of actions, which trigger as soon as the action is method is called. Plus, all events have  also an `<event>-after` equivalent, which is fired after the step is complete (completely animated).
 
@@ -120,12 +131,12 @@ You can call the API in two different ways:
 * `sm.forward[-after]`fires immediately when navigating forward in the menu hierarchy or after the animation is complete respectively. 
 * `sm.navigate[-after]`fires immediately when calling the `navigateTo()` method or after the animation is complete respectively. 
 * `sm.open[-after]` fires immediately when the `open()` method is called or after the animation is complete respectively.
-
+* `sm.init` fires when the slide menu object is finished initializing.
 
 Make sure to add the event listener to the HTML element, which contains the menu, since the events for this specific menu are dispatched there:
 
 ```javascript
-document.addEventListener("DOMContentLoaded", function () {
+window.addEventListener("sm.ready", function () {
   const menuElement = document.getElementById('example-menu');
   const menu = new SlideMenu(menuElement);
 
@@ -171,15 +182,16 @@ To open a specific submenu with the `open` or `toggle` action you can give the s
 Buttons to control the menu can be created easily. Add the class `slide-menu__control` to anchors or buttons and set the `data` attributes `target` to the ID of the desired menu and `action` to the API method:
 
 ```html
-<button type="button" class="slide-menu__control" data-action="open">Open</button>
-<button type="button" class="slide-menu__control" data-action="back">Back</button>
+<button type="button" class="slide-menu__control" data-target="example-menu" data-action="open">Open</button>
+<button type="button" class="slide-menu__control" data-target="example-menu" data-action="back">Back</button>
 ```
 
 *Inside* the menu container the attribute `data-target` can be omitted or set to to the string `this` to control *this* menu.
 
 ```html
-<a class="slide-menu-control" data-action="close">Close this menu</a>
+<a class="slide-menu-control" data-target="example-menu" data-action="close">Close this menu</a>
 <a class="slide-menu-control" data-target="this" data-action="close">Close this menu</a>
+<a class="slide-menu-control" data-action="close">Close this menu</a>
 ```
 
 ### Foldable Submenus
@@ -193,7 +205,7 @@ Foldable submenus can be created using the class `slide-menu__item--has-foldable
 </ul>
 ```
 
-Foldable Submenus will only fold open to the left/right side if the window width is bigger than `minWidthFold`.
+Foldable Submenus will only fold open to the left/right side if the window width is bigger than the configured `minWidthFold`.
 
 ### Additonal Content Within the Menu
 
@@ -248,9 +260,6 @@ The following default CSS variables can be overwritten as needed:
 
 ```css
 :root {
-  --smdm-sm-menu-width: 320px;
-  --smdm-sm-min-width-fold: 640px; /* make sure to set it to the same value as "minWidthFold" in the menu options */
-  --smdm-sm-transition-duration: 300ms; /* make sure to set it to the same value as "transitionDuration" in the menu options */
   --smdm-sm-transition-easing: ease-in-out;
   --smdm-sm-color-bg: rgb(10 10 9);
   --smdm-sm-color-text: rgb(238 237 235);

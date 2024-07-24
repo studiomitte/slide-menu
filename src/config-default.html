@@ -37,7 +37,7 @@
         Close menu
       </button>
       <button type="button" class="btn slide-menu__control" data-target="test-menu-left" data-action="navigateTo"
-        data-arg="#about-1-2" data-cypress="jump-to-about-1-2">
+        data-arg="#about-1-2" data-cypress="jump-to-about">
         Jump to specific submenu (About)
       </button>
       <button type="button" class="btn slide-menu__control" data-target="test-menu-left" data-action="navigateTo"
@@ -264,13 +264,15 @@
         <a href="#/blog" id="special-link-3">Blog</a>
       </li>
       <li>
-        <a href="#/about" aria-label="Open Submenu About" aria-label="Open Submenu About">About</a>
+        <a href="#/about" aria-label="Open Submenu About" aria-label="Open Submenu About"
+          data-cypress="jump-to-about-1-1">About</a>
         <ul>
           <li>
             <a href="#">About 1.1</a>
           </li>
           <li>
-            <a href="#" aria-label="Open Submenu About 1.2" id="about-1-2">About 1.2</a>
+            <a href="#" aria-label="Open Submenu About 1.2" id="about-1-2" data-cypress="jump-to-about-1-2">About
+              1.2</a>
             <ul>
               <li>
                 <a href="#" id="special-link-2">About 1.2.1 - I am Special 2</a>
@@ -409,8 +411,20 @@
     </ul>
 
   </nav> -->
+  <script>
+    const initSlideMenu = () => {
+      console.log('SlideMenu is ready!');
+      const menuLeftElem = document.getElementById('test-menu-left');
+      const menuLeft = new SlideMenu(menuLeftElem);
+    }
 
-  <script src="./Demo.js"></script>
+    if (window.SlideMenu) {
+      initSlideMenu();
+    } else {
+      window.addEventListener('sm.ready', initSlideMenu);
+    }
+
+  </script>
   <script type="module" src="./ts/SlideMenu.ts"></script>
 </body>
 
