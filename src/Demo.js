@@ -41,7 +41,7 @@ const config = () => {
   if (window.innerWidth > 767) {
     menuLeft.open(false);
   }
-}
+};
 
 if (window.SlideMenu) {
   config();

@@ -91,8 +91,13 @@ export class SlideMenu {
     this.foldableWrapperElem.classList.add(CLASSES.foldableWrapper);
     this.sliderElem.after(this.foldableWrapperElem);
 
-    if(this.options.onlyNavigateDecorator && (!this.options.submenuLinkAfter || !this.options.submenuLinkBefore)) {
-      this.debugLog('Make sure to provide navigation decorators manually! Otherwise `onlyNavigateDecorator` only works with `submenuLinkAfter` and `submenuLinkBefore` options!');
+    if (
+      this.options.onlyNavigateDecorator &&
+      (!this.options.submenuLinkAfter || !this.options.submenuLinkBefore)
+    ) {
+      this.debugLog(
+        'Make sure to provide navigation decorators manually! Otherwise `onlyNavigateDecorator` only works with `submenuLinkAfter` and `submenuLinkBefore` options!',
+      );
     }
 
     this.initMenu();
@@ -110,11 +115,10 @@ export class SlideMenu {
     if (this.defaultOpenTarget) {
       this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
     }
-
   }
 
   public debugLog(...args: any[]): void {
-    if(this.options.debug) {
+    if (this.options.debug) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       console.log(...args);
     }
