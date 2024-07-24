@@ -284,9 +284,8 @@ ddev ssh -s frontend
 npm install
 npm run watch
 
-# for testing
-ddev ssh -s cypress
-cypress run
+# run e2e tests (in cypress container)
+npm run test
 ```
 
 ### Build

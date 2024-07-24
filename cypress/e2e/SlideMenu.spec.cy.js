@@ -1,46 +1,11 @@
 /// <reference types="cypress" />
 
-const configDefault = () => {
-    const config = () => {
-        const menuLeftElem = document.getElementById('test-menu-left');
-        const menuLeft = new window.SlideMenu(menuLeftElem);
-        menuLeft.open(false);
-    }
-
-    if (window.SlideMenu) {
-        config();
-    } else {
-        window.addEventListener('sm.ready', config)
-    }
-}
-
-const configOnlyDecorators = () => {
-    const config = () => {
-        const menuLeftElem = document.getElementById('test-menu-left');
-        const menuLeft = new SlideMenu(menuLeftElem, {
-            position: 'left',
-            submenuLinkAfter: ' ⮞',
-            backLinkBefore: '⮜ ',
-            keyClose: 'Escape',
-            showBackLink: false,
-            closeOnClickOutside: true,
-            onlyNavigateDecorator: true,
-            alignFoldTop: false,
-        });
-        menuLeft.open(false);
-    }
-
-    if (window.SlideMenu) {
-        config();
-    } else {
-        window.addEventListener('sm.ready', config)
-    }
-};
-
 describe('slide menu', () => {
 
+    const frontend = 'http://frontend:8080';
+
     it('should be reachable (run "npm run watch" in frontend container first!)', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
         cy.contains('Slide Menu');
         cy.get('html').then(elem => {
             document.body.style.display = 'none';
@@ -49,24 +14,24 @@ describe('slide menu', () => {
     });
 
     it('default config: should open menu per default', () => {
-        cy.visit('http://frontend:8080/config-default.html');
+        cy.visit(frontend + '/config-default.html');
         cy.get('.slide-menu').should('not.be.visible');
     });
 
     it('custom config: should open menu per default', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
         cy.get('.slide-menu').should('be.visible');
     });
 
     it('should close menu on button click', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
 
         cy.get('[data-cypress="close-menu"]').click();
         cy.get('.slide-menu').should('not.be.visible');
     });
 
     it('should toggle menu on button click', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
 
         cy.get('[data-cypress="close-menu"]').click();
         cy.get('.slide-menu').should('not.be.visible');
@@ -80,7 +45,7 @@ describe('slide menu', () => {
     });
 
     it('should open menu on button click', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
 
         cy.get('[data-cypress="close-menu"]').should('be.visible').click();
         cy.get('.slide-menu').should('not.be.visible');
@@ -90,7 +55,7 @@ describe('slide menu', () => {
     });
 
     it('should navigate back on button click', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
 
         cy.get('.slide-menu').should('be.visible');
         cy.get('.slide-menu__foldable__wrapper').should('be.visible');
@@ -103,7 +68,7 @@ describe('slide menu', () => {
     });
 
     it('custom config: should navigate on clicking link decorators', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
 
         // is open
         cy.get('.slide-menu').should('be.visible');
@@ -136,7 +101,7 @@ describe('slide menu', () => {
     });
 
     it('custom config: should not go forward on clicking link', () => {
-        cy.visit('http://frontend:8080');
+        cy.visit(frontend);
 
         // go back
         cy.get('[data-cypress="back-close-fold"]').should('be.visible').click();
@@ -154,7 +119,7 @@ describe('slide menu', () => {
     });
 
     it('default config: should not go forward on clicking link', () => {
-        cy.visit('http://frontend:8080/config-default.html');
+        cy.visit(frontend + '/config-default.html');
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
@@ -184,7 +149,7 @@ describe('slide menu', () => {
     });
 
     it('should switch foldable content on click', () => {
-        cy.visit('http://frontend:8080/config-default.html');
+        cy.visit(frontend + '/config-default.html');
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
@@ -287,7 +252,7 @@ describe('slide menu', () => {
     });
 
     it('should slide without fold', () => {
-        cy.visit('http://frontend:8080/config-default.html');
+        cy.visit(frontend + '/config-default.html');
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();

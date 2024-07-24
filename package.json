@@ -41,6 +41,7 @@
     "vite": "^5.2.11"
   },
   "scripts": {
+    "test": "cypress run || echo 'cypress run' | ddev ssh -s cypress",
     "build": "npx vite build",
     "format": "prettier --write 'src/**/*'",
     "lint": "eslint --max-warnings=0 'src/ts/SlideMenu.ts' 'src/ts/MenuSlide.ts' 'src/ts/SlideMenuOptions.ts'",
