@@ -3,9 +3,10 @@
 ###############################
 
 services:
-  frontend: 
-      container_name: ddev-${DDEV_SITENAME}-frontend
-      image: node:20-alpine
+  cypress: 
+      container_name: ddev-${DDEV_SITENAME}-cypress
+      image: cypress/included:13.13.1
+      entrypoint: ["cypress", "open"]
       working_dir: /home/node/app
       labels:
         com.ddev.site-name: ${DDEV_SITENAME}
@@ -16,6 +17,8 @@ services:
           source: "."
           target: "/mnt/ddev_config"
         
+      healthcheck:
+        test: ['CMD','true'] # disable the healthcheck
 
       # need running process to prevent stopping of container
       stdin_open: true
@@ -25,8 +28,8 @@ services:
         - 8080
 
       environment:
-        - VIRTUAL_HOST=slide-menu.frontend.ddev.site
-        - HTTP_EXPOSE=9998:8080
-        - HTTPS_EXPOSE=9999:8080
+        - VIRTUAL_HOST=slide-menu.cypress.ddev.site
+        - HTTP_EXPOSE=3000:8080
+        - HTTPS_EXPOSE=3000:8080
         - NODE_ENV=development
 

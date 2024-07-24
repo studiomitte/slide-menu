@@ -27,10 +27,11 @@
     "src/*"
   ],
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "cypress": "^13.13.1",
     "eslint": "^8.57.0",
     "eslint-config-love": "^43.1.0",
     "eslint-config-prettier": "^9.1.0",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
@@ -48,7 +49,7 @@
     "pre-version": "npm run lint && npm run typecheck && npm run format && npm run build",
     "post-version": "git push && git push --tags && npm publish",
     "version-patch": "npm run pre-version && npm version patch --force -m \"[RELEASE] patch version %s\"",
-    "version-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\""
+    "version-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\"",
   },
   "dependencies": {
     "custom-event-polyfill": "1.0.7"

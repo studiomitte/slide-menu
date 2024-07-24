@@ -274,6 +274,10 @@ ddev ssh -s frontend
 # for development run
 npm install
 npm run watch
+
+# for testing
+ddev ssh -s cypress
+cypress run
 ```
 
 ### Build
