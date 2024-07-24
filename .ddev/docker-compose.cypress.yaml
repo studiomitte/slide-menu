@@ -6,7 +6,7 @@ services:
   cypress: 
       container_name: ddev-${DDEV_SITENAME}-cypress
       image: cypress/included:13.13.1
-      entrypoint: ["cypress", "open"]
+      entrypoint: ["cypress", "run", "--no-exit"]
       working_dir: /home/node/app
       labels:
         com.ddev.site-name: ${DDEV_SITENAME}
