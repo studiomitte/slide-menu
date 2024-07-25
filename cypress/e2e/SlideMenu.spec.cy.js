@@ -153,10 +153,11 @@ describe('slide menu', () => {
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
-
+        cy.get('.slide-menu').should('be.visible');
+        
         cy.wait(500)
         
-        cy.get('.slide-menu').should('be.visible');
+        cy.get('.slide-menu__foldable__wrapper').should('be.visible');
         cy.contains('News 1.2.3.5').should('be.visible');
         cy.contains('News 1.2.4.5').should('not.be.visible');
 

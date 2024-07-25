@@ -8,6 +8,7 @@
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
+  --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
   --smdm-sm-control-content-back: '⮜';
   --smdm-sm-control-content-close: '✕';
   --smdm-sm-item-padding: 0.9rem 1.5rem;
@@ -176,5 +177,53 @@
     & .slide-menu__submenu--active {
       display: block;
     }
+  }
+
+  &--fold-open &--invisible-on-open-fold {
+    visibility: hidden;
+  }
+
+  &--fold-open &--hidden-on-open-fold {
+    display: none;
+  }
+
+  &__overlay {
+    display: none;
+  }
+
+  &--open {
+    &-hidden {
+      display: none;
+    }
+
+    &-invisible {
+      visibility: hidden;
+    }
+
+    &-show {
+      visibility: visible;
+      display: flex;
+    }
+
+    .slide-menu__overlay {
+      display: block;
+      position: fixed;
+      overscroll-behavior: contain;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: var(--smdm-sm-color-overlay);
+    }
+  }
+
+  body[data-slide-menu-level='0'] &--invisible-on-root-level,
+  body:not([data-slide-menu-level]) &--invisible-on-root-level {
+    visibility: hidden;
+  }
+
+  body[data-slide-menu-level='0'] &--hidden-on-root-level,
+  body:not([data-slide-menu-level]) &--hidden-on-root-level {
+    display: none;
   }
 }

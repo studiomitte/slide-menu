@@ -178,6 +178,17 @@ To open a specific submenu with the `open` or `toggle` action you can give the s
 </nav>
 ```
 
+### Menu Overlay
+
+To add an overlay over the screen while the menu is open add a element with `class="slide-menu__overlay"` before the slide menu. It uses `--smdm-sm-color-overlay` as default color which can be adjusted as needed.
+
+```html
+<div class="slide-menu__overlay">
+<nav class="slide-menu" id="example-menu">
+  ...
+</nav>
+```
+
 ### Control buttons
  
 Buttons to control the menu can be created easily. Add the class `slide-menu__control` to anchors or buttons and set the `data` attributes `target` to the ID of the desired menu and `action` to the API method:
@@ -288,6 +299,7 @@ The following default CSS variables can be overwritten as needed:
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
+  --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
   --smdm-sm-control-content-back: '◄';
   --smdm-sm-control-content-close: '✕';
   --smdm-sm-item-padding: 0.9rem 1.5rem;
@@ -326,13 +338,11 @@ https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages
 ```sh
 npm login
 
-npm run pre-version
-# commit changes
-
 npm run version-patch # increments & commits patch version number
 # or
 npm run version-minor # increments & commits minor version number
 
+# commit changes
 
 npm run post-version
 ```
