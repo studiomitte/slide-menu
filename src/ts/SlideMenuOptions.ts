@@ -61,4 +61,6 @@ export const CLASSES = {
   left: `${NAMESPACE}--left`,
   right: `${NAMESPACE}--right`,
   title: `${NAMESPACE}__title`,
+  hiddenOnRoot: `${NAMESPACE}--hidden-on-root-level`,
+  invisibleOnRoot: `${NAMESPACE}--invisible-on-root-level`,
 };

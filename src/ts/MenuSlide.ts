@@ -178,6 +178,10 @@ export class MenuSlide {
     return parents;
   }
 
+  /**
+   * Focus the first tabbable element in the menu
+   * ⚠️ ATTENTION - setting the focus can mess with animations! Always set focus after animation is done
+   */
   public focusFirstElem(): void {
     focusFirstTabAbleElemIn(this.menuElem);
   }

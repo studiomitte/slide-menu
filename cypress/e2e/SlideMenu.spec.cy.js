@@ -321,4 +321,8 @@ describe('slide menu', () => {
         cy.get('.slide-menu__foldable__wrapper').should('not.be.visible');
         cy.get('[data-cypress="jump-to-about-1-2"]').should('not.be.visible');
     });
+
+    // TODO: check if trapping focus is working on foldable
+    // TODO: check if trapping focus is working slides wihtout fold
+    // TODO: check if default-open-target is working when it is in 1st menu level and you first navigate to root and then open menu again through default-open-target
 });

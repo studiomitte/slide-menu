@@ -35,7 +35,6 @@ export class SlideMenu {
   private isOpen: boolean = false;
   private isAnimating: boolean = false;
   private lastAction: Action | null = null;
-  private defaultOpenTarget: MenuSlide | undefined;
 
   private readonly slides: MenuSlide[] = [];
 
@@ -61,6 +60,9 @@ export class SlideMenu {
     this.options.id = this.menuElem.id ?? 'smdm-slide-menu-' + counter;
     counter++;
     this.menuElem.id = this.options.id;
+
+    // Save this instance in menu to DOM node
+    this.menuElem._slideMenu = this;
 
     // Set CSS Base Variables based on configuration options
     document.documentElement.style.setProperty(
@@ -94,6 +96,7 @@ export class SlideMenu {
     this.foldableWrapperElem.classList.add(CLASSES.foldableWrapper);
     this.sliderElem.after(this.foldableWrapperElem);
 
+    // Extract menu title
     this.menuTitle = this.menuElem.querySelector(`.${CLASSES.title}`) as HTMLElement;
     this.menuTitleDefaultText = this.menuTitle?.textContent?.trim() ?? this.menuTitleDefaultText;
 
@@ -110,17 +113,20 @@ export class SlideMenu {
     this.initSlides();
     this.initEventHandlers();
 
+    // Enable Menu
     this.menuElem.style.display = 'flex';
 
-    // Save this instance in menu to DOM node
-    this.menuElem._slideMenu = this;
-
-    // send event that menu is ready
+    // Send event that menu is initialized
     this.triggerEvent(Action.Initialize);
 
-    if (this.defaultOpenTarget) {
-      this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
-    }
+    // Set the default open target and activate it
+    this.activeSubmenu = this.slides[0].activate();
+    this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
+  }
+
+  private get defaultOpenTarget(): MenuSlide | undefined {
+    const defaultTargetSelector = this.menuElem.dataset.openTarget ?? 'smdm-sm-no-default-provided';
+    return this.getTargetMenuFromIdentifier(defaultTargetSelector);
   }
 
   public debugLog(...args: any[]): void {
@@ -145,7 +151,11 @@ export class SlideMenu {
       offset = 0;
 
       this.lastFocusedElement = document.activeElement;
-      this.activeSubmenu?.focusFirstElem();
+
+      // Can mess with animation - set focus after animation is done
+      setTimeout(() => {
+        this.activeSubmenu?.focusFirstElem();
+      }, this.options.transitionDuration);
     } else {
       offset = this.options.position === MenuPosition.Left ? '-100%' : '100%';
 
@@ -273,9 +283,6 @@ export class SlideMenu {
 
     this.updateMenuTitle(nextMenu, firstUnfoldableParent);
 
-    const currentlyVisibleMenus = [nextMenu, ...parents];
-    const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu?.id);
-
     const isNavigatingBack = previousMenu
       ?.getAllParents()
       .map((menu) => menu.id)
@@ -317,7 +324,14 @@ export class SlideMenu {
       parents.forEach((menu) => {
         menu.disableTabbing();
       });
+    } else if (!previousMenu?.canFold() && !nextMenu.canFold()) {
+      parents.forEach((menu) => {
+        menu.disableTabbing();
+      });
     }
+
+    const currentlyVisibleMenus = [nextMenu, ...parents];
+    const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu?.id);
 
     // Disable all previous active menus not active now
     this.slides.forEach((slide) => {
@@ -332,6 +346,7 @@ export class SlideMenu {
       }
     });
 
+    // Activate all visible menus
     currentlyVisibleMenus.forEach((menu) => {
       if (!menu?.isActive) {
         menu?.activate();
@@ -343,20 +358,34 @@ export class SlideMenu {
     const level = this.getSlideLevel(nextMenu, isNavigatingBack);
     const menuWidth = this.options.menuWidth;
     const offset = -menuWidth * level;
-
     this.moveElem(this.sliderWrapperElem, offset, 'px');
+
+    const controlsHiddenOnRootLevel = document.querySelectorAll(
+      `.${CLASSES.control}.${CLASSES.hiddenOnRoot}, .${CLASSES.control}.${CLASSES.invisibleOnRoot}`,
+    );
+    console.log(controlsHiddenOnRootLevel);
+    if (level === 0) {
+      controlsHiddenOnRootLevel.forEach((elem) => {
+        elem.setAttribute('tabindex', '-1');
+      });
+    } else {
+      controlsHiddenOnRootLevel.forEach((elem) => {
+        elem.removeAttribute('tabindex');
+      });
+    }
 
     this.activeSubmenu = nextMenu;
 
     document.querySelector('body')?.setAttribute('data-slide-menu-level', level.toString());
 
-    // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
     setTimeout(() => {
       if (runInForeground) {
+        // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
         nextMenu.focusFirstElem();
       }
 
       if (isNavigatingBack) {
+        // Wait for anmiation to finish to deactivate previous otherwise width of container messes with slide animation
         previousMenu?.deactivate();
       }
     }, this.options.transitionDuration);
@@ -558,15 +587,11 @@ export class SlideMenu {
       this.slides.push(new MenuSlide(rootMenu, this.options));
     }
 
-    const firstControl = this.menuElem.querySelector(`.${CLASSES.controls} .${CLASSES.control}`) as
-      | HTMLElement
-      | undefined;
-
     this.menuElem.addEventListener('keydown', (event) => {
-      const openedRootMenu = this.activeSubmenu?.getClosestNotFoldableSlide() ?? this.slides[0];
-      if (openedRootMenu) {
-        trapFocus(event, this.activeSubmenu?.menuElem ?? this.menuElem, firstControl);
-      }
+      const firstControl = this.menuElem.querySelector(
+        `.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`,
+      ) as HTMLElement | undefined;
+      trapFocus(event, this.activeSubmenu?.menuElem ?? this.menuElem, firstControl);
     });
   }
 
@@ -608,11 +633,6 @@ export class SlideMenu {
     this.slides.forEach((menuSlide) => {
       menuSlide.appendTo(this.sliderWrapperElem);
     });
-
-    const defaultTargetSelector = this.menuElem.dataset.openTarget ?? 'smdm-sm-no-default-provided';
-    this.defaultOpenTarget = this.getTargetMenuFromIdentifier(defaultTargetSelector);
-
-    this.activeSubmenu = this.defaultOpenTarget?.activate() ?? this.slides[0].activate();
   }
 
   get onlyNavigateDecorator(): boolean {
