@@ -107,6 +107,11 @@
     }
   }
 
+  &__title {
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
   &__control {
     cursor: pointer;
     padding: 0.75rem 1.5rem;

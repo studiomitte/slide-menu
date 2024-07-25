@@ -64,7 +64,6 @@ export function focusFirstTabAbleElemIn(elem: HTMLElement | null | undefined): v
       return isVisible(elem);
     },
   );
-  console.log(firstTabbaleElem);
   // @ts-expect-error // possibly undefined element
   firstTabbaleElem?.focus();
 }

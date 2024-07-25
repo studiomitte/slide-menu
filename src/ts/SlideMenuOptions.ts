@@ -57,6 +57,8 @@ export const CLASSES = {
   foldOpen: `${NAMESPACE}--fold-open`,
   slideIn: `${NAMESPACE}--slide-in`,
   slideOut: `${NAMESPACE}--slide-out`,
+  open: `${NAMESPACE}--open`,
   left: `${NAMESPACE}--left`,
   right: `${NAMESPACE}--right`,
+  title: `${NAMESPACE}__title`,
 };

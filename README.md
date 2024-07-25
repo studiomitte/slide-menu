@@ -85,7 +85,7 @@ Example:
 const initSlideMenu = () => {
   const menu = new SlideMenu(document.getElementById('example-menu'),{
       showBackLink: false,
-      submenuLinkAfter: ' <strong>⇒</strong>'
+      submenuLinkAfter: '<strong>⇒</strong>'
   });
 };
  ```
@@ -151,6 +151,7 @@ window.addEventListener("sm.ready", function () {
 });
 ```
 
+
 ### Define default submenu
 
 To open a specific submenu with the `open` or `toggle` action you can give the slide menu element the attribute `data-open-target` and pass the slug or a selector for the desired target submenu item. Example:
@@ -184,6 +185,8 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 ```html
 <button type="button" class="slide-menu__control" data-target="example-menu" data-action="open">Open</button>
 <button type="button" class="slide-menu__control" data-target="example-menu" data-action="back">Back</button>
+<button type="button" class="slide-menu__control" data-target="example-menu" data-action="toggle">Toggle</button>
+<button type="button" class="slide-menu__control" data-target="example-menu" data-action="navigateTo" data-arg="blog">Navigate to #blog</button>
 ```
 
 *Inside* the menu container the attribute `data-target` can be omitted or set to to the string `this` to control *this* menu.
@@ -194,15 +197,34 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 <a class="slide-menu-control" data-action="close">Close this menu</a>
 ```
 
+### Menu Title
+
+The dynamic menu title `slide-menu__title` can optionally be added anywhere in the menu structure (e.g. in the ``slide-menu__controls``). The title will be updated dynamically according to the current menu level.
+
+```html
+<nav class="slide-menu" id="test-menu-left">
+  <div class="slide-menu__controls">
+    ...
+    <div class="slide-menu__title">Submenu Title</div>
+    ...
+  </div>
+  ...
+</nav>
+```
+
 ### Foldable Submenus
 
 Foldable submenus can be created using the class `slide-menu__item--has-foldable-submenu` on the item that precedes the submenu.
 
 ```html
-<a class="slide-menu__item--has-foldable-submenu" href="#"><span>Foldable</span></a>
-<ul>
-  ...foldable submenu items go here...
-</ul>
+...
+<li>
+  <a class="slide-menu__item--has-foldable-submenu" href="#"><span>Foldable</span></a>
+  <ul>
+    ...foldable submenu items go here...
+  </ul>
+</li>
+...
 ```
 
 Foldable Submenus will only fold open to the left/right side if the window width is bigger than the configured `minWidthFold`.
@@ -213,7 +235,7 @@ Any arbitrary additonal content (e.g. search input fields, detail info,...) can 
 
 ```html
 <nav class="slide-menu" id="test-menu-left">
-  <div class="controls">
+  <div class="slide-menu__controls">
     ...
   </div>
   <div class="slide-menu--additional-content">

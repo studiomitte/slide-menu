@@ -41,8 +41,11 @@ export class SlideMenu {
 
   private readonly options: SlideMenuOptions;
 
+  private readonly menuTitleDefaultText: string = 'Menu';
+
   private readonly menuElem: MenuHTMLElement;
   private readonly sliderElem: HTMLElement;
+  private readonly menuTitle: HTMLElement | null;
   private readonly sliderWrapperElem: HTMLElement;
   private readonly foldableWrapperElem: HTMLElement;
 
@@ -90,6 +93,9 @@ export class SlideMenu {
     this.foldableWrapperElem = document.createElement('div');
     this.foldableWrapperElem.classList.add(CLASSES.foldableWrapper);
     this.sliderElem.after(this.foldableWrapperElem);
+
+    this.menuTitle = this.menuElem.querySelector(`.${CLASSES.title}`) as HTMLElement;
+    this.menuTitleDefaultText = this.menuTitle?.textContent ?? this.menuTitleDefaultText;
 
     if (
       this.options.onlyNavigateDecorator &&
@@ -169,19 +175,23 @@ export class SlideMenu {
   }
 
   /**
-   * Show the menu
+   * Shows the menu, adds `slide-menu--open` class to body
    */
   public show(animate: boolean = true): void {
     this.triggerEvent(Action.Open);
     this.toggleVisibility(true, animate);
+
+    document.querySelector('body')?.classList.add(CLASSES.open);
   }
 
   /**
-   * Hide / Close the menu
+   * Hide / Close the menu, removes `slide-menu--open` class from body
    */
   public close(animate: boolean = true): void {
     this.triggerEvent(Action.Close);
     this.toggleVisibility(false, animate);
+
+    document.querySelector('body')?.classList.remove(CLASSES.open);
   }
 
   /**
@@ -261,6 +271,8 @@ export class SlideMenu {
     const parents = nextMenu.getAllParents();
     const firstUnfoldableParent = parents.find((p) => !p.canFold());
 
+    this.updateMenuTitle(nextMenu, firstUnfoldableParent);
+
     const currentlyVisibleMenus = [nextMenu, ...parents];
     const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu?.id);
 
@@ -300,6 +312,7 @@ export class SlideMenu {
         menu.disableTabbing();
       });
     } else if (previousMenu?.canFold() && !nextMenu.canFold()) {
+      // close fold and disable tabbing for all parents
       this.closeFold();
       parents.forEach((menu) => {
         menu.disableTabbing();
@@ -351,6 +364,27 @@ export class SlideMenu {
 
   private getSlideLevel(): number {
     return Array.from(this.sliderWrapperElem.querySelectorAll('.' + CLASSES.active)).length;
+  }
+
+  private updateMenuTitle(nextMenu: MenuSlide, firstUnfoldableParent?: MenuSlide): void {
+    if (this.menuTitle) {
+      let anchorText = nextMenu?.anchorElem?.textContent ?? this.menuTitleDefaultText;
+      const decoratorTextAfter = this.options?.submenuLinkAfter ?? '';
+      const decoratorTextBefore = this.options?.submenuLinkBefore ?? '';
+
+      if (nextMenu.canFold() && firstUnfoldableParent) {
+        anchorText = firstUnfoldableParent.anchorElem?.textContent ?? anchorText;
+      }
+
+      if (decoratorTextAfter) {
+        anchorText = anchorText.replace(decoratorTextAfter, '');
+      }
+      if (decoratorTextBefore) {
+        anchorText = anchorText.replace(decoratorTextBefore, '');
+      }
+
+      this.menuTitle.innerText = anchorText;
+    }
   }
 
   /**
@@ -573,6 +607,10 @@ export class SlideMenu {
 
     this.activeSubmenu = this.defaultOpenTarget?.activate() ?? this.slides[0].activate();
   }
+
+  get onlyNavigateDecorator(): boolean {
+    return this.options.onlyNavigateDecorator;
+  }
 }
 
 // Link control buttons with the API
@@ -596,22 +634,32 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  event.preventDefault();
-
   const target = btn.getAttribute('data-target');
   const menu =
     !target || target === 'this'
       ? parentsOne(btn, `.${NAMESPACE}`)
-      : document.getElementById(target); // assumes #id
+      : document.getElementById(target) ?? document.querySelector(target); // assumes #id
 
   if (!menu) {
     throw new Error(`Unable to find menu ${target}`);
   }
 
   const instance = (menu as MenuHTMLElement)._slideMenu;
+
   // if(btn.classList.contains(CLASSES.hasSubMenu)) {
   //   instance.markSelectedItem(btn);
   // }
+
+  // Always prevent opening of links if not onlyNavigateDecorator
+  if (instance && !instance.onlyNavigateDecorator) {
+    event.preventDefault();
+  }
+
+  // Only prevent opening of links when clicking the decorator when onlyNavigateDecorator
+  if (instance && instance.onlyNavigateDecorator && event.target.matches(`.${CLASSES.decorator}`)) {
+    event.preventDefault();
+  }
+
   const method = btn.getAttribute('data-action');
 
   const dataArg = btn.getAttribute('data-arg');
