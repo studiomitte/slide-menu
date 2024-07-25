@@ -1,6 +1,6 @@
 {
   "name": "smdm-slide-menu",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "author": "Jakob Osterberger <jo@studiomitte.com>",
   "license": "MIT",
   "type": "module",
@@ -47,7 +47,7 @@
     "lint": "eslint --max-warnings=0 'src/ts/SlideMenu.ts' 'src/ts/MenuSlide.ts' 'src/ts/SlideMenuOptions.ts'",
     "watch": "npx vite --port 8080",
     "typecheck": "npx tsc --noEmit",
-    "pre-version": "npm run lint && npm run typecheck && npm run format && npm run build",
+    "pre-version": "npm run lint && npm run typecheck && npm run format && npm run build && npm run test",
     "post-version": "git push && git push --tags && npm publish",
     "version-patch": "npm run pre-version && npm version patch --force -m \"[RELEASE] patch version %s\"",
     "version-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\""
