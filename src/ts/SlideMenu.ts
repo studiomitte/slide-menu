@@ -95,7 +95,7 @@ export class SlideMenu {
     this.sliderElem.after(this.foldableWrapperElem);
 
     this.menuTitle = this.menuElem.querySelector(`.${CLASSES.title}`) as HTMLElement;
-    this.menuTitleDefaultText = this.menuTitle?.textContent ?? this.menuTitleDefaultText;
+    this.menuTitleDefaultText = this.menuTitle?.textContent?.trim() ?? this.menuTitleDefaultText;
 
     if (
       this.options.onlyNavigateDecorator &&
@@ -383,7 +383,7 @@ export class SlideMenu {
         anchorText = anchorText.replace(decoratorTextBefore, '');
       }
 
-      this.menuTitle.innerText = anchorText;
+      this.menuTitle.innerText = anchorText.trim();
     }
   }
 
