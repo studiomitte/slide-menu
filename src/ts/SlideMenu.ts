@@ -340,15 +340,15 @@ export class SlideMenu {
 
     nextMenu.enableTabbing();
 
-    const level = this.getSlideLevel();
-    const navDecrement = !nextMenu.canFold() ? Number(isNavigatingBack) : 0;
-    const factor = Math.max(1, level) - 1 - navDecrement;
+    const level = this.getSlideLevel(nextMenu, isNavigatingBack);
     const menuWidth = this.options.menuWidth;
-    const offset = -menuWidth * factor;
+    const offset = -menuWidth * level;
 
     this.moveElem(this.sliderWrapperElem, offset, 'px');
 
     this.activeSubmenu = nextMenu;
+
+    document.querySelector('body')?.setAttribute('data-slide-menu-level', level.toString());
 
     // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
     setTimeout(() => {
@@ -362,8 +362,12 @@ export class SlideMenu {
     }, this.options.transitionDuration);
   }
 
-  private getSlideLevel(): number {
-    return Array.from(this.sliderWrapperElem.querySelectorAll('.' + CLASSES.active)).length;
+  private getSlideLevel(nextMenu: MenuSlide, isNavigatingBack?: boolean): number {
+    const activeNum = Array.from(
+      this.sliderWrapperElem.querySelectorAll('.' + CLASSES.active),
+    ).length;
+    const navDecrement = !nextMenu.canFold() ? Number(isNavigatingBack) : 0;
+    return Math.max(1, activeNum) - 1 - navDecrement;
   }
 
   private updateMenuTitle(nextMenu: MenuSlide, firstUnfoldableParent?: MenuSlide): void {
@@ -395,7 +399,10 @@ export class SlideMenu {
   private getTargetMenuFromIdentifier(
     targetMenuIdAnchorHrefOrSelector: string,
   ): MenuSlide | undefined {
-    return this.slides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector));
+    return (
+      this.slides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector)) ??
+      this.slides.find((menu) => menu.menuElem.querySelector(targetMenuIdAnchorHrefOrSelector))
+    );
   }
 
   private getTargetMenuDynamically(): MenuSlide | undefined {

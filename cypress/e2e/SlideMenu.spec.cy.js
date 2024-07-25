@@ -153,6 +153,9 @@ describe('slide menu', () => {
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
+
+        cy.wait(500)
+        
         cy.get('.slide-menu').should('be.visible');
         cy.contains('News 1.2.3.5').should('be.visible');
         cy.contains('News 1.2.4.5').should('not.be.visible');
@@ -240,10 +243,14 @@ describe('slide menu', () => {
         cy.contains('News 1.2.3.5').should('be.visible');
         cy.contains('News 1.2.4.5').should('not.be.visible');
 
+        cy.wait(500)
+
         // navigate to show 1.2.4.5
         cy.contains('News 1.2.4').should('be.visible').click();
         cy.contains('News 1.2.3.5').should('not.be.visible');
         cy.contains('News 1.2.4.5').should('be.visible');
+
+        cy.wait(500)
 
         // navigate to show 1.2.3.5
         cy.contains('News 1.2.3').should('be.visible').click();
@@ -258,6 +265,8 @@ describe('slide menu', () => {
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
         cy.get('.slide-menu').should('be.visible');
         cy.get('.slide-menu__foldable__wrapper').should('be.visible');
+
+        cy.wait(500)
 
         // close fold
         cy.get('[data-cypress="back-close-fold"]').should('be.visible').click();

@@ -193,8 +193,7 @@ export class MenuSlide {
       this.anchorElem?.id === idHrefOrSelector ||
       this.anchorElem?.href === idHrefOrSelector ||
       this.anchorElem?.matches(idHrefOrSelector) ||
-      this.menuElem.matches(idHrefOrSelector) ||
-      !!this.menuElem.querySelector(idHrefOrSelector)
+      this.menuElem.matches(idHrefOrSelector)
     );
   }
 
