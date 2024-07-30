@@ -34,13 +34,24 @@ describe('slide menu', () => {
         cy.visit(frontend);
 
         cy.get('[data-cypress="close-menu"]').click();
-        cy.get('.slide-menu').should('not.be.visible');
 
-        cy.get('[data-cypress="toggle-menu"]').click();
-        cy.get('.slide-menu').should('be.visible');
-        cy.get('[data-cypress="close-menu"]').click();
+        cy.wait(500);
+        
         cy.get('.slide-menu').should('not.be.visible');
         cy.get('[data-cypress="toggle-menu"]').click();
+
+        cy.wait(500);
+
+        cy.get('.slide-menu').should('be.visible');
+        cy.get('[data-cypress="back-manually-inserted-backlink"]').should('be.visible').click();
+        cy.get('[data-cypress="close-menu"]').click();
+
+        cy.wait(500);
+        
+        cy.get('.slide-menu').should('not.be.visible');
+        cy.get('[data-cypress="toggle-menu"]').click();
+
+        cy.wait(500);
         cy.get('.slide-menu').should('be.visible');
     });
 

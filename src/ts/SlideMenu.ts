@@ -60,6 +60,8 @@ export class SlideMenu {
     this.options.id = this.menuElem.id ?? 'smdm-slide-menu-' + counter;
     counter++;
     this.menuElem.id = this.options.id;
+    this.menuElem.classList.add(NAMESPACE);
+    this.menuElem.classList.add(this.options.position);
 
     // Save this instance in menu to DOM node
     this.menuElem._slideMenu = this;
@@ -656,7 +658,7 @@ document.addEventListener('click', (event) => {
 
   const btn = canControlMenu(event.target)
     ? event.target
-    : event.target.closest(`.${CLASSES.control}, .${CLASSES.hasSubMenu}, .${CLASSES.decorator}`);
+    : event.target.closest(`.${CLASSES.decorator}, .${CLASSES.control}, .${CLASSES.hasSubMenu}`);
   if (!btn || !canControlMenu(btn)) {
     return;
   }

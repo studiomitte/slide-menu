@@ -2,7 +2,7 @@
 
 > ℹ️ This project is a fork from https://github.com/grubersjoe/slide-menu. See **[ Original Demo](https://grubersjoe.github.io/slide-menu)**
 
-*A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions and various options. Allows foldable submenu structures for desktop views.*
+*A library agnostic, dependency free multilevel page menu with a smooth slide effect based on CSS transitions and various options. Allows foldable submenu structures for desktop views.*
 
 Support: All current browsers and IE11+ (if using `dist/slide-menu.ie.js`).
 
@@ -11,13 +11,13 @@ Support: All current browsers and IE11+ (if using `dist/slide-menu.ie.js`).
 npm install smdm-slide-menu
 ``` 
 
-Now import `dist/slide-menu.js` and `dist/slide-menu.css` in your bundler or build system of choice or use a 1998 `<script>` and `<link>` tag. Afterwards `SlideMenu` will be available in the global namespace (`window.SlideMenu`).
+Now `import 'smdm-slide-menu/dist/slide-menu'` and `import 'smdm-slide-menu/dist/slide-menu.css'` in your bundler or build system of choice or use a 1998 `<script>` and `<link>` tag. Afterwards `SlideMenu` will be available in the global namespace (`window.SlideMenu`).
 
-To keep the bundle size small (17 kB vs. 22 kB) Internet Explorer 11 is not supported out of the box. If you need to support Internet Explorer 11 use `dist/slide-menu.ie.js` instead. 
+To keep the bundle size small Internet Explorer 11 is not supported out of the box. If you need to support Internet Explorer 11 use `dist/slide-menu.ie.js` instead. 
 
 
 ## Usage
-All you need is the traditional CSS menu HTML markup and a wrapper with the class `slide-menu`. Menus can be nested endlessly to create the desired hierarchy. If you wish to programmatically control the menu, you should also set an ID to be able to use the API (see below).
+All you need is the traditional menu HTML markup and a wrapper with the class `slide-menu`. Menus can be nested endlessly to create the desired hierarchy. If you wish to programmatically control the menu, you should also set IDs to be able to use the API (see below).
 
 **Example**
 
@@ -76,7 +76,7 @@ Option | Description | Valid values | Default
 `menuWidth` | Width of the menu slider (without fold) | *number* | `320`
 `minWidthFold` | Minimum window width in pixel for fold menu to be shown as fold not as slide | *number* | `640`
 `transitionDuration` | Duration of slide animation in milliseconds | *number* | `300`
-`dynamicOpenTarget` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` (especially useful for SPAs) | *boolean* | `false`
+`dynamicOpenTarget` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` (especially useful for SPA's) | *boolean* | `false`
 `debug` | Shows verbose logs / warnings | *boolean* | `false`
 
 Example:
@@ -108,7 +108,7 @@ You can call the API in two different ways:
     menu.open();
     ```
 
-### Methods
+### Methods / Actions
 
 * `close(animate = true)` - Close the menu
 * `back(closeFold = false)` - Navigate on level back if possible. Additionally closes fold
@@ -122,7 +122,7 @@ You can call the API in two different ways:
 
 ### Events
 
-As soon as the `SlideMenu` class can be used globally the event `sm.ready` is fired.
+For initializing SlideMenu, as soon as the `SlideMenu` class can be used globally the event `sm.ready` is fired on the ``window`` object.
 
 `SlideMenu` emits events for all kind of actions, which trigger as soon as the action is method is called. Plus, all events have  also an `<event>-after` equivalent, which is fired after the step is complete (completely animated).
 
@@ -136,7 +136,7 @@ As soon as the `SlideMenu` class can be used globally the event `sm.ready` is fi
 Make sure to add the event listener to the HTML element, which contains the menu, since the events for this specific menu are dispatched there:
 
 ```javascript
-window.addEventListener("sm.ready", function () {
+const initSlideMenu = () => {
   const menuElement = document.getElementById('example-menu');
   const menu = new SlideMenu(menuElement);
 
@@ -148,22 +148,31 @@ window.addEventListener("sm.ready", function () {
   menuElement.addEventListener('sm.open-after', function () {
     console.log('The menu has opened');
   });
-});
+}
+
+if(window.SlideMenu) {
+  initSlideMenu();
+} else {
+  window.addEventListener("sm.ready", function () {
+    initSlideMenu();
+  });
+}
+
 ```
 
 
 ### Define default submenu
 
-To open a specific submenu with the `open` or `toggle` action you can give the slide menu element the attribute `data-open-target` and pass the slug or a selector for the desired target submenu item. Example:
+To open a specific submenu with the `open` or `toggle` action you can give the slide menu element the attribute `data-open-target` and pass the id, href or a css selector for the desired target submenu item. Example:
 
 ```html
-<nav class="slide-menu" id="example-menu" data-open-target="/submenu">
+<nav class="slide-menu" id="example-menu" data-open-target="default-submenu">
   <ul>
     <li>
       <a href="/blog">Blog</a>
     </li>
     <li>
-      <a href="/submenu">Submenu</a>
+      <a id="default-submenu" href="/submenu">Submenu</a>
       <ul>
         <!-- this submenu wil be opened as default -->
         <li><a href="#">Submenu entry 1</a></li>
@@ -180,7 +189,7 @@ To open a specific submenu with the `open` or `toggle` action you can give the s
 
 ### Menu Overlay
 
-To add an overlay over the screen while the menu is open add a element with `class="slide-menu__overlay"` before the slide menu. It uses `--smdm-sm-color-overlay` as default color which can be adjusted as needed.
+To add an overlay over the screen while the menu is open add an element with `class="slide-menu__overlay"` before the slide menu. It uses `--smdm-sm-color-overlay` as default color which can be adjusted as needed.
 
 ```html
 <div class="slide-menu__overlay">
@@ -210,7 +219,7 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 
 ### Menu Title
 
-The dynamic menu title `slide-menu__title` can optionally be added anywhere in the menu structure (e.g. in the ``slide-menu__controls``). The title will be updated dynamically according to the current menu level.
+A dynamic menu title `slide-menu__title` can optionally be added anywhere in the menu structure (e.g. in the ``slide-menu__controls``). The title will be updated dynamically according to the current menu level.
 
 ```html
 <nav class="slide-menu" id="test-menu-left">
@@ -219,7 +228,9 @@ The dynamic menu title `slide-menu__title` can optionally be added anywhere in t
     <div class="slide-menu__title">Submenu Title</div>
     ...
   </div>
-  ...
+  <ul>
+    ...
+  </ul>
 </nav>
 ```
 
@@ -238,11 +249,11 @@ Foldable submenus can be created using the class `slide-menu__item--has-foldable
 ...
 ```
 
-Foldable Submenus will only fold open to the left/right side if the window width is bigger than the configured `minWidthFold`.
+Foldable Submenus will only fold open if the window width is bigger than the configured `minWidthFold`.
 
-### Additonal Content Within the Menu
+### Additonal Content within the Menu
 
-Any arbitrary additonal content (e.g. search input fields, detail info,...) can be inserted anywhere in the menu structure. The class `slide-menu--additional-content` provides standard padding like it is used for the menu ítems. Example:
+Any arbitrary additonal content (e.g. search input fields, detail info, images,...) can be inserted anywhere in the menu structure. The class `slide-menu--additional-content` provides standard padding like it is used for the menu items. Example:
 
 ```html
 <nav class="slide-menu" id="test-menu-left">
