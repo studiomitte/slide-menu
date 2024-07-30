@@ -659,7 +659,7 @@ document.addEventListener('click', (event) => {
   const btn = canControlMenu(event.target)
     ? event.target
     : event.target.closest(
-        `.${CLASSES.decorator}[data-action], .${CLASSES.control}, .${CLASSES.hasSubMenu}`,
+        `.${CLASSES.decorator}[data-action], .${CLASSES.control}[data-action], .${CLASSES.hasSubMenu}[data-action]`,
       );
   if (!btn || !canControlMenu(btn)) {
     return;
@@ -687,7 +687,7 @@ document.addEventListener('click', (event) => {
   }
 
   // Only prevent opening of links when clicking the decorator when onlyNavigateDecorator
-  if (instance && instance.onlyNavigateDecorator && event.target.matches(`.${CLASSES.decorator}`)) {
+  if (instance && instance.onlyNavigateDecorator && btn.matches(`.${CLASSES.decorator}`)) {
     event.preventDefault();
   }
 
