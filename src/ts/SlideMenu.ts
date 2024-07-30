@@ -658,7 +658,9 @@ document.addEventListener('click', (event) => {
 
   const btn = canControlMenu(event.target)
     ? event.target
-    : event.target.closest(`.${CLASSES.decorator}, .${CLASSES.control}, .${CLASSES.hasSubMenu}`);
+    : event.target.closest(
+        `.${CLASSES.decorator}[data-action], .${CLASSES.control}, .${CLASSES.hasSubMenu}`,
+      );
   if (!btn || !canControlMenu(btn)) {
     return;
   }
