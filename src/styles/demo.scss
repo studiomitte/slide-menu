@@ -147,6 +147,17 @@ main {
     }
   }
 
+  &__item {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__decorator {
+    display: flex;
+    align-items: center;
+  }
+
   &__controls {
     display: flex;
     justify-content: space-between;
@@ -159,5 +170,11 @@ main {
 
   &__overlay {
     pointer-events: none;
+  }
+
+  &__control {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 }

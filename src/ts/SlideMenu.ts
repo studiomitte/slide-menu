@@ -245,45 +245,15 @@ export class SlideMenu {
     target: HTMLElement | MenuSlide | string,
     runInForeground: boolean = true,
   ): void {
-    let nextMenu: MenuSlide;
-
     // Open Menu if still closed
     if (runInForeground && !this.isOpen) {
       this.show();
     }
 
-    if (typeof target === 'string') {
-      const menu = this.getTargetMenuFromIdentifier(target);
-      if (menu instanceof MenuSlide) {
-        nextMenu = menu;
-      } else {
-        throw new Error('Invalid parameter `target`. A valid query selector is required.');
-      }
-    }
-
-    if (target instanceof HTMLElement) {
-      const menu = this.slides.find((menu) => menu.contains(target as HTMLElement));
-      if (menu instanceof MenuSlide) {
-        nextMenu = menu;
-      } else {
-        throw new Error('Invalid parameter `target`. Not found in slide menu');
-      }
-    }
-
-    if (target instanceof MenuSlide) {
-      nextMenu = target;
-    }
-
-    // @ts-expect-error // used before access -> can be undefined
-    if (!nextMenu) {
-      throw new Error('No valid next slide fund');
-    }
-
+    const nextMenu: MenuSlide = this.findNextMenu(target);
     const previousMenu = this.activeSubmenu;
     const parents = nextMenu.getAllParents();
     const firstUnfoldableParent = parents.find((p) => !p.canFold());
-
-    this.updateMenuTitle(nextMenu, firstUnfoldableParent);
 
     const isNavigatingBack = previousMenu
       ?.getAllParents()
@@ -306,6 +276,48 @@ export class SlideMenu {
       }
     }
 
+    this.updateMenuTitle(nextMenu, firstUnfoldableParent);
+    this.setTabbingForFold(nextMenu, firstUnfoldableParent, previousMenu, parents);
+
+    const currentlyVisibleMenus = [nextMenu, ...parents];
+    this.activateVisibleMenus(currentlyVisibleMenus, isNavigatingBack, previousMenu, nextMenu);
+
+    const level = this.getSlideLevel(nextMenu, isNavigatingBack);
+    const menuWidth = this.options.menuWidth;
+    const offset = -menuWidth * level;
+    this.moveElem(this.sliderWrapperElem, offset, 'px');
+
+    this.hideControlsIfOnRootLevel(level);
+    this.setBodyTagSlideLevel(level);
+    this.setActiveSubmenu(nextMenu);
+
+    setTimeout(() => {
+      if (runInForeground) {
+        // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
+        nextMenu.focusFirstElem();
+      }
+
+      if (isNavigatingBack) {
+        // Wait for anmiation to finish to deactivate previous otherwise width of container messes with slide animation
+        previousMenu?.deactivate();
+      }
+    }, this.options.transitionDuration);
+  }
+
+  private setActiveSubmenu(nextMenu: MenuSlide): void {
+    this.activeSubmenu = nextMenu;
+  }
+
+  private setBodyTagSlideLevel(level: number): void {
+    document.querySelector('body')?.setAttribute('data-slide-menu-level', level.toString());
+  }
+
+  private setTabbingForFold(
+    nextMenu: MenuSlide,
+    firstUnfoldableParent: MenuSlide | undefined,
+    previousMenu: MenuSlide | undefined,
+    parents: MenuSlide[],
+  ): void {
     if (nextMenu.canFold()) {
       this.openFold();
 
@@ -331,10 +343,15 @@ export class SlideMenu {
         menu.disableTabbing();
       });
     }
+  }
 
-    const currentlyVisibleMenus = [nextMenu, ...parents];
+  private activateVisibleMenus(
+    currentlyVisibleMenus: MenuSlide[],
+    isNavigatingBack: boolean | undefined,
+    previousMenu: MenuSlide | undefined,
+    nextMenu: MenuSlide,
+  ): void {
     const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu?.id);
-
     // Disable all previous active menus not active now
     this.slides.forEach((slide) => {
       if (!currentlyVisibleIds.includes(slide.id)) {
@@ -354,43 +371,49 @@ export class SlideMenu {
         menu?.activate();
       }
     });
-
     nextMenu.enableTabbing();
+  }
 
-    const level = this.getSlideLevel(nextMenu, isNavigatingBack);
-    const menuWidth = this.options.menuWidth;
-    const offset = -menuWidth * level;
-    this.moveElem(this.sliderWrapperElem, offset, 'px');
+  private findNextMenu(target: string | HTMLElement | MenuSlide): MenuSlide {
+    if (typeof target === 'string') {
+      const menu = this.getTargetMenuFromIdentifier(target);
+      if (menu instanceof MenuSlide) {
+        return menu;
+      } else {
+        throw new Error('Invalid parameter `target`. A valid query selector is required.');
+      }
+    }
 
-    const controlsHiddenOnRootLevel = document.querySelectorAll(
+    if (target instanceof HTMLElement) {
+      const menu = this.slides.find((menu) => menu.contains(target as HTMLElement));
+      if (menu instanceof MenuSlide) {
+        return menu;
+      } else {
+        throw new Error('Invalid parameter `target`. Not found in slide menu');
+      }
+    }
+
+    if (target instanceof MenuSlide) {
+      return target;
+    } else {
+      throw new Error('No valid next slide fund');
+    }
+  }
+
+  private hideControlsIfOnRootLevel(level: number): void {
+    const controlsToHideIfOnRootLevel = document.querySelectorAll(
       `.${CLASSES.control}.${CLASSES.hiddenOnRoot}, .${CLASSES.control}.${CLASSES.invisibleOnRoot}`,
     );
-    console.log(controlsHiddenOnRootLevel);
+
     if (level === 0) {
-      controlsHiddenOnRootLevel.forEach((elem) => {
+      controlsToHideIfOnRootLevel.forEach((elem) => {
         elem.setAttribute('tabindex', '-1');
       });
     } else {
-      controlsHiddenOnRootLevel.forEach((elem) => {
+      controlsToHideIfOnRootLevel.forEach((elem) => {
         elem.removeAttribute('tabindex');
       });
     }
-
-    this.activeSubmenu = nextMenu;
-
-    document.querySelector('body')?.setAttribute('data-slide-menu-level', level.toString());
-
-    setTimeout(() => {
-      if (runInForeground) {
-        // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
-        nextMenu.focusFirstElem();
-      }
-
-      if (isNavigatingBack) {
-        // Wait for anmiation to finish to deactivate previous otherwise width of container messes with slide animation
-        previousMenu?.deactivate();
-      }
-    }, this.options.transitionDuration);
   }
 
   private getSlideLevel(nextMenu: MenuSlide, isNavigatingBack?: boolean): number {
@@ -644,11 +667,10 @@ export class SlideMenu {
 
 // Link control buttons with the API
 document.addEventListener('click', (event) => {
-  if (!(event.target instanceof HTMLElement)) {
-    return;
-  }
-
-  const canControlMenu = (elem: Element): boolean => {
+  const canControlMenu = (elem: Element | undefined | null): boolean => {
+    if (!elem) {
+      return false;
+    }
     return (
       elem.classList.contains(CLASSES.control) ||
       elem.classList.contains(CLASSES.hasSubMenu) ||
@@ -656,20 +678,21 @@ document.addEventListener('click', (event) => {
     );
   };
 
-  const btn = canControlMenu(event.target)
+  const btn = canControlMenu(event.target as Element)
     ? event.target
-    : event.target.closest(
+    : // @ts-expect-error target is Element | null | undefined
+      event.target?.closest(
         `.${CLASSES.decorator}[data-action], .${CLASSES.control}[data-action], .${CLASSES.hasSubMenu}[data-action]`,
       );
-  if (!btn || !canControlMenu(btn)) {
+  if (!btn || !canControlMenu(btn as Element)) {
     return;
   }
 
   const target = btn.getAttribute('data-target');
   const menu =
     !target || target === 'this'
-      ? parentsOne(btn, `.${NAMESPACE}`)
-      : document.getElementById(target) ?? document.querySelector(target); // assumes #id
+      ? parentsOne(btn as Node, `.${NAMESPACE}`)
+      : document.getElementById(target as string) ?? document.querySelector(target); // assumes #id
 
   if (!menu) {
     throw new Error(`Unable to find menu ${target}`);
