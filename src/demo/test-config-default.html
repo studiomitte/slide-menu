@@ -10,7 +10,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <link rel="shortcut icon" href="./favicon.png" />
     <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet" />
-    <link href="./styles/demo.scss" rel="stylesheet" />
+    <link href="../styles/slide-menu.scss" rel="stylesheet" />
+    <link href="../styles/demo.scss" rel="stylesheet" />
   </head>
 
   <body>
@@ -59,7 +60,7 @@
           data-target="test-menu-left"
           data-action="navigateTo"
           data-arg="#about-1-2"
-          data-cypress="jump-to-about-1-2"
+          data-cypress="jump-to-about"
         >
           Jump to specific submenu (About)
         </button>
@@ -376,7 +377,11 @@
           <a href="#/blog" id="special-link-3">Blog</a>
         </li>
         <li>
-          <a href="#/about" aria-label="Open Submenu About" aria-label="Open Submenu About"
+          <a
+            href="#/about"
+            aria-label="Open Submenu About"
+            aria-label="Open Submenu About"
+            data-cypress="jump-to-about-1-1"
             >About</a
           >
           <ul>
@@ -384,7 +389,13 @@
               <a href="#">About 1.1</a>
             </li>
             <li>
-              <a href="#" aria-label="Open Submenu About 1.2" id="about-1-2">About 1.2</a>
+              <a
+                href="#"
+                aria-label="Open Submenu About 1.2"
+                id="about-1-2"
+                data-cypress="jump-to-about-1-2"
+                >About 1.2</a
+              >
               <ul>
                 <li>
                   <a href="#" id="special-link-2">About 1.2.1 - I am Special 2</a>
@@ -417,114 +428,19 @@
       </ul>
     </nav>
 
-    <!-- <nav class="slide-menu" id="test-menu-right">
+    <script>
+      const initSlideMenu = () => {
+        console.log('SlideMenu is ready!');
+        const menuLeftElem = document.getElementById('test-menu-left');
+        const menuLeft = new SlideMenu(menuLeftElem);
+      };
 
-    <div class="controls">
-      <button type="button" class="btn slide-menu__control" data-action="back">Back</button>
-      <button type="button" class="btn slide-menu__control" data-action="close">Close</button>
-    </div>
-    <img src="https://studiomitte.com/build/images/logo/logo.svg" width="35" height="35"
-      alt="Studiomitte Logo">
-    <ul>
-      <li>
-        <a href="http://google.de">News</a>
-        <ul>
-          <li>
-            <a href="#"><span>News 1.1</span></a>
-          </li>
-          <li>
-            <a class="slide-menu__item--has-foldable-submenu" href="http://google.de"><span>News 1.2</span></a>
-            <ul>
-              <li>
-                <a href="http://google.de">News 1.2.1</a>
-              </li>
-              <li>
-                <a href="#" id="special-link-1">News 1.2.2 &ndash; I'm special (1)!</a>
-              </li>
-              <li>
-                <a href="#">News 1.2.2</a>
-              </li>
-              <li>
-                <a class="slide-menu__item--has-foldable-submenu" href="#">News 1.2.3</a>
-                <ul>
-                  <li>
-                    <a href="#">News 1.2.3.1</a>
-                  </li>
-                  <li>
-                    <a href="#">News 1.2.3.2</a>
-                  </li>
-                  <li>
-                    <a href="#">News 1.2.3.3</a>
-                  </li>
-                  <li id="special-link-2">
-                    <a href="#">News 1.2.3.4 - I'm special (2)!</a>
-                  </li>
-                  <li>
-                    <a href="#">News 1.2.3.5</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a href="#">News 1.2.4</a>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <a href="#">News 1.3</a>
-          </li>
-          <li>
-            <a href="#">News 1.3</a>
-          </li>
-          <li>
-            <a href="#">News 1.4</a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="#" id="special-link-3">Blog</a>
-      </li>
-      <li>
-        <a href="#">About</a>
-        <ul>
-          <li>
-            <a href="#">About 1.1</a>
-          </li>
-          <li>
-            <a href="#">About 1.2</a>
-            <ul>
-              <li>
-                <a href="#">About 1.2.1</a>
-              </li>
-              <li>
-                <a href="#">About 1.2.2</a>
-              </li>
-              <li>
-                <a href="#">About 1.2.3</a>
-              </li>
-              <li>
-                <a href="#">About 1.2.4</a>
-              </li>
-              <li>
-                <a href="#">About 1.2.5</a>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <a href="#">About 1.3</a>
-          </li>
-          <li>
-            <a href="#">About 1.4</a>
-          </li>
-          <li>
-            <a href="#">About 1.5</a>
-          </li>
-        </ul>
-      </li>
-    </ul>
-
-  </nav> -->
-
-    <script src="./Demo.js"></script>
-    <script type="module" src="../../dist/slide-menu.js"></script>
+      if (window.SlideMenu) {
+        initSlideMenu();
+      } else {
+        window.addEventListener('sm.ready', initSlideMenu);
+      }
+    </script>
+    <script type="module" src="../lib/SlideMenu.ts"></script>
   </body>
 </html>

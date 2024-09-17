@@ -22,6 +22,6 @@
     "store",
     "dist",
     "docs",
-    "src/demo/TsDemo.ts"
+    "src/demo/ts-demo.ts"
   ]
 }

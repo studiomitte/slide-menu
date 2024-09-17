@@ -1,7 +1,5 @@
-import '../styles/slide-menu.scss';
 import { Slide, SlideHTMLElement } from './Slide';
 import { Action, SlideMenuOptions, MenuPosition, CLASSES, NAMESPACE } from './SlideMenuOptions';
-
 import { parentsOne, trapFocus } from './utils/dom';
 
 export interface MenuHTMLElement extends HTMLElement {

@@ -3,7 +3,7 @@ import {SlideMenu} from "../../dist/index";
 const menuLeftElem = document.getElementById('test-menu-left');
 
 const menuLeft = new SlideMenu(menuLeftElem, {
-  position: 'right',
+  position: 'left',
   keyClose: 'Escape',
   showBackLink: false,
   submenuLinkAfter: '>',

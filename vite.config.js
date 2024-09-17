@@ -10,9 +10,8 @@ export default defineConfig({
         assetsDir: '../dist',
         rollupOptions: {
             input: {
-                "slide-menu": './src/lib/SlideMenu.ts',
+                "slide-menu": './src/lib/SlideMenu.min.ts',
             },
-
             output: {
                 entryFileNames: '[name].js',
                 assetFileNames: '[name].[ext]',
