@@ -1,7 +1,4 @@
 :root {
-  // --smdm-sm-menu-width: 320px;
-  // --smdm-sm-min-width-fold: 640px;
-  // --smdm-sm-transition-duration: 300ms;
   --smdm-sm-transition-easing: ease-in-out;
   --smdm-sm-color-bg: rgb(10 10 9);
   --smdm-sm-color-text: rgb(238 237 235);
@@ -9,7 +6,7 @@
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
   --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
-  --smdm-sm-control-content-back: '⮜';
+  --smdm-sm-control-content-back: '<';
   --smdm-sm-control-content-close: '✕';
   --smdm-sm-item-padding: 0.9rem 1.5rem;
 }
