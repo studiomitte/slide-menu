@@ -1,4 +1,4 @@
-import { MenuPosition, Direction, Action, CLASSES, } from './lib/SlideMenuOptions';
+import { MenuPosition, Direction, Action, CLASSES } from './lib/SlideMenuOptions';
 import { Slide } from './lib/Slide';
 import { SlideMenu } from './lib/SlideMenu';
-export { MenuPosition, Direction, Action, CLASSES, Slide, SlideMenu, };
+export { MenuPosition, Direction, Action, CLASSES, Slide, SlideMenu };
