@@ -1,6 +1,6 @@
-import { Slide } from './Slide';
-import { Action, MenuPosition, CLASSES, NAMESPACE } from './SlideMenuOptions';
-import { parentsOne, trapFocus } from './utils/dom';
+import { Slide } from './Slide.js';
+import { Action, MenuPosition, CLASSES, NAMESPACE } from './SlideMenuOptions.js';
+import { parentsOne, trapFocus } from './utils/dom.js';
 const DEFAULT_OPTIONS = {
     backLinkAfter: '',
     backLinkBefore: '',

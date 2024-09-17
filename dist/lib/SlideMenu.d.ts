@@ -1,5 +1,5 @@
-import { Slide } from './Slide';
-import { SlideMenuOptions } from './SlideMenuOptions';
+import { Slide } from './Slide.js';
+import { SlideMenuOptions } from './SlideMenuOptions.js';
 export interface MenuHTMLElement extends HTMLElement {
     _slideMenu: SlideMenu;
 }

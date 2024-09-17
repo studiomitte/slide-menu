@@ -1,5 +1,5 @@
-import { Action, CLASSES } from './SlideMenuOptions';
-import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn } from './utils/dom';
+import { Action, CLASSES } from './SlideMenuOptions.js';
+import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn } from './utils/dom.js';
 let number = 0;
 export class Slide {
     get isActive() {
