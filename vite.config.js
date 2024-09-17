@@ -10,8 +10,7 @@ export default defineConfig({
         assetsDir: '../dist',
         rollupOptions: {
             input: {
-                "slide-menu.ie": './src/ts/SlideMenu.legacy.ts',
-                "slide-menu": './src/ts/SlideMenu.ts',
+                "slide-menu": './src/lib/SlideMenu.ts',
             },
 
             output: {

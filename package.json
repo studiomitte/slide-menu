@@ -20,7 +20,8 @@
     "url": "git+https://github.com/studiomitte/slide-menu.git"
   },
   "bugs": "https://github.com/studiomitte/slide-menu/issues",
-  "main": "dist/slide-menu.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "./*",
     "dist/*",
@@ -42,7 +43,7 @@
   },
   "scripts": {
     "test": "cypress run || echo 'cypress run' | ddev ssh -s cypress",
-    "build": "npx vite build",
+    "build": "npx tsc -p . && npx vite build",
     "format": "prettier --write 'src/**/*'",
     "lint": "eslint --max-warnings=0 'src/ts/SlideMenu.ts' 'src/ts/MenuSlide.ts' 'src/ts/SlideMenuOptions.ts'",
     "watch": "npx vite --port 8080",

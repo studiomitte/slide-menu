@@ -4,16 +4,16 @@ import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn } from './utils/dom';
 let number = 0;
 
 export interface SlideHTMLElement extends HTMLElement {
-  _slide: MenuSlide;
+  _slide: Slide;
 }
 
-export class MenuSlide {
+export class Slide {
   public readonly id: string;
   public readonly isFoldable: boolean = false;
   public readonly parentMenuElem?: SlideHTMLElement;
   public readonly name: string;
 
-  public parent?: MenuSlide;
+  public parent?: Slide;
   private active: boolean = false;
 
   public get isActive(): boolean {
@@ -29,7 +29,7 @@ export class MenuSlide {
     number++;
 
     this.name = this.anchorElem?.textContent ?? '';
-    this.parentMenuElem = (anchorElem?.parentElement?.closest('ul') ?? undefined) as
+    this.parentMenuElem = (anchorElem?.parentElement?.closest('ul') ?? undefined) as unknown as
       | SlideHTMLElement
       | undefined;
     this.parent = this.parentMenuElem?._slide;
@@ -157,7 +157,7 @@ export class MenuSlide {
     return this;
   }
 
-  public getClosestNotFoldableSlide(): MenuSlide | undefined {
+  public getClosestNotFoldableSlide(): Slide | undefined {
     return !this.isFoldable ? this : this.getAllParents().find((p) => !p.isFoldable);
   }
 
@@ -165,10 +165,10 @@ export class MenuSlide {
    *
    * @returns
    */
-  public getAllParents(): MenuSlide[] {
-    const parents: MenuSlide[] = [];
+  public getAllParents(): Slide[] {
+    const parents: Slide[] = [];
 
-    let parent: MenuSlide | undefined = this.parent;
+    let parent: Slide | undefined = this.parent;
 
     while (parent) {
       parents.push(parent);

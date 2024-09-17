@@ -1,20 +1,20 @@
 import '../styles/slide-menu.scss';
-import { MenuSlide, SlideHTMLElement } from './MenuSlide';
+import { Slide, SlideHTMLElement } from './Slide';
 import { Action, SlideMenuOptions, MenuPosition, CLASSES, NAMESPACE } from './SlideMenuOptions';
 
 import { parentsOne, trapFocus } from './utils/dom';
 
-interface MenuHTMLElement extends HTMLElement {
+export interface MenuHTMLElement extends HTMLElement {
   _slideMenu: SlideMenu;
 }
 
-const DEFAULT_OPTIONS = {
+const DEFAULT_OPTIONS: SlideMenuOptions = {
   backLinkAfter: '',
   backLinkBefore: '',
   showBackLink: true,
   keyClose: 'Escape',
   keyOpen: '',
-  position: 'right',
+  position: MenuPosition.Right,
   submenuLinkAfter: '',
   submenuLinkBefore: '',
   closeOnClickOutside: false,
@@ -30,13 +30,13 @@ const DEFAULT_OPTIONS = {
 let counter = 0;
 
 export class SlideMenu {
-  private activeSubmenu: MenuSlide | undefined;
+  private activeSubmenu: Slide | undefined;
   private lastFocusedElement: Element | null = null;
   private isOpen: boolean = false;
   private isAnimating: boolean = false;
   private lastAction: Action | null = null;
 
-  private readonly slides: MenuSlide[] = [];
+  private readonly slides: Slide[] = [];
 
   private readonly options: SlideMenuOptions;
 
@@ -48,7 +48,7 @@ export class SlideMenu {
   private readonly sliderWrapperElem: HTMLElement;
   private readonly foldableWrapperElem: HTMLElement;
 
-  public constructor(elem: HTMLElement, options?: Partial<SlideMenuOptions>) {
+  public constructor(elem?: HTMLElement|null, options?: Partial<SlideMenuOptions>) {
     if (elem === null) {
       throw new Error('Argument `elem` must be a valid HTML node');
     }
@@ -126,7 +126,7 @@ export class SlideMenu {
     this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
   }
 
-  private get defaultOpenTarget(): MenuSlide | undefined {
+  private get defaultOpenTarget(): Slide | undefined {
     const defaultTargetSelector = this.menuElem.dataset.openTarget ?? 'smdm-sm-no-default-provided';
     return this.getTargetMenuFromIdentifier(defaultTargetSelector);
   }
@@ -242,7 +242,7 @@ export class SlideMenu {
    * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
   public navigateTo(
-    target: HTMLElement | MenuSlide | string,
+    target: HTMLElement | Slide | string,
     runInForeground: boolean = true,
   ): void {
     // Open Menu if still closed
@@ -250,7 +250,7 @@ export class SlideMenu {
       this.show();
     }
 
-    const nextMenu: MenuSlide = this.findNextMenu(target);
+    const nextMenu: Slide = this.findNextMenu(target);
     const previousMenu = this.activeSubmenu;
     const parents = nextMenu.getAllParents();
     const firstUnfoldableParent = parents.find((p) => !p.canFold());
@@ -304,7 +304,7 @@ export class SlideMenu {
     }, this.options.transitionDuration);
   }
 
-  private setActiveSubmenu(nextMenu: MenuSlide): void {
+  private setActiveSubmenu(nextMenu: Slide): void {
     this.activeSubmenu = nextMenu;
   }
 
@@ -313,10 +313,10 @@ export class SlideMenu {
   }
 
   private setTabbingForFold(
-    nextMenu: MenuSlide,
-    firstUnfoldableParent: MenuSlide | undefined,
-    previousMenu: MenuSlide | undefined,
-    parents: MenuSlide[],
+    nextMenu: Slide,
+    firstUnfoldableParent: Slide | undefined,
+    previousMenu: Slide | undefined,
+    parents: Slide[],
   ): void {
     if (nextMenu.canFold()) {
       this.openFold();
@@ -346,10 +346,10 @@ export class SlideMenu {
   }
 
   private activateVisibleMenus(
-    currentlyVisibleMenus: MenuSlide[],
+    currentlyVisibleMenus: Slide[],
     isNavigatingBack: boolean | undefined,
-    previousMenu: MenuSlide | undefined,
-    nextMenu: MenuSlide,
+    previousMenu: Slide | undefined,
+    nextMenu: Slide,
   ): void {
     const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu?.id);
     // Disable all previous active menus not active now
@@ -374,10 +374,10 @@ export class SlideMenu {
     nextMenu.enableTabbing();
   }
 
-  private findNextMenu(target: string | HTMLElement | MenuSlide): MenuSlide {
+  private findNextMenu(target: string | HTMLElement | Slide): Slide {
     if (typeof target === 'string') {
       const menu = this.getTargetMenuFromIdentifier(target);
-      if (menu instanceof MenuSlide) {
+      if (menu instanceof Slide) {
         return menu;
       } else {
         throw new Error('Invalid parameter `target`. A valid query selector is required.');
@@ -386,14 +386,14 @@ export class SlideMenu {
 
     if (target instanceof HTMLElement) {
       const menu = this.slides.find((menu) => menu.contains(target as HTMLElement));
-      if (menu instanceof MenuSlide) {
+      if (menu instanceof Slide) {
         return menu;
       } else {
         throw new Error('Invalid parameter `target`. Not found in slide menu');
       }
     }
 
-    if (target instanceof MenuSlide) {
+    if (target instanceof Slide) {
       return target;
     } else {
       throw new Error('No valid next slide fund');
@@ -416,7 +416,7 @@ export class SlideMenu {
     }
   }
 
-  private getSlideLevel(nextMenu: MenuSlide, isNavigatingBack?: boolean): number {
+  private getSlideLevel(nextMenu: Slide, isNavigatingBack?: boolean): number {
     const activeNum = Array.from(
       this.sliderWrapperElem.querySelectorAll('.' + CLASSES.active),
     ).length;
@@ -424,7 +424,7 @@ export class SlideMenu {
     return Math.max(1, activeNum) - 1 - navDecrement;
   }
 
-  private updateMenuTitle(nextMenu: MenuSlide, firstUnfoldableParent?: MenuSlide): void {
+  private updateMenuTitle(nextMenu: Slide, firstUnfoldableParent?: Slide): void {
     if (this.menuTitle) {
       let anchorText = nextMenu?.anchorElem?.textContent ?? this.menuTitleDefaultText;
       const decoratorTextAfter = this.options?.submenuLinkAfter ?? '';
@@ -452,14 +452,14 @@ export class SlideMenu {
    */
   private getTargetMenuFromIdentifier(
     targetMenuIdAnchorHrefOrSelector: string,
-  ): MenuSlide | undefined {
+  ): Slide | undefined {
     return (
       this.slides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector)) ??
       this.slides.find((menu) => menu.menuElem.querySelector(targetMenuIdAnchorHrefOrSelector))
     );
   }
 
-  private getTargetMenuDynamically(): MenuSlide | undefined {
+  private getTargetMenuDynamically(): Slide | undefined {
     const currentPath = location.pathname;
     const currentHash = location.hash;
     const currentHashItem = this.slides.find((menu) => menu.matches(currentHash));
@@ -607,9 +607,9 @@ export class SlideMenu {
 
     this.menuElem.classList.add(this.options.position);
 
-    const rootMenu = this.menuElem.querySelector('ul') as SlideHTMLElement | null;
+    const rootMenu = this.menuElem.querySelector('ul') as unknown as SlideHTMLElement | null;
     if (rootMenu) {
-      this.slides.push(new MenuSlide(rootMenu, this.options));
+      this.slides.push(new Slide(rootMenu, this.options));
     }
 
     this.menuElem.addEventListener('keydown', (event) => {
@@ -645,13 +645,13 @@ export class SlideMenu {
         return;
       }
 
-      const submenu = anchor.parentElement.querySelector('ul') as SlideHTMLElement | null;
+      const submenu = anchor.parentElement.querySelector('ul') as unknown as SlideHTMLElement | null;
 
       if (!submenu) {
         return;
       }
 
-      const menuSlide = new MenuSlide(submenu, this.options, anchor);
+      const menuSlide = new Slide(submenu, this.options, anchor);
       this.slides.push(menuSlide);
     });
 
@@ -740,5 +740,5 @@ document.addEventListener('click', (event) => {
 // @ts-expect-error // Expose SlideMenu to the global namespace
 window.SlideMenu = SlideMenu;
 
-// send global event when SlideMenu is ready
+// send global event when SlideMenu is ready and available in global namespace
 window.dispatchEvent(new Event('sm.ready'));

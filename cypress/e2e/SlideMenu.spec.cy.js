@@ -14,7 +14,7 @@ describe('slide menu', () => {
     });
 
     it('default config: should open menu per default', () => {
-        cy.visit(frontend + '/config-default.html');
+        cy.visit(frontend + '/demo/config-default.html');
         cy.get('.slide-menu').should('not.be.visible');
     });
 
@@ -130,7 +130,7 @@ describe('slide menu', () => {
     });
 
     it('default config: should not go forward on clicking link', () => {
-        cy.visit(frontend + '/config-default.html');
+        cy.visit(frontend + '/demo/config-default.html');
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
@@ -160,7 +160,7 @@ describe('slide menu', () => {
     });
 
     it('should switch foldable content on click', () => {
-        cy.visit(frontend + '/config-default.html');
+        cy.visit(frontend + '/demo/config-default.html');
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
@@ -271,7 +271,7 @@ describe('slide menu', () => {
     });
 
     it('should slide without fold', () => {
-        cy.visit(frontend + '/config-default.html');
+        cy.visit(frontend + '/demo/config-default.html');
 
         // open menu
         cy.get('[data-cypress="open-menu"]').should('be.visible').click();
