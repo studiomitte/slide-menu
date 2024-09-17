@@ -3,7 +3,7 @@ export interface SlideMenuOptions {
     backLinkAfter: string;
     keyOpen: string;
     keyClose: string;
-    position: MenuPosition | "left" | "right";
+    position: MenuPosition | 'left' | 'right';
     showBackLink: boolean;
     submenuLinkBefore: string;
     submenuLinkAfter: string;

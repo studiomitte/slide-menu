@@ -1,4 +1,4 @@
-import {SlideMenu} from "../../dist/index";
+import { SlideMenu } from '../../dist/index';
 
 const menuLeftElem = document.getElementById('test-menu-left');
 

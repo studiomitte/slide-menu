@@ -46,7 +46,7 @@ export class SlideMenu {
   private readonly sliderWrapperElem: HTMLElement;
   private readonly foldableWrapperElem: HTMLElement;
 
-  public constructor(elem?: HTMLElement|null, options?: Partial<SlideMenuOptions>) {
+  public constructor(elem?: HTMLElement | null, options?: Partial<SlideMenuOptions>) {
     if (elem === null) {
       throw new Error('Argument `elem` must be a valid HTML node');
     }
@@ -239,10 +239,7 @@ export class SlideMenu {
   /**
    * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
-  public navigateTo(
-    target: HTMLElement | Slide | string,
-    runInForeground: boolean = true,
-  ): void {
+  public navigateTo(target: HTMLElement | Slide | string, runInForeground: boolean = true): void {
     // Open Menu if still closed
     if (runInForeground && !this.isOpen) {
       this.show();
@@ -448,9 +445,7 @@ export class SlideMenu {
    * @param targetMenuIdHrefOrSelector a selector or Slide ID or Slug of Href
    * @returns
    */
-  private getTargetMenuFromIdentifier(
-    targetMenuIdAnchorHrefOrSelector: string,
-  ): Slide | undefined {
+  private getTargetMenuFromIdentifier(targetMenuIdAnchorHrefOrSelector: string): Slide | undefined {
     return (
       this.slides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector)) ??
       this.slides.find((menu) => menu.menuElem.querySelector(targetMenuIdAnchorHrefOrSelector))
@@ -643,7 +638,9 @@ export class SlideMenu {
         return;
       }
 
-      const submenu = anchor.parentElement.querySelector('ul') as unknown as SlideHTMLElement | null;
+      const submenu = anchor.parentElement.querySelector(
+        'ul',
+      ) as unknown as SlideHTMLElement | null;
 
       if (!submenu) {
         return;
