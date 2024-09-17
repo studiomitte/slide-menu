@@ -4,17 +4,41 @@
 
 *A library agnostic, dependency free multilevel page menu with a smooth slide effect based on CSS transitions and various options. Allows foldable submenu structures for desktop views.*
 
-Support: All current browsers and IE11+ (if using `dist/slide-menu.ie.js`).
-
 ## Install
+
 ```sh
 npm install smdm-slide-menu
-``` 
+```
 
-Now `import 'smdm-slide-menu/dist/slide-menu'` and `import 'smdm-slide-menu/dist/slide-menu.css'` in your bundler or build system of choice or use a 1998 `<script>` and `<link>` tag. Afterwards `SlideMenu` will be available in the global namespace (`window.SlideMenu`).
+You can include smdm-slide-menu as standalone script or as a module.
 
-To keep the bundle size small Internet Explorer 11 is not supported out of the box. If you need to support Internet Explorer 11 use `dist/slide-menu.ie.js` instead. 
+### Option 1 (Module)
 
+```ts
+import {SlideMenu} from 'smdm-slide-menu';
+// You can use smdm-slide-menu here right away
+const menuElement = document.getElementById('example-menu');
+const menu = new SlideMenu(menuElement);
+```
+
+ Also make sure to include the css like `import 'smdm-slide-menu/dist/slide-menu.css'`
+
+### Option 2 (Standalone Script)
+
+Use `import 'smdm-slide-menu/dist/slide-menu.js'` and `import 'smdm-slide-menu/dist/slide-menu.css'` in your bundler or build system of choice or use a 1998 `<script>` and `<link>` tag to load the menu anywhere in your HTML document. The `SlideMenu` class will be available in the global namespace (`window.SlideMenu`) as soon as the ``"sm.ready"`` Event has been fired.
+
+```js
+const initSlideMenu = () => {
+  const menuElement = document.getElementById('example-menu');
+  const menu = new SlideMenu(menuElement);
+};
+
+if(window.SlideMenu) {
+  initSlideMenu()
+} else {
+  window.addEventListener("sm.ready", initSlideMenu);
+}
+```
 
 ## Usage
 All you need is the traditional menu HTML markup and a wrapper with the class `slide-menu`. Menus can be nested endlessly to create the desired hierarchy. If you wish to programmatically control the menu, you should also set IDs to be able to use the API (see below).
@@ -41,21 +65,6 @@ All you need is the traditional menu HTML markup and a wrapper with the class `s
   </ul>
 </nav>
 ```
-
-Create the menu then like this:
-
-```javascript
-const initSlideMenu = () => {
-  const menuElement = document.getElementById('example-menu');
-  const menu = new SlideMenu(menuElement);
-};
-
-if(window.SlideMenu) {
-  initSlideMenu()
-} else {
-  window.addEventListener("sm.ready", initSlideMenu);
-}
-```
  
 ## Options
 
@@ -80,22 +89,23 @@ Option | Description | Valid values | Default
 `debug` | Shows verbose logs / warnings | *boolean* | `false`
 
 Example:
- 
-```javascript
+
+```js
 const initSlideMenu = () => {
   const menu = new SlideMenu(document.getElementById('example-menu'),{
       showBackLink: false,
       submenuLinkAfter: '<strong>⇒</strong>'
   });
 };
- ```
+```
  
 ## API
 
 You can call the API in two different ways:
 
-* Reuse the reference to the `SlideMenu` instance: 
-    ```javascript
+* Reuse the reference to the `SlideMenu` instance:
+
+    ```js
     const menu = new SlideMenu(document.getElementById('example-menu'));
   
     // ... later
