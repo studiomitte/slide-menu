@@ -314,15 +314,13 @@ The following default CSS variables can be overwritten as needed:
 
 ```css
 :root {
-    --smdm-sm-transition-easing: ease-in-out;
+  --smdm-sm-transition-easing: ease-in-out;
   --smdm-sm-color-bg: rgb(10 10 9);
   --smdm-sm-color-text: rgb(238 237 235);
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
   --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
-  --smdm-sm-control-content-back: '<';
-  --smdm-sm-control-content-close: '✕';
   --smdm-sm-item-padding: 0.9rem 1.5rem;
 }
 ```

@@ -140,6 +140,9 @@ main {
 }
 
 .slide-menu {
+  line-height: 1.4;
+  font-size: 0.8rem;
+
   li a[data-action='close'] {
     &:before {
       content: var(--smdm-sm-control-content-close);
@@ -151,11 +154,16 @@ main {
     display: flex !important;
     align-items: center;
     justify-content: space-between;
+    font-size: 0.8rem;
   }
 
   &__decorator {
     display: flex;
     align-items: center;
+  }
+
+  &__control {
+    text-transform: uppercase;
   }
 
   &__controls {
