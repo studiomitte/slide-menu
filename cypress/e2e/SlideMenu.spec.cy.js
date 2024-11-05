@@ -344,6 +344,17 @@ describe('slide menu', () => {
         cy.get('[data-cypress="third-level"]').should('not.be.visible');
     });
 
+    it('should navigate to second fold level', () => {
+        cy.visit(frontend + '/demo/test-config-default.html');
+
+        // open specific menu
+        cy.get('[data-cypress="open-news-1-2-3-1"]').should('be.visible').click();
+        cy.get('.slide-menu').should('be.visible');
+        cy.get('.slide-menu__foldable__wrapper').should('be.visible');
+        cy.get('[data-cypress="third-level"]').should('be.visible');
+        cy.get('[data-cypress="news-1-2-3-1"]').should('be.visible');
+    });
+
     // TODO: check if fold is not opening on mobile dimensions
     // TODO: check if trapping focus is working on foldable
     // TODO: check if trapping focus is working slides wihtout fold

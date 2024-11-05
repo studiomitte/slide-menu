@@ -82,7 +82,17 @@
           data-arg="#special-link-777"
           data-cypress="open-news-1-2-2"
         >
-          Jump to specific link (Blog)
+          Jump to second menu level (first fold level)
+        </button>
+        <button
+          type="button"
+          class="btn slide-menu__control"
+          data-target="test-menu-left"
+          data-action="navigateTo"
+          data-arg="#special-link-999"
+          data-cypress="open-news-1-2-3-1"
+        >
+          Jump to third menu level (second fold level)
         </button>
       </div>
 
@@ -167,7 +177,7 @@
                     aria-label="Open Submenu News 1.2.3"
                     >News 1.2.3</a
                   >
-                  <ul data-cypress="thrid-level">
+                  <ul data-cypress="third-level">
                     <li>
                       <div class="slide-menu--additional-content">
                         <img src="https://studiomitte.com/build/images/logo/logo.svg" alt="" />
@@ -175,7 +185,7 @@
                       </div>
                     </li>
                     <li>
-                      <a href="#">News 1.2.3.1</a>
+                      <a id="special-link-999" data-cypress="news-1-2-3-1" href="#">News 1.2.3.1</a>
                     </li>
                     <li>
                       <a href="#">News 1.2.3.2</a>
