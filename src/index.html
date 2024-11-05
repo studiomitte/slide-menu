@@ -73,6 +73,16 @@
         >
           Jump to specific link (Blog)
         </button>
+        <button
+          type="button"
+          class="btn slide-menu__control"
+          data-target="test-menu-left"
+          data-action="navigateTo"
+          data-arg="#special-link-777"
+          data-cypress="jump-to-special-link-777"
+        >
+          Jump to specific link in first fold level (News)
+        </button>
       </div>
 
       <footer>
@@ -146,10 +156,7 @@
                   <a href="http://google.de">News 1.2.1</a>
                 </li>
                 <li>
-                  <a href="#">News 1.2.2</a>
-                </li>
-                <li>
-                  <a href="#">News 1.2.2</a>
+                  <a id="special-link-777" href="#">News 1.2.2</a>
                 </li>
                 <li>
                   <a

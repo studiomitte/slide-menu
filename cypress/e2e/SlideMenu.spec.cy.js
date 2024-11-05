@@ -333,6 +333,18 @@ describe('slide menu', () => {
         cy.get('[data-cypress="jump-to-about-1-2"]').should('not.be.visible');
     });
 
+    it('should navigate to first fold level', () => {
+        cy.visit(frontend + '/demo/test-config-default.html');
+
+        // open specific menu
+        cy.get('[data-cypress="open-news-1-2-2"]').should('be.visible').click();
+        cy.get('.slide-menu').should('be.visible');
+        cy.get('.slide-menu__foldable__wrapper').should('be.visible');
+        cy.get('[data-cypress="news-1-2-2"]').should('be.visible');
+        cy.get('[data-cypress="third-level"]').should('not.be.visible');
+    });
+
+    // TODO: check if fold is not opening on mobile dimensions
     // TODO: check if trapping focus is working on foldable
     // TODO: check if trapping focus is working slides wihtout fold
     // TODO: check if default-open-target is working when it is in 1st menu level and you first navigate to root and then open menu again through default-open-target

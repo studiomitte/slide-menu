@@ -74,6 +74,16 @@
         >
           Jump to specific link (Blog)
         </button>
+        <button
+          type="button"
+          class="btn slide-menu__control"
+          data-target="test-menu-left"
+          data-action="navigateTo"
+          data-arg="#special-link-777"
+          data-cypress="open-news-1-2-2"
+        >
+          Jump to specific link (Blog)
+        </button>
       </div>
 
       <footer>
@@ -113,7 +123,7 @@
       <ul>
         <li>
           <a href="#/news" aria-label="Open News" data-cypress="jump-to-news">News</a>
-          <ul>
+          <ul data-cypress="first-level">
             <li>
               <a
                 href="#"
@@ -136,7 +146,7 @@
                 aria-label="Open Submenu News 1.2"
                 ><span>News 1.2</span></a
               >
-              <ul>
+              <ul data-cypress="second-level">
                 <li>
                   <div class="slide-menu--additional-content">
                     <img src="https://studiomitte.com/build/images/logo/logo.svg" alt="" />
@@ -147,10 +157,7 @@
                   <a href="http://google.de">News 1.2.1</a>
                 </li>
                 <li>
-                  <a href="#">News 1.2.2</a>
-                </li>
-                <li>
-                  <a href="#">News 1.2.2</a>
+                  <a id="special-link-777" data-cypress="news-1-2-2" href="#">News 1.2.2</a>
                 </li>
                 <li>
                   <a
@@ -160,7 +167,7 @@
                     aria-label="Open Submenu News 1.2.3"
                     >News 1.2.3</a
                   >
-                  <ul>
+                  <ul data-cypress="thrid-level">
                     <li>
                       <div class="slide-menu--additional-content">
                         <img src="https://studiomitte.com/build/images/logo/logo.svg" alt="" />

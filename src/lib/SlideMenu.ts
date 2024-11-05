@@ -126,7 +126,7 @@ export class SlideMenu {
 
   private get defaultOpenTarget(): Slide | undefined {
     const defaultTargetSelector = this.menuElem.dataset.openTarget ?? 'smdm-sm-no-default-provided';
-    return this.getTargetMenuFromIdentifier(defaultTargetSelector);
+    return this.getTargetSlideByIdentifier(defaultTargetSelector);
   }
 
   public debugLog(...args: any[]): void {
@@ -371,7 +371,7 @@ export class SlideMenu {
 
   private findNextMenu(target: string | HTMLElement | Slide): Slide {
     if (typeof target === 'string') {
-      const menu = this.getTargetMenuFromIdentifier(target);
+      const menu = this.getTargetSlideByIdentifier(target);
       if (menu instanceof Slide) {
         return menu;
       } else {
@@ -441,18 +441,18 @@ export class SlideMenu {
   }
 
   /**
-   *
+   * 
    * @param targetMenuIdHrefOrSelector a selector or Slide ID or Slug of Href
    * @returns
    */
-  private getTargetMenuFromIdentifier(targetMenuIdAnchorHrefOrSelector: string): Slide | undefined {
+  private getTargetSlideByIdentifier(targetMenuIdAnchorHrefOrSelector: string): Slide | undefined {
     return (
       this.slides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector)) ??
       this.slides.find((menu) => menu.menuElem.querySelector(targetMenuIdAnchorHrefOrSelector))
     );
   }
 
-  private getTargetMenuDynamically(): Slide | undefined {
+  private getTargetSlideDynamically(): Slide | undefined {
     const currentPath = location.pathname;
     const currentHash = location.hash;
     const currentHashItem = this.slides.find((menu) => menu.matches(currentHash));
@@ -462,7 +462,7 @@ export class SlideMenu {
 
   public open(animate: boolean = true): void {
     const target = this.options.dynamicOpenTarget
-      ? this.getTargetMenuDynamically()
+      ? this.getTargetSlideDynamically()
       : this.defaultOpenTarget;
     if (target) {
       this.navigateTo(target);
