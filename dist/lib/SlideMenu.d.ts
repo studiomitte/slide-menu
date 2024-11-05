@@ -56,8 +56,8 @@ export declare class SlideMenu {
      * @param targetMenuIdHrefOrSelector a selector or Slide ID or Slug of Href
      * @returns
      */
-    private getTargetMenuFromIdentifier;
-    private getTargetMenuDynamically;
+    private getTargetSlideByIdentifier;
+    private getTargetSlideDynamically;
     open(animate?: boolean): void;
     /**
      * Set up all event handlers

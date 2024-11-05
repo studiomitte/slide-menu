@@ -441,7 +441,7 @@ export class SlideMenu {
   }
 
   /**
-   * 
+   *
    * @param targetMenuIdHrefOrSelector a selector or Slide ID or Slug of Href
    * @returns
    */

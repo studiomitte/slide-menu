@@ -82,7 +82,7 @@ export class SlideMenu {
     get defaultOpenTarget() {
         var _a;
         const defaultTargetSelector = (_a = this.menuElem.dataset.openTarget) !== null && _a !== void 0 ? _a : 'smdm-sm-no-default-provided';
-        return this.getTargetMenuFromIdentifier(defaultTargetSelector);
+        return this.getTargetSlideByIdentifier(defaultTargetSelector);
     }
     debugLog(...args) {
         if (this.options.debug) {
@@ -284,7 +284,7 @@ export class SlideMenu {
     }
     findNextMenu(target) {
         if (typeof target === 'string') {
-            const menu = this.getTargetMenuFromIdentifier(target);
+            const menu = this.getTargetSlideByIdentifier(target);
             if (menu instanceof Slide) {
                 return menu;
             }
@@ -349,11 +349,11 @@ export class SlideMenu {
      * @param targetMenuIdHrefOrSelector a selector or Slide ID or Slug of Href
      * @returns
      */
-    getTargetMenuFromIdentifier(targetMenuIdAnchorHrefOrSelector) {
+    getTargetSlideByIdentifier(targetMenuIdAnchorHrefOrSelector) {
         var _a;
         return ((_a = this.slides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector))) !== null && _a !== void 0 ? _a : this.slides.find((menu) => menu.menuElem.querySelector(targetMenuIdAnchorHrefOrSelector)));
     }
-    getTargetMenuDynamically() {
+    getTargetSlideDynamically() {
         const currentPath = location.pathname;
         const currentHash = location.hash;
         const currentHashItem = this.slides.find((menu) => menu.matches(currentHash));
@@ -362,7 +362,7 @@ export class SlideMenu {
     }
     open(animate = true) {
         const target = this.options.dynamicOpenTarget
-            ? this.getTargetMenuDynamically()
+            ? this.getTargetSlideDynamically()
             : this.defaultOpenTarget;
         if (target) {
             this.navigateTo(target);
