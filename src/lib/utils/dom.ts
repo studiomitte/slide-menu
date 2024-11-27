@@ -119,3 +119,12 @@ export function alignTop(elem: HTMLElement): void {
     elem.style.top = `-${dy}px`;
   }
 }
+
+export function validateQuery(str: string): boolean {
+  try {
+    document.querySelector(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}

@@ -91,3 +91,12 @@ export function alignTop(elem) {
         elem.style.top = `-${dy}px`;
     }
 }
+export function validateQuery(str) {
+    try {
+        document.querySelector(str);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}

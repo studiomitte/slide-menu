@@ -1,5 +1,5 @@
 import { SlideMenuOptions, Action, CLASSES } from './SlideMenuOptions.js';
-import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn } from './utils/dom.js';
+import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn, validateQuery } from './utils/dom.js';
 
 let number = 0;
 
@@ -191,13 +191,17 @@ export class Slide {
   }
 
   public matches(idHrefOrSelector: string): boolean {
-    return (
+    const validSelector = validateQuery(idHrefOrSelector);
+    const currentOrigin = window.location.origin;
+    const defaultSelector = `[id="${idHrefOrSelector.replace('#', '')}"], [href="${idHrefOrSelector}"], [href="${currentOrigin + idHrefOrSelector}"], [href="${currentOrigin}/${idHrefOrSelector}"]`;
+
+    return !!(
       this.id === idHrefOrSelector ||
       this.menuElem.id === idHrefOrSelector ||
-      this.anchorElem?.id === idHrefOrSelector ||
+      this.anchorElem?.id === idHrefOrSelector.replace('#', '') ||
       this.anchorElem?.href === idHrefOrSelector ||
-      this.anchorElem?.matches(idHrefOrSelector) ||
-      this.menuElem.matches(idHrefOrSelector)
+      this.menuElem?.querySelector(defaultSelector) ||
+      (validSelector && this.menuElem.querySelector(idHrefOrSelector))
     );
   }
 

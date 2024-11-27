@@ -1,5 +1,5 @@
 import { Action, CLASSES } from './SlideMenuOptions.js';
-import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn } from './utils/dom.js';
+import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn, validateQuery } from './utils/dom.js';
 let number = 0;
 export class Slide {
     get isActive() {
@@ -141,12 +141,15 @@ export class Slide {
     }
     matches(idHrefOrSelector) {
         var _a, _b, _c;
-        return (this.id === idHrefOrSelector ||
+        const validSelector = validateQuery(idHrefOrSelector);
+        const currentOrigin = window.location.origin;
+        const defaultSelector = `[id="${idHrefOrSelector.replace('#', '')}"], [href="${idHrefOrSelector}"], [href="${currentOrigin + idHrefOrSelector}"], [href="${currentOrigin}/${idHrefOrSelector}"]`;
+        return !!(this.id === idHrefOrSelector ||
             this.menuElem.id === idHrefOrSelector ||
-            ((_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.id) === idHrefOrSelector ||
+            ((_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.id) === idHrefOrSelector.replace('#', '') ||
             ((_b = this.anchorElem) === null || _b === void 0 ? void 0 : _b.href) === idHrefOrSelector ||
-            ((_c = this.anchorElem) === null || _c === void 0 ? void 0 : _c.matches(idHrefOrSelector)) ||
-            this.menuElem.matches(idHrefOrSelector));
+            ((_c = this.menuElem) === null || _c === void 0 ? void 0 : _c.querySelector(defaultSelector)) ||
+            (validSelector && this.menuElem.querySelector(idHrefOrSelector)));
     }
     contains(elem) {
         return this.anchorElem === elem || this.menuElem.contains(elem);

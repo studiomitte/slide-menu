@@ -7,3 +7,4 @@ export declare const TAB_ABLE_SELECTOR = "a[href]:not([disabled]), button:not([d
 export declare function focusFirstTabAbleElemIn(elem: HTMLElement | null | undefined): void;
 export declare function trapFocus(event: KeyboardEvent, targetElement: HTMLElement, firstElement?: HTMLElement, lastElement?: HTMLElement): void;
 export declare function alignTop(elem: HTMLElement): void;
+export declare function validateQuery(str: string): boolean;

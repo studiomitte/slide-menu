@@ -7,6 +7,11 @@
   --smdm-sm-color-controls: rgb(20 20 19);
   --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
   --smdm-sm-item-padding: 0.9rem 1.5rem;
+
+  --smdm-sm-calc-slide-width: min(100vw, var(--smdm-sm-menu-width));
+  --smdm-sm-calc-wrapper-translation: calc(
+    var(--smdm-sm-calc-slide-width) * var(--smdm-sm-menu-level) * -1
+  );
 }
 
 .slide-menu {
@@ -62,8 +67,10 @@
       width: fit-content;
 
       .slide-menu__submenu {
-        width: var(--smdm-sm-menu-width);
+        width: var(--smdm-sm-calc-slide-width);
       }
+
+      transform: translateX(var(--smdm-sm-calc-wrapper-translation));
 
       margin: 0;
       padding-left: 0;

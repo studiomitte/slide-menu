@@ -46,6 +46,7 @@ export class SlideMenu {
         document.documentElement.style.setProperty('--smdm-sm-menu-width', `${this.options.menuWidth}px`);
         document.documentElement.style.setProperty('--smdm-sm-min-width-fold', `${this.options.minWidthFold}px`);
         document.documentElement.style.setProperty('--smdm-sm-transition-duration', `${this.options.transitionDuration}ms`);
+        document.documentElement.style.setProperty('--smdm-sm-menu-level', `0`);
         // Add slider container
         this.sliderElem = document.createElement('div');
         this.sliderElem.classList.add(CLASSES.slider);
@@ -73,16 +74,22 @@ export class SlideMenu {
         this.initEventHandlers();
         // Enable Menu
         this.menuElem.style.display = 'flex';
-        // Send event that menu is initialized
-        this.triggerEvent(Action.Initialize);
         // Set the default open target and activate it
         this.activeSubmenu = this.slides[0].activate();
         this.navigateTo((_e = this.defaultOpenTarget) !== null && _e !== void 0 ? _e : this.slides[0], false);
+        this.slides.forEach((menu) => {
+            menu.disableTabbing();
+        });
+        // Send event that menu is initialized
+        this.triggerEvent(Action.Initialize);
     }
     get defaultOpenTarget() {
         var _a;
         const defaultTargetSelector = (_a = this.menuElem.dataset.openTarget) !== null && _a !== void 0 ? _a : 'smdm-sm-no-default-provided';
         return this.getTargetSlideByIdentifier(defaultTargetSelector);
+    }
+    get isFoldOpen() {
+        return this.menuElem.classList.contains(CLASSES.foldOpen);
     }
     debugLog(...args) {
         if (this.options.debug) {
@@ -147,6 +154,9 @@ export class SlideMenu {
         var _a;
         this.triggerEvent(Action.Close);
         this.toggleVisibility(false, animate);
+        this.slides.forEach((menu) => {
+            menu.disableTabbing();
+        });
         (_a = document.querySelector('body')) === null || _a === void 0 ? void 0 : _a.classList.remove(CLASSES.open);
     }
     /**
@@ -206,13 +216,10 @@ export class SlideMenu {
             }
         }
         this.updateMenuTitle(nextMenu, firstUnfoldableParent);
-        this.setTabbingForFold(nextMenu, firstUnfoldableParent, previousMenu, parents);
+        this.setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents);
         const currentlyVisibleMenus = [nextMenu, ...parents];
         this.activateVisibleMenus(currentlyVisibleMenus, isNavigatingBack, previousMenu, nextMenu);
-        const level = this.getSlideLevel(nextMenu, isNavigatingBack);
-        const menuWidth = this.options.menuWidth;
-        const offset = -menuWidth * level;
-        this.moveElem(this.sliderWrapperElem, offset, 'px');
+        const level = this.setSlideLevel(nextMenu, isNavigatingBack);
         this.hideControlsIfOnRootLevel(level);
         this.setBodyTagSlideLevel(level);
         this.setActiveSubmenu(nextMenu);
@@ -234,7 +241,7 @@ export class SlideMenu {
         var _a;
         (_a = document.querySelector('body')) === null || _a === void 0 ? void 0 : _a.setAttribute('data-slide-menu-level', level.toString());
     }
-    setTabbingForFold(nextMenu, firstUnfoldableParent, previousMenu, parents) {
+    setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents) {
         if (nextMenu.canFold()) {
             this.openFold();
             // Enable Tabbing for foldable Parents
@@ -243,23 +250,21 @@ export class SlideMenu {
                     menu.enableTabbing();
                 }
             });
+            firstUnfoldableParent === null || firstUnfoldableParent === void 0 ? void 0 : firstUnfoldableParent.enableTabbing();
             // disable Tabbing for invisible unfoldable parents
             firstUnfoldableParent === null || firstUnfoldableParent === void 0 ? void 0 : firstUnfoldableParent.getAllParents().forEach((menu) => {
                 menu.disableTabbing();
             });
+            return;
         }
-        else if ((previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.canFold()) && !nextMenu.canFold()) {
-            // close fold and disable tabbing for all parents
+        if ((previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.canFold()) && !nextMenu.canFold()) {
+            // close fold
             this.closeFold();
-            parents.forEach((menu) => {
-                menu.disableTabbing();
-            });
         }
-        else if (!(previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.canFold()) && !nextMenu.canFold()) {
-            parents.forEach((menu) => {
-                menu.disableTabbing();
-            });
-        }
+        parents.forEach((menu) => {
+            menu.disableTabbing();
+        });
+        nextMenu.enableTabbing();
     }
     activateVisibleMenus(currentlyVisibleMenus, isNavigatingBack, previousMenu, nextMenu) {
         const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu === null || menu === void 0 ? void 0 : menu.id);
@@ -321,10 +326,13 @@ export class SlideMenu {
             });
         }
     }
-    getSlideLevel(nextMenu, isNavigatingBack) {
+    setSlideLevel(nextMenu, isNavigatingBack = false) {
         const activeNum = Array.from(this.sliderWrapperElem.querySelectorAll('.' + CLASSES.active)).length;
-        const navDecrement = !nextMenu.canFold() ? Number(isNavigatingBack) : 0;
-        return Math.max(1, activeNum) - 1 - navDecrement;
+        const navDecrement = !(nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.canFold()) ? Number(isNavigatingBack) : 0;
+        const level = Math.max(1, activeNum) - 1 - navDecrement;
+        this.setBodyTagSlideLevel(level);
+        document.documentElement.style.setProperty('--smdm-sm-menu-level', `${level}`);
+        return level;
     }
     updateMenuTitle(nextMenu, firstUnfoldableParent) {
         var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -350,9 +358,15 @@ export class SlideMenu {
      * @returns
      */
     getTargetSlideByIdentifier(targetMenuIdAnchorHrefOrSelector) {
-        var _a;
-        return ((_a = this.slides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector))) !== null && _a !== void 0 ? _a : this.slides.find((menu) => menu.menuElem.querySelector(targetMenuIdAnchorHrefOrSelector)));
+        // search from bottom to top
+        const reversedSlides = this.slides.slice().reverse();
+        console.log(reversedSlides);
+        return reversedSlides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector));
     }
+    /**
+     * Get menu that has current path or hash as anchor element or within the menu
+     * @returns
+     */
     getTargetSlideDynamically() {
         const currentPath = location.pathname;
         const currentHash = location.hash;
@@ -489,6 +503,29 @@ export class SlideMenu {
             const firstControl = this.menuElem.querySelector(`.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`);
             trapFocus(event, (_b = (_a = this.activeSubmenu) === null || _a === void 0 ? void 0 : _a.menuElem) !== null && _b !== void 0 ? _b : this.menuElem, firstControl);
         });
+        const resizeObserver = new ResizeObserver((entries) => {
+            var _a, _b, _c, _d, _e, _f, _g;
+            if (entries.length === 0) {
+                return;
+            }
+            const bodyContentWidth = entries[0].contentRect.width;
+            if (bodyContentWidth < this.options.minWidthFold && this.isFoldOpen) {
+                this.closeFold();
+                const parents = (_a = this.activeSubmenu) === null || _a === void 0 ? void 0 : _a.getAllParents();
+                const firstUnfoldableParent = parents === null || parents === void 0 ? void 0 : parents.find((p) => !p.canFold());
+                this.setTabbing((_b = this.activeSubmenu) !== null && _b !== void 0 ? _b : this.slides[0], firstUnfoldableParent, this.activeSubmenu, parents !== null && parents !== void 0 ? parents : []);
+                this.setSlideLevel((_c = this.activeSubmenu) !== null && _c !== void 0 ? _c : this.slides[0]);
+                this.setTabbing((_d = this.activeSubmenu) !== null && _d !== void 0 ? _d : this.slides[0], undefined, undefined, []);
+            }
+            if (bodyContentWidth > this.options.minWidthFold && !this.isFoldOpen) {
+                this.openFold();
+                const parents = (_e = this.activeSubmenu) === null || _e === void 0 ? void 0 : _e.getAllParents();
+                const firstUnfoldableParent = parents === null || parents === void 0 ? void 0 : parents.find((p) => !p.canFold());
+                this.setTabbing((_f = this.activeSubmenu) !== null && _f !== void 0 ? _f : this.slides[0], firstUnfoldableParent, this.activeSubmenu, parents !== null && parents !== void 0 ? parents : []);
+                this.setSlideLevel((_g = this.activeSubmenu) !== null && _g !== void 0 ? _g : this.slides[0]);
+            }
+        });
+        resizeObserver.observe(document.body);
     }
     /**
      * Pause the CSS transitions, to apply CSS changes directly without an animation

@@ -366,6 +366,7 @@ describe('slide menu', () => {
         cy.get('[data-cypress="about-1-4-4"]').should('be.visible');
     });
 
+    // TODO: Tabbing & Focus Trapping on resizing window
     // TODO: check if fold is not opening on mobile dimensions
     // TODO: check if trapping focus is working on foldable
     // TODO: check if trapping focus is working slides wihtout fold

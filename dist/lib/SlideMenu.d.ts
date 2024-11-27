@@ -19,6 +19,7 @@ export declare class SlideMenu {
     private readonly foldableWrapperElem;
     constructor(elem?: HTMLElement | null, options?: Partial<SlideMenuOptions>);
     private get defaultOpenTarget();
+    get isFoldOpen(): boolean;
     debugLog(...args: any[]): void;
     /**
      * Toggle the menu
@@ -45,11 +46,11 @@ export declare class SlideMenu {
     navigateTo(target: HTMLElement | Slide | string, runInForeground?: boolean): void;
     private setActiveSubmenu;
     private setBodyTagSlideLevel;
-    private setTabbingForFold;
+    private setTabbing;
     private activateVisibleMenus;
     private findNextMenu;
     private hideControlsIfOnRootLevel;
-    private getSlideLevel;
+    private setSlideLevel;
     private updateMenuTitle;
     /**
      *
@@ -57,6 +58,10 @@ export declare class SlideMenu {
      * @returns
      */
     private getTargetSlideByIdentifier;
+    /**
+     * Get menu that has current path or hash as anchor element or within the menu
+     * @returns
+     */
     private getTargetSlideDynamically;
     open(animate?: boolean): void;
     /**
