@@ -464,9 +464,6 @@ export class SlideMenu {
   private getTargetSlideByIdentifier(targetMenuIdAnchorHrefOrSelector: string): Slide | undefined {
     // search from bottom to top
     const reversedSlides = this.slides.slice().reverse();
-
-    console.log(reversedSlides);
-
     return reversedSlides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector));
   }
 
