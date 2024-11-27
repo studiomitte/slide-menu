@@ -363,7 +363,7 @@ npm run version-minor # increments & commits minor version number
 
 # commit changes
 
-npm run post-version
+npm run publish-version
 ```
 
 #### Testing Package - Install locally

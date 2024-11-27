@@ -8,10 +8,19 @@
   --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
   --smdm-sm-item-padding: 0.9rem 1.5rem;
 
-  --smdm-sm-calc-slide-width: min(100vw, var(--smdm-sm-menu-width));
+  // Slider is full screen width by default
+  --smdm-sm-calc-menu-width: 100vw;
+  --smdm-sm-calc-slide-width: min(100vw, var(--smdm-sm-calc-menu-width));
   --smdm-sm-calc-wrapper-translation: calc(
     var(--smdm-sm-calc-slide-width) * var(--smdm-sm-menu-level) * -1
   );
+}
+
+// If screen is larger, set to JS configured menu width 
+@media screen and (min-width: 415px) {
+  :root {
+    --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
+  }
 }
 
 .slide-menu {
@@ -46,7 +55,7 @@
   }
 
   &__slider {
-    width: var(--smdm-sm-menu-width);
+    width: var(--smdm-sm-calc-menu-width);
     overflow-x: hidden;
     height: 100vh;
     max-width: 100%;
@@ -83,7 +92,7 @@
 
   &__submenu {
     display: none;
-    width: var(--smdm-sm-menu-width);
+    width: var(--smdm-sm-calc-menu-width);
     margin: 0;
     padding-left: 0;
     list-style: none;
