@@ -16,7 +16,7 @@
   );
 }
 
-// If screen is larger, set to JS configured menu width 
+// If screen is larger, set to JS configured menu width
 @media screen and (min-width: 415px) {
   :root {
     --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
