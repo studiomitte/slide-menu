@@ -12,21 +12,30 @@ export class Slide {
         this.anchorElem = anchorElem;
         this.isFoldable = false;
         this.active = false;
-        this.id = 'smdm-' + number;
+        this.ref = '/';
+        this.id = menuElem.id ? menuElem.id : 'smdm-' + number;
+        menuElem.id = this.id;
         number++;
         this.name = (_b = (_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : '';
         this.parentMenuElem = ((_d = (_c = anchorElem === null || anchorElem === void 0 ? void 0 : anchorElem.parentElement) === null || _c === void 0 ? void 0 : _c.closest('ul')) !== null && _d !== void 0 ? _d : undefined);
         this.parent = (_e = this.parentMenuElem) === null || _e === void 0 ? void 0 : _e._slide;
         if (anchorElem) {
             anchorElem === null || anchorElem === void 0 ? void 0 : anchorElem.classList.add(CLASSES.hasSubMenu);
-            if (!this.options.onlyNavigateDecorator) {
+            this.ref = anchorElem.href.replace(window.location.origin, '');
+            if (!this.options.navigationButtons) {
                 anchorElem.dataset.action = Action.NavigateTo;
-                anchorElem.dataset.target = this.options.id;
                 anchorElem.dataset.arg = this.id;
+                anchorElem.role = 'button';
+                anchorElem.setAttribute('aria-controls', this.id);
+                anchorElem.setAttribute('aria-expanded', 'false');
             }
         }
         menuElem.classList.add(CLASSES.submenu);
+        menuElem.role = 'menu';
         menuElem.dataset.smdmId = this.id;
+        menuElem.querySelectorAll('li').forEach((link) => {
+            link.classList.add(CLASSES.listItem);
+        });
         menuElem.querySelectorAll('a').forEach((link) => {
             link.classList.add(CLASSES.item);
         });
@@ -37,7 +46,7 @@ export class Slide {
         if (options.showBackLink) {
             this.addBackLink(options);
         }
-        this.addLinkDecorator(options);
+        this.addNavigatorButton(options);
         menuElem._slide = this;
     }
     addBackLink(options = this.options) {
@@ -54,44 +63,55 @@ export class Slide {
         this.menuElem.insertBefore(backLinkLi, this.menuElem.firstChild);
         return backLink;
     }
-    // Add `before` and `after` text
-    addLinkDecorator(options) {
-        var _a, _b, _c;
-        const decoratorTag = 'span';
-        if (options.submenuLinkBefore) {
-            const linkBeforeElem = document.createElement(decoratorTag);
-            linkBeforeElem.classList.add(CLASSES.decorator);
-            linkBeforeElem.innerHTML = options.submenuLinkBefore;
-            linkBeforeElem.dataset.action = Action.NavigateTo;
-            linkBeforeElem.dataset.target = this.options.id;
-            linkBeforeElem.dataset.arg = this.id;
-            if (this.options.onlyNavigateDecorator) {
-                linkBeforeElem.setAttribute('tabindex', '0');
-            }
-            (_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.insertBefore(linkBeforeElem, (_b = this.anchorElem) === null || _b === void 0 ? void 0 : _b.firstChild);
+    addNavigatorButton(options) {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        if (!options.navigationButtons) {
+            return;
         }
-        if (options.submenuLinkAfter) {
-            const linkAfterElem = document.createElement(decoratorTag);
-            linkAfterElem.classList.add(CLASSES.decorator);
-            linkAfterElem.innerHTML = options.submenuLinkAfter;
-            linkAfterElem.dataset.action = Action.NavigateTo;
-            linkAfterElem.dataset.target = this.options.id;
-            linkAfterElem.dataset.arg = this.id;
-            if (this.options.onlyNavigateDecorator) {
-                linkAfterElem.setAttribute('tabindex', '0');
-            }
-            (_c = this.anchorElem) === null || _c === void 0 ? void 0 : _c.appendChild(linkAfterElem);
+        const existingNavigator = Array.from((_c = (_b = (_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.children) !== null && _c !== void 0 ? _c : []).find((elem) => elem.classList.contains(CLASSES.navigator));
+        const navigatorTag = 'button';
+        const navigator = (existingNavigator !== null && existingNavigator !== void 0 ? existingNavigator : document.createElement(navigatorTag));
+        navigator.classList.add(CLASSES.navigator);
+        navigator.dataset.action = (_e = (_d = navigator.dataset) === null || _d === void 0 ? void 0 : _d.action) !== null && _e !== void 0 ? _e : Action.NavigateTo;
+        navigator.dataset.arg = (_g = (_f = navigator.dataset) === null || _f === void 0 ? void 0 : _f.arg) !== null && _g !== void 0 ? _g : this.id;
+        navigator.setAttribute('aria-controls', this.id);
+        navigator.setAttribute('aria-expanded', 'false');
+        navigator.setAttribute('tabindex', '0');
+        navigator.title = navigator.title ? navigator.title : options.navigationButtonsLabel + ': ' + this.name;
+        if (navigator.tagName !== 'BUTTON') {
+            navigator.role = 'button';
         }
-        return this.anchorElem;
+        if (typeof options.navigationButtons === 'string' && !(navigator.innerHTML.trim())) {
+            navigator.innerHTML = options.navigationButtons;
+        }
+        else if (!navigator.getAttribute('aria-label')) {
+            navigator.setAttribute('aria-label', options.navigationButtonsLabel + ': ' + this.name);
+        }
+        (_h = this.anchorElem) === null || _h === void 0 ? void 0 : _h.insertAdjacentElement('afterend', navigator);
+        this.navigatorElem = navigator;
     }
     deactivate() {
+        var _a, _b;
         this.active = false;
         this.menuElem.classList.remove(CLASSES.active);
+        if (this.options.navigationButtons) {
+            (_a = this.navigatorElem) === null || _a === void 0 ? void 0 : _a.setAttribute('aria-expanded', 'false');
+        }
+        else {
+            (_b = this.anchorElem) === null || _b === void 0 ? void 0 : _b.setAttribute('aria-expanded', 'false');
+        }
         return this;
     }
     activate() {
+        var _a, _b;
         this.active = true;
         this.menuElem.classList.add(CLASSES.active);
+        if (this.options.navigationButtons) {
+            (_a = this.navigatorElem) === null || _a === void 0 ? void 0 : _a.setAttribute('aria-expanded', 'true');
+        }
+        else {
+            (_b = this.anchorElem) === null || _b === void 0 ? void 0 : _b.setAttribute('aria-expanded', 'true');
+        }
         return this;
     }
     enableTabbing() {
@@ -107,10 +127,6 @@ export class Slide {
     }
     appendTo(elem) {
         elem.appendChild(this.menuElem);
-        return this;
-    }
-    postionTop(number) {
-        this.menuElem.style.top = number + 'px';
         return this;
     }
     getClosestNotFoldableSlide() {
@@ -140,16 +156,13 @@ export class Slide {
         return this.isFoldable && window.innerWidth >= this.options.minWidthFold;
     }
     matches(idHrefOrSelector) {
-        var _a, _b, _c;
-        const validSelector = validateQuery(idHrefOrSelector);
-        const currentOrigin = window.location.origin;
-        const defaultSelector = `[id="${idHrefOrSelector.replace('#', '')}"], [href="${idHrefOrSelector}"], [href="${currentOrigin + idHrefOrSelector}"], [href="${currentOrigin}/${idHrefOrSelector}"]`;
+        var _a;
+        const validSelector = validateQuery(idHrefOrSelector.trim());
         return !!(this.id === idHrefOrSelector ||
             this.menuElem.id === idHrefOrSelector ||
             ((_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.id) === idHrefOrSelector.replace('#', '') ||
-            ((_b = this.anchorElem) === null || _b === void 0 ? void 0 : _b.href) === idHrefOrSelector ||
-            ((_c = this.menuElem) === null || _c === void 0 ? void 0 : _c.querySelector(defaultSelector)) ||
-            (validSelector && this.menuElem.querySelector(idHrefOrSelector)));
+            idHrefOrSelector.replace(window.location.origin, '').startsWith(this.ref) ||
+            (validSelector && this.menuElem.querySelector(idHrefOrSelector.trim() + `:not(.${CLASSES.hasSubMenu})`)));
     }
     contains(elem) {
         return this.anchorElem === elem || this.menuElem.contains(elem);

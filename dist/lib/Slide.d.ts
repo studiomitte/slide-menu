@@ -10,18 +10,19 @@ export declare class Slide {
     readonly isFoldable: boolean;
     readonly parentMenuElem?: SlideHTMLElement;
     readonly name: string;
+    readonly ref: string;
+    navigatorElem?: HTMLElement;
     parent?: Slide;
     private active;
     get isActive(): boolean;
     constructor(menuElem: SlideHTMLElement, options: SlideMenuOptions, anchorElem?: HTMLAnchorElement | undefined);
     private addBackLink;
-    private addLinkDecorator;
+    private addNavigatorButton;
     deactivate(): this;
     activate(): this;
     enableTabbing(): void;
     disableTabbing(): void;
     appendTo(elem: HTMLElement): this;
-    postionTop(number: number): this;
     getClosestNotFoldableSlide(): Slide | undefined;
     /**
      *

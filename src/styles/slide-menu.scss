@@ -1,27 +1,35 @@
 :root {
+  // Defaults overwritten by user CSS if desired
   --smdm-sm-transition-easing: ease-in-out;
   --smdm-sm-color-bg: rgb(10 10 9);
   --smdm-sm-color-text: rgb(238 237 235);
+  --smdm-sm-color-icon: rgb(238 237 235);
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
   --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
   --smdm-sm-item-padding: 0.9rem 1.5rem;
 
-  // Slider is full screen width by default
-  --smdm-sm-calc-menu-width: 100vw;
+  // Defaults ovewritten by JS
+  --smdm-sm-menu-width: 320px;
+  --smdm-sm-menu-level: 0;
+  --smdm-sm-transition-duration: 300ms;
+  --smdm-sm-min-width-fold: 640px;
+
+  // Calculated
+  --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
   --smdm-sm-calc-slide-width: min(100vw, var(--smdm-sm-calc-menu-width));
   --smdm-sm-calc-wrapper-translation: calc(
     var(--smdm-sm-calc-slide-width) * var(--smdm-sm-menu-level) * -1
   );
 }
 
-// If screen is larger, set to JS configured menu width
-@media screen and (min-width: 415px) {
-  :root {
-    --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
-  }
-}
+// // If screen is larger, set to JS configured menu width
+// @media screen and (min-width: 415px) {
+//   :root {
+//     --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
+//   }
+// }
 
 .slide-menu {
   position: fixed;
@@ -35,24 +43,18 @@
   box-sizing: border-box;
 
   transition: transform var(--smdm-sm-transition-duration) var(--smdm-sm-transition-easing);
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
   transform: translateX(100%);
   will-change: transform;
 
   z-index: 1000;
   background-color: var(--smdm-sm-color-bg);
   color: var(--smdm-sm-color-text);
-
-  &.right {
-    flex-direction: row-reverse;
-
-    // .slide-menu__slider__wrapper {
-    //   // flex-direction: row-reverse;
-    // }
-
-    .slide-menu__foldable__wrapper {
-      flex-direction: row-reverse;
-    }
-  }
 
   &__slider {
     width: var(--smdm-sm-calc-menu-width);
@@ -100,6 +102,12 @@
     &--active {
       display: block;
     }
+
+    & > .slide-menu__listitem {
+      display: flex;
+      width: 100%;
+      border-bottom: solid 1px var(--smdm-sm-color-active);
+    } 
   }
 
   &__item {
@@ -108,7 +116,7 @@
     cursor: pointer;
     text-decoration: none;
     padding: var(--smdm-sm-item-padding);
-    border-bottom: solid 1px var(--smdm-sm-color-active);
+    flex: 1 0 auto;
 
     &:hover {
       background-color: var(--smdm-sm-color-hover);
@@ -132,16 +140,11 @@
 
       & .slide-menu__control {
         padding: 0.75rem 1.5rem;
-        flex: 1 0 auto;
         color: var(--smdm-sm-color-text);
         background-color: var(--smdm-sm-color-controls);
         border: none;
       }
     }
-  }
-
-  &__backlink {
-    text-transform: uppercase;
   }
 
   &__submenu--foldable {
@@ -158,6 +161,7 @@
   &--additional-content {
     padding: var(--smdm-sm-item-padding);
     border-bottom: solid 1px var(--smdm-sm-color-active);
+    width: 100%;
   }
 
   &__foldable__wrapper {
@@ -179,6 +183,13 @@
 
   &--fold-open &--hidden-on-open-fold {
     display: none;
+  }
+
+  &__navigator {
+    background-color: var(--smdm-sm-color-bg);
+    color: var(--smdm-sm-color-icon);
+    border: none;
+    cursor: pointer;
   }
 
   &__overlay {
@@ -208,6 +219,14 @@
       bottom: 0;
       left: 0;
       background: var(--smdm-sm-color-overlay);
+    }
+  }
+
+  &.right {
+    flex-direction: row-reverse;
+
+    .slide-menu__foldable__wrapper {
+      flex-direction: row-reverse;
     }
   }
 

@@ -25,6 +25,12 @@ export declare class SlideMenu {
      * Toggle the menu
      */
     toggleVisibility(show?: boolean, animate?: boolean): void;
+    /**
+   * Get menu that has current path or hash as anchor element or within the menu
+   * @returns
+   */
+    private getTargetSlideDynamically;
+    open(animate?: boolean): void;
     toggle(animate?: boolean): void;
     /**
      * Shows the menu, adds `slide-menu--open` class to body
@@ -59,12 +65,6 @@ export declare class SlideMenu {
      */
     private getTargetSlideByIdentifier;
     /**
-     * Get menu that has current path or hash as anchor element or within the menu
-     * @returns
-     */
-    private getTargetSlideDynamically;
-    open(animate?: boolean): void;
-    /**
      * Set up all event handlers
      */
     private initEventHandlers;
@@ -88,7 +88,7 @@ export declare class SlideMenu {
      */
     private runWithoutAnimation;
     /**
-     * Enhance the markup of menu items which contain a submenu
+     * Enhance the markup of menu items which contain a submenu and move them into the slider
      */
     private initSlides;
     get onlyNavigateDecorator(): boolean;

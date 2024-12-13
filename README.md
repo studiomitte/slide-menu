@@ -46,6 +46,8 @@ All you need is the traditional menu HTML markup and a wrapper with the class `s
 **Example**
 
 ```html
+<button class="slide-menu__control" data-target="example-menu" data-action="open">Open menu</button>
+
 <nav class="slide-menu" id="example-menu">
   <ul>
     <li>
@@ -69,23 +71,22 @@ All you need is the traditional menu HTML markup and a wrapper with the class `s
 ## Options
 
 The `SlideMenu()` constructor takes an optional second parameter to pass in various options:
-  
+
 Option | Description | Valid values | Default
 --- | --- | --- | ---
-`backLinkAfter` | HTML to append to back link in submenus | HTML code |  `''`
-`backLinkBefore` | HTML to prepend to back link in submenus | HTML code |  `''`
-`keyClose` | Key used to close the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `Escape`
+`backLinkAfter` | HTML to append to back link in submenus | HTML *string* |  `''`
+`backLinkBefore` | HTML to prepend to back link in submenus | HTML *string* |  `''`
+`keyClose` | Key used to close the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `'Escape'`
 `keyOpen` | Key used to open the menu | [Any valid KeyboardEvent key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) | `undefined`
 `position` | Position of the menu | `'left'` or `'right'` | `'right'`
-`showBackLink` | Add a link to navigate back in submenus (first entry) | *boolean* | `true`
-`submenuLinkBefore` | HTML to prepend to links with a submenu | HTML code |  `''`
-`submenuLinkAfter` | HTML to append to links with a submenu | HTML code |  `''`
+`showBackLink` | automatically add a link to navigate back in submenus (first entry) | *boolean* | `true`
+`navigationButtons` | automatically add navigation buttons for submenus / HTML to add inside the navigation buttons *💡keeps already provided navigation buttons (with class `slide-menu__navigator`) in the markup* | *boolean* / HTML *string* |  `false`
+`navigationButtonsLabel` | Aria-Label for the navigation buttons | *string* |  `'Open submenu: '`
 `closeOnClickOutside` | Menu closes when clicked outside menu  element | *boolean* | `false`
-`onlyNavigateDecorator` | Prevents navigation when clicking the link directly, triggers menu slide navigation only when clicking the link decorator elements  | *boolean* | `false`
-`menuWidth` | Width of the menu slider (without fold) | *number* | `320`
+`menuWidth` | Width of the menu slider in pixel (without fold) | *number* | `320`
 `minWidthFold` | Minimum window width in pixel for fold menu to be shown as fold not as slide | *number* | `640`
 `transitionDuration` | Duration of slide animation in milliseconds | *number* | `300`
-`dynamicOpenTarget` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` or ``location.hash`` (especially useful for SPA's) | *boolean* | `false`
+`dynamicOpenDefault` | Dynamically determine the default menu that will be opened based on current ``location.pathname`` and ``location.hash`` | *boolean* | `false`
 `debug` | Shows verbose logs / warnings | *boolean* | `false`
 
 Example:
@@ -94,11 +95,11 @@ Example:
 const initSlideMenu = () => {
   const menu = new SlideMenu(document.getElementById('example-menu'),{
       showBackLink: false,
-      submenuLinkAfter: '<strong>⇒</strong>'
+      navigationButtons: '<strong>⇒</strong>',
   });
 };
 ```
- 
+
 ## API
 
 You can call the API in two different ways:
@@ -126,9 +127,9 @@ You can call the API in two different ways:
     Open the menu level which contains specified menu element. `target` can either be a `document.querySelector` compatible string selector or the the DOM element (inside the menu). The first found element (if any) will be used.
 * `show(animate = true)` - Shows the menu if closed
 * `open(animate = true)` - Opens the menu if closed an potentially navigates to target
-  * If attribute `data-open-target="..."` is provided in the root menu element the menu will navigate to that target per default. Target must be a `document.querySelector` compatible string
-  * If option ``dynamicOpenTarget`` is true opens submenu matching the currently active slug or hash in the browser URL (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
-* `toggle(animate = true)` - Toggle the menu (if defined opens the `data-open-target="..."` / `dynamicOpenTarget` by default)
+  * If attribute `data-open-default="..."` is provided in the root menu element the menu will navigate to that target per default. Target must be a `document.querySelector` compatible string
+  * If option ``dynamicOpenDefault`` is true opens submenu matching the currently active slug or hash in the browser URL (e.g. if you are on the page `https://example.com/about` slide menu will try to open the submenu of the item `<a href="/about">About</a>` or open the submenu containing it)
+* `toggle(animate = true)` - Toggle the menu (if defined opens the `data-open-default="..."` / `dynamicOpenDefault` by default)
 
 ### Events
 
@@ -173,10 +174,10 @@ if(window.SlideMenu) {
 
 ### Define default submenu
 
-To open a specific submenu with the `open` or `toggle` action you can give the slide menu element the attribute `data-open-target` and pass the id, href or a css selector for the desired target submenu item. Example:
+To open a specific submenu with the `open` or `toggle` action you can give the slide menu element the attribute `data-open-default` and pass the id, href or a css selector for the desired target submenu item. Example:
 
 ```html
-<nav class="slide-menu" id="example-menu" data-open-target="default-submenu">
+<nav class="slide-menu" id="example-menu" data-open-default="default-submenu">
   <ul>
     <li>
       <a href="/blog">Blog</a>
@@ -214,6 +215,7 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 
 ```html
 <button type="button" class="slide-menu__control" data-target="example-menu" data-action="open">Open</button>
+<button type="button" class="slide-menu__control" data-target="example-menu" data-action="close" data-arg="close-fold">Close</button>
 <button type="button" class="slide-menu__control" data-target="example-menu" data-action="back">Back</button>
 <button type="button" class="slide-menu__control" data-target="example-menu" data-action="toggle">Toggle</button>
 <button type="button" class="slide-menu__control" data-target="example-menu" data-action="navigateTo" data-arg="blog">Navigate to #blog</button>
@@ -227,9 +229,46 @@ Buttons to control the menu can be created easily. Add the class `slide-menu__co
 <a class="slide-menu-control" data-action="close">Close this menu</a>
 ```
 
+
+#### Navigation Buttons
+
+To create navigation buttons that navigate between submenus buttons with the class `slide-menu__navigator` can be added. The navigation buttons can be generated automatically by using the `navigationButtons` configuration option. The buttons can also be added manually in the HTML structure like so:
+
+```js
+new SlideMenu(document.getElementById('example-menu'), {
+  navigationButtons: true
+});
+
+// or with JS defined HTML markup inside
+
+new SlideMenu(document.getElementById('example-menu'), {
+  navigationButtons: '<strong>⇒</strong>'
+})
+```
+
+and
+
+```html
+<nav class="slide-menu" id="example-menu">
+  ...
+  <ul>
+    ...
+    <li>
+      <a href="#">Submenu entry 1</a>
+      <!-- navigation buttons already procided in HTML will be used and not overwritten -->
+      <button class="slide-menu__navigator">Next (Open Submenu)</button>
+      <ul>
+        ...
+      </ul>
+    </li>
+  </ul>
+</nav>
+```
+
+
 ### Menu Title
 
-A dynamic menu title `slide-menu__title` can optionally be added anywhere in the menu structure (e.g. in the ``slide-menu__controls``). The title will be updated dynamically according to the current menu level.
+A dynamic menu title `slide-menu__title` can optionally be added anywhere in the menu structure (e.g. within ``slide-menu__controls``). The title will be updated dynamically according to the current menu level.
 
 ```html
 <nav class="slide-menu" id="test-menu-left">
@@ -251,7 +290,7 @@ Foldable submenus can be created using the class `slide-menu__item--has-foldable
 ```html
 ...
 <li>
-  <a class="slide-menu__item--has-foldable-submenu" href="#"><span>Foldable</span></a>
+  <a class="slide-menu__item--has-foldable-submenu" href="#"><span>Foldable Submenu</span></a>
   <ul>
     ...foldable submenu items go here...
   </ul>
@@ -276,6 +315,12 @@ Any arbitrary additonal content (e.g. search input fields, detail info, images,.
   </div>
   <ul>
     ...
+    <li>
+      <div class="slide-menu--additional-content">
+        <p>Some more additional content</p>
+      </div>
+    </li>
+    ...
   </ul>
 </nav>
 ```
@@ -288,7 +333,11 @@ To add Links for closing the menu in the end of Submenus for convenient keyboard
 <ul>
   <li>...Menu item 1...</li>
   <li>...Menu item 2...</li>
-  <li><a href="#" data-action="close" class="slide-menu__control">X Close</a></li>
+  <li>
+    <div class="slide-menu--additional-content">
+      <button data-action="close" class="slide-menu__control">X Close</button>
+    </div>
+  </li>
 </ul>
 ```
 
@@ -298,7 +347,11 @@ If you want to insert backlinks manually like in the following example use the a
 
 ```html
 <ul>
-  <li><a href="#" data-action="back" class="slide-menu__control">🔙 Backlink</a></li>
+  <li>
+    <div class="slide-menu--additional-content">
+      <button data-action="back" class="slide-menu__control">🔙 Backlink</button>
+    </div>
+  </li>
   <li>...Menu item 1...</li>
   <li>...Menu item 2...</li>
 </ul>
@@ -317,6 +370,7 @@ The following default CSS variables can be overwritten as needed:
   --smdm-sm-transition-easing: ease-in-out;
   --smdm-sm-color-bg: rgb(10 10 9);
   --smdm-sm-color-text: rgb(238 237 235);
+  --smdm-sm-color-icon: rgb(238 237 235);
   --smdm-sm-color-active: rgb(32 31 29);
   --smdm-sm-color-hover: rgb(20 20 19);
   --smdm-sm-color-controls: rgb(20 20 19);
@@ -337,7 +391,7 @@ ddev ssh -s frontend
 npm install
 npm run watch
 
-# run e2e tests (in cypress container)
+# run e2e tests locally (run command outside of DDEV container)
 npm run test
 ```
 

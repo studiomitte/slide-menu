@@ -12,7 +12,9 @@ export class Slide {
   public readonly isFoldable: boolean = false;
   public readonly parentMenuElem?: SlideHTMLElement;
   public readonly name: string;
-
+  public readonly ref: string;
+  
+  public navigatorElem?: HTMLElement;
   public parent?: Slide;
   private active: boolean = false;
 
@@ -25,7 +27,9 @@ export class Slide {
     public readonly options: SlideMenuOptions,
     public readonly anchorElem?: HTMLAnchorElement,
   ) {
-    this.id = 'smdm-' + number;
+    this.ref = '/';
+    this.id = menuElem.id ? menuElem.id : 'smdm-' + number;
+    menuElem.id = this.id;
     number++;
 
     this.name = this.anchorElem?.textContent ?? '';
@@ -36,16 +40,23 @@ export class Slide {
 
     if (anchorElem) {
       anchorElem?.classList.add(CLASSES.hasSubMenu);
+      this.ref = anchorElem.href.replace(window.location.origin, '');
 
-      if (!this.options.onlyNavigateDecorator) {
+      if (!this.options.navigationButtons) {
         anchorElem.dataset.action = Action.NavigateTo;
-        anchorElem.dataset.target = this.options.id;
         anchorElem.dataset.arg = this.id;
+        anchorElem.role = 'button';
+        anchorElem.setAttribute('aria-controls', this.id);
+        anchorElem.setAttribute('aria-expanded', 'false');
       }
     }
 
     menuElem.classList.add(CLASSES.submenu);
+    menuElem.role = 'menu';
     menuElem.dataset.smdmId = this.id;
+    menuElem.querySelectorAll('li').forEach((link) => {
+      link.classList.add(CLASSES.listItem);
+    });
     menuElem.querySelectorAll('a').forEach((link) => {
       link.classList.add(CLASSES.item);
     });
@@ -55,11 +66,13 @@ export class Slide {
       menuElem.classList.add(CLASSES.foldableSubmenu);
     }
 
+
+
     if (options.showBackLink) {
       this.addBackLink(options);
     }
 
-    this.addLinkDecorator(options);
+    this.addNavigatorButton(options);
 
     menuElem._slide = this;
   }
@@ -84,54 +97,57 @@ export class Slide {
     return backLink;
   }
 
-  // Add `before` and `after` text
-  private addLinkDecorator(options: SlideMenuOptions): HTMLAnchorElement | undefined {
-    const decoratorTag = 'span';
-
-    if (options.submenuLinkBefore) {
-      const linkBeforeElem = document.createElement(decoratorTag);
-
-      linkBeforeElem.classList.add(CLASSES.decorator);
-      linkBeforeElem.innerHTML = options.submenuLinkBefore;
-      linkBeforeElem.dataset.action = Action.NavigateTo;
-      linkBeforeElem.dataset.target = this.options.id;
-      linkBeforeElem.dataset.arg = this.id;
-
-      if (this.options.onlyNavigateDecorator) {
-        linkBeforeElem.setAttribute('tabindex', '0');
-      }
-
-      this.anchorElem?.insertBefore(linkBeforeElem, this.anchorElem?.firstChild);
+  private addNavigatorButton(options: SlideMenuOptions): void {
+    if (!options.navigationButtons) {
+      return;
     }
 
-    if (options.submenuLinkAfter) {
-      const linkAfterElem = document.createElement(decoratorTag);
+    const existingNavigator = Array.from(this.anchorElem?.parentElement?.children ?? []).find((elem) => elem.classList.contains(CLASSES.navigator)) as HTMLElement | undefined;
+    const navigatorTag = 'button';
+    const navigator = (existingNavigator ?? document.createElement(navigatorTag)) as HTMLElement;
 
-      linkAfterElem.classList.add(CLASSES.decorator);
-      linkAfterElem.innerHTML = options.submenuLinkAfter;
-      linkAfterElem.dataset.action = Action.NavigateTo;
-      linkAfterElem.dataset.target = this.options.id;
-      linkAfterElem.dataset.arg = this.id;
+    navigator.classList.add(CLASSES.navigator);
+    navigator.dataset.action = navigator.dataset?.action ?? Action.NavigateTo;
+    navigator.dataset.arg = navigator.dataset?.arg ?? this.id;
+    navigator.setAttribute('aria-controls', this.id);
+    navigator.setAttribute('aria-expanded', 'false');
+    navigator.setAttribute('tabindex', '0');
+    navigator.title = navigator.title ? navigator.title : options.navigationButtonsLabel + ': ' + this.name;
 
-      if (this.options.onlyNavigateDecorator) {
-        linkAfterElem.setAttribute('tabindex', '0');
-      }
-
-      this.anchorElem?.appendChild(linkAfterElem);
+    if (navigator.tagName !== 'BUTTON') {
+      navigator.role = 'button';
     }
 
-    return this.anchorElem;
+    if (typeof options.navigationButtons === 'string' && !(navigator.innerHTML.trim())) {
+      navigator.innerHTML = options.navigationButtons;
+    } else if(!navigator.getAttribute('aria-label')) {
+      navigator.setAttribute('aria-label', options.navigationButtonsLabel + ': ' + this.name);
+    }
+
+    this.anchorElem?.insertAdjacentElement('afterend', navigator);
+
+    this.navigatorElem = navigator;
   }
 
   public deactivate(): this {
     this.active = false;
     this.menuElem.classList.remove(CLASSES.active);
+    if(this.options.navigationButtons) {
+      this.navigatorElem?.setAttribute('aria-expanded', 'false');
+    } else {
+      this.anchorElem?.setAttribute('aria-expanded', 'false');
+    }
     return this;
   }
-
+  
   public activate(): this {
     this.active = true;
     this.menuElem.classList.add(CLASSES.active);
+    if(this.options.navigationButtons) {
+      this.navigatorElem?.setAttribute('aria-expanded', 'true');
+    } else {
+      this.anchorElem?.setAttribute('aria-expanded', 'true');
+    }
     return this;
   }
 
@@ -149,11 +165,6 @@ export class Slide {
 
   public appendTo(elem: HTMLElement): this {
     elem.appendChild(this.menuElem);
-    return this;
-  }
-
-  public postionTop(number: number): this {
-    this.menuElem.style.top = number + 'px';
     return this;
   }
 
@@ -191,17 +202,14 @@ export class Slide {
   }
 
   public matches(idHrefOrSelector: string): boolean {
-    const validSelector = validateQuery(idHrefOrSelector);
-    const currentOrigin = window.location.origin;
-    const defaultSelector = `[id="${idHrefOrSelector.replace('#', '')}"], [href="${idHrefOrSelector}"], [href="${currentOrigin + idHrefOrSelector}"], [href="${currentOrigin}/${idHrefOrSelector}"]`;
+    const validSelector = validateQuery(idHrefOrSelector.trim());
 
     return !!(
       this.id === idHrefOrSelector ||
       this.menuElem.id === idHrefOrSelector ||
       this.anchorElem?.id === idHrefOrSelector.replace('#', '') ||
-      this.anchorElem?.href === idHrefOrSelector ||
-      this.menuElem?.querySelector(defaultSelector) ||
-      (validSelector && this.menuElem.querySelector(idHrefOrSelector))
+      idHrefOrSelector.replace(window.location.origin, '').startsWith(this.ref) ||
+      (validSelector && this.menuElem.querySelector(idHrefOrSelector.trim() + `:not(.${CLASSES.hasSubMenu})`))
     );
   }
 

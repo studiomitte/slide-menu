@@ -78,7 +78,7 @@ describe('slide menu', () => {
         cy.get('[data-cypress="back-manually-inserted-backlink"]').should('not.be.visible');
     });
 
-    it('custom config: should navigate on clicking link decorators', () => {
+    it('custom config: should navigate on clicking link navigators', () => {
         cy.visit(frontend + '/demo/js-demo.html');
 
         // is open
@@ -96,16 +96,16 @@ describe('slide menu', () => {
 
         cy.wait(500)
 
-        // go forward by decorator
-        cy.get('[data-cypress="jump-to-news"] .slide-menu__decorator').should('be.visible').click();
+        // go forward by navigator
+        cy.get('[data-cypress="jump-to-news"] + .slide-menu__navigator').should('be.visible').click();
         cy.get('.slide-menu').should('be.visible');
         cy.get('.slide-menu__foldable__wrapper').should('not.be.visible');
         cy.get('[data-cypress="back-manually-inserted-backlink"]').should('be.visible');
 
         cy.wait(500)
 
-        // go forward by decorator
-        cy.get('[data-cypress="jump-to-news-1-2"] .slide-menu__decorator').should('be.visible').click();
+        // go forward by navigator
+        cy.get('[data-cypress="jump-to-news-1-2"] + .slide-menu__navigator').should('be.visible').click();
         cy.get('.slide-menu').should('be.visible');
         cy.get('.slide-menu__foldable__wrapper').should('be.visible');
         cy.get('[data-cypress="back-manually-inserted-backlink"]').should('be.visible');
@@ -122,7 +122,7 @@ describe('slide menu', () => {
 
         cy.wait(500)
 
-        // should not go forward without decorator
+        // should not go forward without navigator
         cy.get('[data-cypress="jump-to-news"]').should('be.visible').click();
         cy.get('.slide-menu').should('be.visible');
         cy.get('.slide-menu__foldable__wrapper').should('not.be.visible');
@@ -144,7 +144,7 @@ describe('slide menu', () => {
 
         cy.wait(500)
 
-        // should go forward without decorator
+        // should go forward without navigator
         cy.get('[data-cypress="jump-to-news"]').should('be.visible').click();
         cy.get('.slide-menu').should('be.visible');
         cy.get('[data-cypress="back-manually-inserted-backlink"]').should('be.visible');
@@ -152,7 +152,7 @@ describe('slide menu', () => {
 
         cy.wait(500)
 
-        // should go forward without decorator
+        // should go forward without navigator
         cy.get('[data-cypress="jump-to-news-1-2"]').should('be.visible').click();
         cy.get('.slide-menu').should('be.visible');
         cy.get('[data-cypress="back-manually-inserted-backlink"]').should('be.visible');
@@ -366,9 +366,102 @@ describe('slide menu', () => {
         cy.get('[data-cypress="about-1-4-4"]').should('be.visible');
     });
 
-    // TODO: Tabbing & Focus Trapping on resizing window
+    // check if trapping focus is working on foldable
+    it('should trap focus inside menu with foldable', () => {
+        cy.visit(frontend + '/demo/test-config-default.html');
+
+        cy.realPress("Tab"); 
+
+        cy.focused()
+            .should('exist')
+            .closest('.slide-menu')
+            .should('not.exist') 
+
+        // open menu
+        cy.get('[data-cypress="open-menu"]').should('be.visible').click();
+        cy.get('.slide-menu').should('be.visible');
+        cy.get('.slide-menu__foldable__wrapper').should('be.visible');
+
+        cy.wait(500)
+
+        // cycle through all menu items multiple times
+        for (let i = 0; i < 75; i++) {
+            cy.realPress("Tab");
+    
+            cy.wait(100)
+    
+            cy.focused()
+                .should('exist')
+                .closest('.slide-menu')
+                .should('exist')
+        }
+
+        cy.get('[data-cypress="close-menu-control"]').click();
+
+        cy.wait(500);
+
+        cy.focused()
+            .should('exist')
+            .closest('.slide-menu')
+            .should('not.exist')
+
+        cy.realPress("Tab");
+
+        cy.focused()
+            .should('exist')
+            .closest('.slide-menu')
+            .should('not.exist') 
+    });
+
+    // check if trapping focus is working on slides
+    it('should trap focus inside menu with slides', () => {
+        cy.visit(frontend + '/demo/test-config-default.html');
+
+        cy.realPress("Tab"); 
+
+        cy.focused()
+            .should('exist')
+            .closest('.slide-menu')
+            .should('not.exist') 
+
+        // open menu
+        cy.get('[data-cypress="jump-to-about"]').should('be.visible').click();
+        cy.get('.slide-menu').should('be.visible');
+        cy.get('.slide-menu__foldable__wrapper').should('not.be.visible');
+
+        cy.wait(500)
+
+        // cycle through all menu items multiple times
+        for (let i = 0; i < 75; i++) {
+            cy.realPress("Tab");
+    
+            cy.wait(100)
+    
+            cy.focused()
+                .should('exist')
+                .closest('.slide-menu')
+                .should('exist')
+        }
+
+        cy.get('[data-cypress="close-menu-control"]').click();
+
+        cy.wait(500);
+
+        cy.focused()
+            .should('exist')
+            .closest('.slide-menu')
+            .should('not.exist')
+
+        cy.realPress("Tab");
+
+        cy.focused()
+            .should('exist')
+            .closest('.slide-menu')
+            .should('not.exist') 
+    });
+
     // TODO: check if fold is not opening on mobile dimensions
-    // TODO: check if trapping focus is working on foldable
     // TODO: check if trapping focus is working slides wihtout fold
+    // TODO: tabbing & focus Trapping on resizing window
     // TODO: check if default-open-target is working when it is in 1st menu level and you first navigate to root and then open menu again through default-open-target
 });

@@ -5,14 +5,14 @@ export interface SlideMenuOptions {
     keyClose: string;
     position: MenuPosition | 'left' | 'right';
     showBackLink: boolean;
-    submenuLinkBefore: string;
-    submenuLinkAfter: string;
+    submenuLinkBefore: string | boolean;
+    navigationButtons: string | boolean;
+    navigationButtonsLabel: string;
     closeOnClickOutside: boolean;
-    onlyNavigateDecorator: boolean;
     menuWidth: number;
     minWidthFold: number;
     transitionDuration: number;
-    dynamicOpenTarget: boolean;
+    dynamicOpenDefault: boolean;
     debug: boolean;
     id: string;
 }
@@ -40,8 +40,10 @@ export declare const CLASSES: {
     control: string;
     controls: string;
     decorator: string;
+    navigator: string;
     slider: string;
     item: string;
+    listItem: string;
     submenu: string;
     sliderWrapper: string;
     foldableWrapper: string;

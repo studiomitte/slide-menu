@@ -33,13 +33,11 @@ const config = () => {
 
   const menuLeft = new SlideMenu(menuLeftElem, {
     position: 'left',
-    submenuLinkAfter: arrowHtml(),
+    navigationButtons: arrowHtml(),
     backLinkBefore: arrowHtml('transform: rotate(180deg)'),
-
     keyClose: 'Escape',
     showBackLink: false,
     closeOnClickOutside: true,
-    onlyNavigateDecorator: true,
   });
 
   if (window.innerWidth > 767) {

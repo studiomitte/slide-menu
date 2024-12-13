@@ -105,11 +105,11 @@
     </main>
 
     <div class="slide-menu__overlay"></div>
-    <nav class="slide-menu" id="test-menu-left" data-open-target="#special-link-888">
+    <nav class="slide-menu" id="test-menu-left" data-open-default="#special-link-888">
       <div class="slide-menu__controls">
         <button
           type="button"
-          class="slide-menu__control slide-menu--invisible-on-root-level"
+          class="slide-menu__control slide-menu__back slide-menu--invisible-on-root-level"
           data-action="back"
           data-arg="close-fold"
           data-cypress="back-close-fold"
@@ -117,7 +117,7 @@
           Back
         </button>
         <div class="slide-menu__title">Title</div>
-        <button type="button" class="slide-menu__control" data-action="close">Close</button>
+        <button type="button" class="slide-menu__control slide-menu__close" data-action="close">Close</button>
       </div>
       <div class="slide-menu--additional-content">
         <img
@@ -130,6 +130,9 @@
       <ul>
         <li>
           <a href="#/news" aria-label="Open News" data-cypress="jump-to-news">News</a>
+          <button class="slide-menu__navigator">
+            Sooooomeeewhere
+          </button>
           <ul>
             <li>
               <a

@@ -13,14 +13,14 @@ const DEFAULT_OPTIONS: SlideMenuOptions = {
   keyClose: 'Escape',
   keyOpen: '',
   position: MenuPosition.Right,
-  submenuLinkAfter: '',
   submenuLinkBefore: '',
   closeOnClickOutside: false,
-  onlyNavigateDecorator: false,
+  navigationButtonsLabel: 'Open submenu ',
+  navigationButtons: false,
   menuWidth: 320, // px
   minWidthFold: 640, // px
   transitionDuration: 300, // ms
-  dynamicOpenTarget: false,
+  dynamicOpenDefault: false,
   debug: false,
   id: '',
 };
@@ -55,11 +55,12 @@ export class SlideMenu {
     this.options = Object.assign({}, DEFAULT_OPTIONS, options);
 
     this.menuElem = elem as MenuHTMLElement;
-    this.options.id = this.menuElem.id ?? 'smdm-slide-menu-' + counter;
+    this.options.id = this.menuElem.id ? this.menuElem.id : 'smdm-slide-menu-' + counter;
     counter++;
     this.menuElem.id = this.options.id;
     this.menuElem.classList.add(NAMESPACE);
     this.menuElem.classList.add(this.options.position);
+    this.menuElem.role = 'navigation';
 
     // Save this instance in menu to DOM node
     this.menuElem._slideMenu = this;
@@ -101,15 +102,6 @@ export class SlideMenu {
     this.menuTitle = this.menuElem.querySelector(`.${CLASSES.title}`) as HTMLElement;
     this.menuTitleDefaultText = this.menuTitle?.textContent?.trim() ?? this.menuTitleDefaultText;
 
-    if (
-      this.options.onlyNavigateDecorator &&
-      (!this.options.submenuLinkAfter || !this.options.submenuLinkBefore)
-    ) {
-      this.debugLog(
-        'Make sure to provide navigation decorators manually! Otherwise `onlyNavigateDecorator` only works with `submenuLinkAfter` and `submenuLinkBefore` options!',
-      );
-    }
-
     this.initMenu();
     this.initSlides();
     this.initEventHandlers();
@@ -129,7 +121,7 @@ export class SlideMenu {
   }
 
   private get defaultOpenTarget(): Slide | undefined {
-    const defaultTargetSelector = this.menuElem.dataset.openTarget ?? 'smdm-sm-no-default-provided';
+    const defaultTargetSelector = this.menuElem.dataset.openDefault ?? 'smdm-sm-no-default-provided';    
     return this.getTargetSlideByIdentifier(defaultTargetSelector);
   }
 
@@ -181,6 +173,30 @@ export class SlideMenu {
     this.isOpen = !!show;
 
     this.moveElem(this.menuElem, offset);
+  }
+
+    /**
+   * Get menu that has current path or hash as anchor element or within the menu
+   * @returns
+   */
+  private getTargetSlideDynamically(): Slide | undefined {
+    const currentPath = location.pathname;
+    const currentHash = location.hash;
+    const currentHashItem = this.slides.find((menu) => menu.matches(currentHash));
+    const currentPathItem = this.slides.find((menu) => menu.matches(currentPath));
+    return currentPathItem ?? currentHashItem;
+  }
+
+  public open(animate: boolean = true): void {
+    const target = this.options.dynamicOpenDefault
+      ? this.getTargetSlideDynamically()
+      : this.defaultOpenTarget;
+
+    if (target) {
+      this.navigateTo(target);
+    }
+
+    this.show(animate);
   }
 
   public toggle(animate: boolean = true): void {
@@ -438,18 +454,18 @@ export class SlideMenu {
   private updateMenuTitle(nextMenu: Slide, firstUnfoldableParent?: Slide): void {
     if (this.menuTitle) {
       let anchorText = nextMenu?.anchorElem?.textContent ?? this.menuTitleDefaultText;
-      const decoratorTextAfter = this.options?.submenuLinkAfter ?? '';
-      const decoratorTextBefore = this.options?.submenuLinkBefore ?? '';
+      const navigatorTextAfter = this.options?.navigationButtons ?? '';
+      const navigatorTextBefore = this.options?.submenuLinkBefore ?? '';
 
       if (nextMenu.canFold() && firstUnfoldableParent) {
         anchorText = firstUnfoldableParent.anchorElem?.textContent ?? anchorText;
       }
 
-      if (decoratorTextAfter) {
-        anchorText = anchorText.replace(decoratorTextAfter, '');
+      if (navigatorTextAfter && typeof navigatorTextAfter === 'string') {
+        anchorText = anchorText.replace(navigatorTextAfter, '');
       }
-      if (decoratorTextBefore) {
-        anchorText = anchorText.replace(decoratorTextBefore, '');
+      if (navigatorTextBefore && typeof navigatorTextBefore === 'string') {
+        anchorText = anchorText.replace(navigatorTextBefore, '');
       }
 
       this.menuTitle.innerText = anchorText.trim();
@@ -463,32 +479,17 @@ export class SlideMenu {
    */
   private getTargetSlideByIdentifier(targetMenuIdAnchorHrefOrSelector: string): Slide | undefined {
     // search from bottom to top
-    const reversedSlides = this.slides.slice().reverse();
-    return reversedSlides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector));
-  }
+    const sortedByTreeDepth = this.slides.slice().sort((a, b) => {
+      const depthA = a.ref.split('/').length;
+      const depthB = b.ref.split('/').length;
 
-  /**
-   * Get menu that has current path or hash as anchor element or within the menu
-   * @returns
-   */
-  private getTargetSlideDynamically(): Slide | undefined {
-    const currentPath = location.pathname;
-    const currentHash = location.hash;
-    const currentHashItem = this.slides.find((menu) => menu.matches(currentHash));
-    const currentPathItem = this.slides.find((menu) => menu.matches(currentPath));
-    return currentPathItem ?? currentHashItem;
-  }
+      if (depthB !== depthA) {
+        return depthB - depthA;
+      }
 
-  public open(animate: boolean = true): void {
-    const target = this.options.dynamicOpenTarget
-      ? this.getTargetSlideDynamically()
-      : this.defaultOpenTarget;
-
-    if (target) {
-      this.navigateTo(target);
-    }
-
-    this.show(animate);
+      return b.ref.length - a.ref.length;
+    });
+    return sortedByTreeDepth.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector));
   }
 
   /**
@@ -553,7 +554,7 @@ export class SlideMenu {
           break;
         case 'Enter':
           // @ts-expect-error // simulate click event
-          if (elem?.classList.contains(CLASSES.decorator)) elem.click();
+          if (elem?.classList.contains(CLASSES.navigator)) elem.click();
           break;
       }
     });
@@ -626,6 +627,13 @@ export class SlideMenu {
     }
 
     this.menuElem.addEventListener('keydown', (event) => {
+      // WCAG - if anchors are used for navigation make them usable with space
+      if (event.key === ' ' && event.target instanceof HTMLAnchorElement && event.target.role === 'button') {
+        event.preventDefault();
+        event.target.click();
+      }
+      
+      // WCAG - trap focus in menu
       const firstControl = this.menuElem.querySelector(
         `.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`,
       ) as HTMLElement | undefined;
@@ -686,7 +694,7 @@ export class SlideMenu {
   }
 
   /**
-   * Enhance the markup of menu items which contain a submenu
+   * Enhance the markup of menu items which contain a submenu and move them into the slider
    */
   private initSlides(): void {
     this.menuElem.querySelectorAll('a').forEach((anchor: HTMLAnchorElement, index: number) => {
@@ -712,7 +720,7 @@ export class SlideMenu {
   }
 
   get onlyNavigateDecorator(): boolean {
-    return this.options.onlyNavigateDecorator;
+    return !!this.options.navigationButtons;
   }
 }
 
@@ -725,7 +733,7 @@ document.addEventListener('click', (event) => {
     return (
       elem.classList.contains(CLASSES.control) ||
       elem.classList.contains(CLASSES.hasSubMenu) ||
-      elem.classList.contains(CLASSES.decorator)
+      elem.classList.contains(CLASSES.navigator)
     );
   };
 
@@ -733,12 +741,13 @@ document.addEventListener('click', (event) => {
     ? event.target
     : // @ts-expect-error target is Element | null | undefined
       event.target?.closest(
-        `.${CLASSES.decorator}[data-action], .${CLASSES.control}[data-action], .${CLASSES.hasSubMenu}[data-action]`,
+        `.${CLASSES.navigator}[data-action], .${CLASSES.control}[data-action], .${CLASSES.hasSubMenu}[data-action]`,
       );
   if (!btn || !canControlMenu(btn as Element)) {
     return;
   }
 
+  // Find Slide-Menu that should be controlled
   const target = btn.getAttribute('data-target');
   const menu =
     !target || target === 'this'
@@ -749,25 +758,21 @@ document.addEventListener('click', (event) => {
     throw new Error(`Unable to find menu ${target}`);
   }
 
-  const instance = (menu as MenuHTMLElement)._slideMenu;
-
-  // if(btn.classList.contains(CLASSES.hasSubMenu)) {
-  //   instance.markSelectedItem(btn);
-  // }
+  const slideMenuInstance = (menu as MenuHTMLElement)._slideMenu;
 
   // Always prevent opening of links if not onlyNavigateDecorator
-  if (instance && !instance.onlyNavigateDecorator) {
+  if (slideMenuInstance && !slideMenuInstance.onlyNavigateDecorator) {
     event.preventDefault();
   }
 
   // Only prevent opening of links when clicking the decorator when onlyNavigateDecorator
-  if (instance && instance.onlyNavigateDecorator && btn.matches(`.${CLASSES.decorator}`)) {
-    event.preventDefault();
-  }
+  // if (slideMenuInstance && slideMenuInstance.onlyNavigateDecorator) {
+  //   event.preventDefault();
+  // }
 
-  const method = btn.getAttribute('data-action');
+  const methodName = btn.getAttribute('data-action');
+  const dataArg = btn.getAttribute('data-arg') ?? btn.href;
 
-  const dataArg = btn.getAttribute('data-arg');
   const dataArgMapping = {
     false: false,
     true: true,
@@ -781,10 +786,12 @@ document.addEventListener('click', (event) => {
       dataArgMapping[dataArg]
     : dataArg;
 
-  // @ts-expect-error // make functions accessible from outside context
-  if (instance && method && typeof instance[method] === 'function') {
-    // @ts-expect-error // make functions accessible from outside context
-    arg ? instance[method](arg) : instance[method]();
+  // console.log(slideMenuInstance, methodName, arg);
+
+  // @ts-expect-error // make functions dynamically accessible from outside context
+  if (slideMenuInstance && methodName && typeof slideMenuInstance[methodName] === 'function') {
+    // @ts-expect-error // make functions dynamically accessible from outside context
+    arg ? slideMenuInstance[methodName](arg) : slideMenuInstance[methodName]();
   }
 });
 

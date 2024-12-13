@@ -6,10 +6,10 @@ const menuLeft = new SlideMenu(menuLeftElem, {
   position: 'left',
   keyClose: 'Escape',
   showBackLink: false,
-  submenuLinkAfter: '>',
+  navigationButtons: '>',
   backLinkBefore: '<',
   closeOnClickOutside: true,
-  onlyNavigateDecorator: false,
+  navigateLinks: true,
   minWidthFold: 768,
   menuWidth: 440,
 });
