@@ -129,9 +129,9 @@ export class SlideMenu {
         this.moveElem(this.menuElem, offset);
     }
     /**
-   * Get menu that has current path or hash as anchor element or within the menu
-   * @returns
-   */
+     * Get menu that has current path or hash as anchor element or within the menu
+     * @returns
+     */
     getTargetSlideDynamically() {
         const currentPath = location.pathname;
         const currentHash = location.hash;
@@ -504,7 +504,9 @@ export class SlideMenu {
         this.menuElem.addEventListener('keydown', (event) => {
             var _a, _b;
             // WCAG - if anchors are used for navigation make them usable with space
-            if (event.key === ' ' && event.target instanceof HTMLAnchorElement && event.target.role === 'button') {
+            if (event.key === ' ' &&
+                event.target instanceof HTMLAnchorElement &&
+                event.target.role === 'button') {
                 event.preventDefault();
                 event.target.click();
             }

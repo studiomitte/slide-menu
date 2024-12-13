@@ -26,9 +26,9 @@ export declare class SlideMenu {
      */
     toggleVisibility(show?: boolean, animate?: boolean): void;
     /**
-   * Get menu that has current path or hash as anchor element or within the menu
-   * @returns
-   */
+     * Get menu that has current path or hash as anchor element or within the menu
+     * @returns
+     */
     private getTargetSlideDynamically;
     open(animate?: boolean): void;
     toggle(animate?: boolean): void;

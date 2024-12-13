@@ -77,11 +77,13 @@ export class Slide {
         navigator.setAttribute('aria-controls', this.id);
         navigator.setAttribute('aria-expanded', 'false');
         navigator.setAttribute('tabindex', '0');
-        navigator.title = navigator.title ? navigator.title : options.navigationButtonsLabel + ': ' + this.name;
+        navigator.title = navigator.title
+            ? navigator.title
+            : options.navigationButtonsLabel + ': ' + this.name;
         if (navigator.tagName !== 'BUTTON') {
             navigator.role = 'button';
         }
-        if (typeof options.navigationButtons === 'string' && !(navigator.innerHTML.trim())) {
+        if (typeof options.navigationButtons === 'string' && !navigator.innerHTML.trim()) {
             navigator.innerHTML = options.navigationButtons;
         }
         else if (!navigator.getAttribute('aria-label')) {
@@ -162,7 +164,8 @@ export class Slide {
             this.menuElem.id === idHrefOrSelector ||
             ((_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.id) === idHrefOrSelector.replace('#', '') ||
             idHrefOrSelector.replace(window.location.origin, '').startsWith(this.ref) ||
-            (validSelector && this.menuElem.querySelector(idHrefOrSelector.trim() + `:not(.${CLASSES.hasSubMenu})`)));
+            (validSelector &&
+                this.menuElem.querySelector(idHrefOrSelector.trim() + `:not(.${CLASSES.hasSubMenu})`)));
     }
     contains(elem) {
         return this.anchorElem === elem || this.menuElem.contains(elem);
