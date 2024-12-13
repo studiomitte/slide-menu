@@ -121,7 +121,8 @@ export class SlideMenu {
   }
 
   private get defaultOpenTarget(): Slide | undefined {
-    const defaultTargetSelector = this.menuElem.dataset.openDefault ?? 'smdm-sm-no-default-provided';    
+    const defaultTargetSelector =
+      this.menuElem.dataset.openDefault ?? 'smdm-sm-no-default-provided';
     return this.getTargetSlideByIdentifier(defaultTargetSelector);
   }
 
@@ -175,7 +176,7 @@ export class SlideMenu {
     this.moveElem(this.menuElem, offset);
   }
 
-    /**
+  /**
    * Get menu that has current path or hash as anchor element or within the menu
    * @returns
    */
@@ -628,11 +629,15 @@ export class SlideMenu {
 
     this.menuElem.addEventListener('keydown', (event) => {
       // WCAG - if anchors are used for navigation make them usable with space
-      if (event.key === ' ' && event.target instanceof HTMLAnchorElement && event.target.role === 'button') {
+      if (
+        event.key === ' ' &&
+        event.target instanceof HTMLAnchorElement &&
+        event.target.role === 'button'
+      ) {
         event.preventDefault();
         event.target.click();
       }
-      
+
       // WCAG - trap focus in menu
       const firstControl = this.menuElem.querySelector(
         `.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`,

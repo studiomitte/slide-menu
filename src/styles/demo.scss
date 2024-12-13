@@ -196,7 +196,7 @@ main {
     border-right: none;
     bottom: 0;
     box-sizing: border-box;
-    content: "";
+    content: '';
     display: block;
     height: 10px;
     margin: auto;
@@ -212,9 +212,10 @@ main {
     padding-right: calc(1.5rem + 10px) !important;
     display: inline-flex;
     align-items: center;
-    line-height:1;
+    line-height: 1;
 
-    &:after, &:before {
+    &:after,
+    &:before {
       position: absolute;
       right: 1.5rem;
       content: ' ';
@@ -245,7 +246,7 @@ main {
       border-right: none;
       bottom: 0;
       box-sizing: border-box;
-      content: "";
+      content: '';
       display: block;
       height: 10px;
       margin: auto;
@@ -255,4 +256,3 @@ main {
     }
   }
 }
-

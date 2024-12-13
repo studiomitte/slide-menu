@@ -32,7 +32,7 @@ const config = () => {
     position: 'right',
     keyClose: 'Escape',
     showBackLink: false,
-    navigationButtons: false, 
+    navigationButtons: false,
     closeOnClickOutside: true,
     dynamicOpenDefault: false,
   });

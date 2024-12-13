@@ -13,7 +13,7 @@ export class Slide {
   public readonly parentMenuElem?: SlideHTMLElement;
   public readonly name: string;
   public readonly ref: string;
-  
+
   public navigatorElem?: HTMLElement;
   public parent?: Slide;
   private active: boolean = false;
@@ -66,8 +66,6 @@ export class Slide {
       menuElem.classList.add(CLASSES.foldableSubmenu);
     }
 
-
-
     if (options.showBackLink) {
       this.addBackLink(options);
     }
@@ -102,7 +100,9 @@ export class Slide {
       return;
     }
 
-    const existingNavigator = Array.from(this.anchorElem?.parentElement?.children ?? []).find((elem) => elem.classList.contains(CLASSES.navigator)) as HTMLElement | undefined;
+    const existingNavigator = Array.from(this.anchorElem?.parentElement?.children ?? []).find(
+      (elem) => elem.classList.contains(CLASSES.navigator),
+    ) as HTMLElement | undefined;
     const navigatorTag = 'button';
     const navigator = (existingNavigator ?? document.createElement(navigatorTag)) as HTMLElement;
 
@@ -112,15 +112,17 @@ export class Slide {
     navigator.setAttribute('aria-controls', this.id);
     navigator.setAttribute('aria-expanded', 'false');
     navigator.setAttribute('tabindex', '0');
-    navigator.title = navigator.title ? navigator.title : options.navigationButtonsLabel + ': ' + this.name;
+    navigator.title = navigator.title
+      ? navigator.title
+      : options.navigationButtonsLabel + ': ' + this.name;
 
     if (navigator.tagName !== 'BUTTON') {
       navigator.role = 'button';
     }
 
-    if (typeof options.navigationButtons === 'string' && !(navigator.innerHTML.trim())) {
+    if (typeof options.navigationButtons === 'string' && !navigator.innerHTML.trim()) {
       navigator.innerHTML = options.navigationButtons;
-    } else if(!navigator.getAttribute('aria-label')) {
+    } else if (!navigator.getAttribute('aria-label')) {
       navigator.setAttribute('aria-label', options.navigationButtonsLabel + ': ' + this.name);
     }
 
@@ -132,18 +134,18 @@ export class Slide {
   public deactivate(): this {
     this.active = false;
     this.menuElem.classList.remove(CLASSES.active);
-    if(this.options.navigationButtons) {
+    if (this.options.navigationButtons) {
       this.navigatorElem?.setAttribute('aria-expanded', 'false');
     } else {
       this.anchorElem?.setAttribute('aria-expanded', 'false');
     }
     return this;
   }
-  
+
   public activate(): this {
     this.active = true;
     this.menuElem.classList.add(CLASSES.active);
-    if(this.options.navigationButtons) {
+    if (this.options.navigationButtons) {
       this.navigatorElem?.setAttribute('aria-expanded', 'true');
     } else {
       this.anchorElem?.setAttribute('aria-expanded', 'true');
@@ -209,7 +211,8 @@ export class Slide {
       this.menuElem.id === idHrefOrSelector ||
       this.anchorElem?.id === idHrefOrSelector.replace('#', '') ||
       idHrefOrSelector.replace(window.location.origin, '').startsWith(this.ref) ||
-      (validSelector && this.menuElem.querySelector(idHrefOrSelector.trim() + `:not(.${CLASSES.hasSubMenu})`))
+      (validSelector &&
+        this.menuElem.querySelector(idHrefOrSelector.trim() + `:not(.${CLASSES.hasSubMenu})`))
     );
   }
 

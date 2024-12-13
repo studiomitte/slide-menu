@@ -52,7 +52,8 @@
     "pre-version": "npm run lint && npm run typecheck && npm run format && npm run test && npm run build",
     "publish-version": "git push && git push --tags && npm publish",
     "version-patch": "npm run pre-version && npm version patch --force -m \"[RELEASE] patch version %s\"",
-    "version-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\""
+    "version-minor": "npm run pre-version && npm version minor --force -m \"[RELEASE] minor version %s\"",
+    "version-major": "npm run pre-version && npm version major --force -m \"[RELEASE] major version %s\""
   },
   "dependencies": {
     "custom-event-polyfill": "1.0.7"

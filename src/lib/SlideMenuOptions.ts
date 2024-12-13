@@ -5,8 +5,8 @@ export interface SlideMenuOptions {
   keyClose: string;
   position: MenuPosition | 'left' | 'right';
   showBackLink: boolean;
-  submenuLinkBefore: string|boolean;
-  navigationButtons: string|boolean;
+  submenuLinkBefore: string | boolean;
+  navigationButtons: string | boolean;
   navigationButtonsLabel: string;
   closeOnClickOutside: boolean;
   menuWidth: number;
