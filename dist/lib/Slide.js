@@ -31,7 +31,7 @@ export class Slide {
             }
         }
         menuElem.classList.add(CLASSES.submenu);
-        menuElem.role = 'menu';
+        // menuElem.role = 'menu';
         menuElem.dataset.smdmId = this.id;
         menuElem.querySelectorAll('li').forEach((link) => {
             link.classList.add(CLASSES.listItem);
