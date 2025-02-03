@@ -4,7 +4,7 @@
   "author": "Jakob Osterberger <jo@studiomitte.com>",
   "license": "MIT",
   "type": "module",
-  "description": "A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions",
+  "description": "A library agnostic multilevel page menu with a smooth slide effect based on CSS transitions, focused on accessibility.",
   "browserslist": [
     "> 1%"
   ],
@@ -13,7 +13,8 @@
     "multi level",
     "navigation",
     "foldable",
-    "mobile"
+    "mobile",
+    "accessibility"
   ],
   "repository": {
     "type": "git",
@@ -28,7 +29,9 @@
     "src/*"
   ],
   "devDependencies": {
+    "@cypress-audit/pa11y": "^1.4.2",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "chrome-launcher": "^1.1.2",
     "cypress": "^13.13.1",
     "cypress-real-events": "^1.13.0",
     "eslint": "^8.57.0",
@@ -43,6 +46,7 @@
     "vite": "^5.2.11"
   },
   "scripts": {
+    "test-a11y": "pa11y http://frontend:8080/demo/js-demo.html --config ./pa11y.config.json",
     "test": "cypress run || echo 'cypress run' | ddev ssh -s cypress",
     "build": "npx tsc -p . && npx vite build",
     "format": "prettier --write 'src/**/*'",
