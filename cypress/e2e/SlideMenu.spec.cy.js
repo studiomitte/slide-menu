@@ -1,8 +1,32 @@
 /// <reference types="cypress" />
 
-describe('slide menu', () => {
+const frontend = 'http://frontend:8080';
 
-    const frontend = 'http://frontend:8080';
+// describe('Accessibility Testing pa11y', () => {
+//     it(`should be accessible`, () => {
+//     cy.visit(frontend + '/demo/js-demo.html');
+//     cy.pa11y(
+//         {
+//             hideElements: null, // f.g. '.klaro, #cookie-bot'
+//             ignore: [
+//                 "WCAG2AAA.Principle2.Guideline2_4.2_4_1.G1,G123,G124.NoSuchID",
+//                 "WCAG2AAA.Principle1.Guideline1_1.1_1_1.H67.2",
+//             ], // rules can be ignored here
+//             rules: [], // extra rules can be added f.g 'Principle1.Guideline1_3.1_3_1_AAA' all options can be found here: https://squizlabs.github.io/HTML_CodeSniffer/Standards/WCAG2/
+//             includeNotices: false,
+//             includeWarnings: false,
+//             standard: 'WCAG2AAA', // possible standards 'WCAG2A', 'WCAG2AA', 'WCAG2AAA'
+//             chromeLaunchConfig: {
+//                 headless: true,
+//                 ignoreHTTPSErrors: true,
+//                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
+//             }
+//         }
+//     ); 
+//     })
+// });
+
+describe('slide menu', () => {
 
     it('should be reachable (run "npm run watch" in frontend container first!)', () => {
         cy.visit(frontend + '/demo/js-demo.html');
@@ -463,5 +487,6 @@ describe('slide menu', () => {
     // TODO: check if fold is not opening on mobile dimensions
     // TODO: check if trapping focus is working slides wihtout fold
     // TODO: tabbing & focus Trapping on resizing window
+    // TODO: check tabbing not possible if menu is closed
     // TODO: check if default-open-target is working when it is in 1st menu level and you first navigate to root and then open menu again through default-open-target
 });

@@ -16,6 +16,8 @@ composer_version: "2"
 web_environment: []
 nodejs_version: "20"
 
+webimage_extra_packages: ["chromium"] # for pa11y
+
 # Key features of DDEV's config.yaml:
 
 # name: <projectname> # Name of the project, automatically provides

@@ -1,0 +1,16 @@
+{
+    "hideElements": null,
+    "rules": [],
+    "ignore": [
+        "WCAG2AAA.Principle2.Guideline2_4.2_4_1.G1,G123,G124.NoSuchID",
+        "WCAG2AAA.Principle1.Guideline1_1.1_1_1.H67.2"
+    ],
+    "includeNotices": false,
+    "includeWarnings": true,
+    "standard": "WCAG2AAA",
+    "chromeLaunchConfig": {
+        "headless": true,
+        "ignoreHTTPSErrors": true,
+        "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    }
+}

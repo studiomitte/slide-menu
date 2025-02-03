@@ -30,7 +30,7 @@ h1 {
 
   small {
     margin-left: 0.3rem;
-    color: var(--color-gray-400);
+    color: var(--color-gray-600);
     font-size: 60%;
   }
 }
@@ -42,8 +42,8 @@ h2 {
 }
 
 a {
-  text-decoration: none;
-  color: var(--color-gray-400);
+  text-decoration: underline;
+  color: var(--color-gray-600);
 }
 
 a,
