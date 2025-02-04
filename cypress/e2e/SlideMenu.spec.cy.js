@@ -484,9 +484,64 @@ describe('slide menu', () => {
             .should('not.exist') 
     });
 
+    // check tabbing not possible if menu is closed
+    it.only('should not be tabable when closed', () => {
+        cy.visit(frontend + '/demo/test-config-default.html');
+
+        cy.wait(500);
+
+        cy.get('.slide-menu').should('not.be.visible');
+        cy.get('button').first().focus().should('be.visible').should('be.focused');
+
+        cy.realPress("Tab");
+        cy.wait(100);
+        cy.focused()
+            .should('exist')
+            .closest('.slide-menu')
+            .should('not.exist') 
+
+        // cy.get('[data-cypress="jump-to-about"]').should('be.visible').focus();
+
+        // check that is not tabbable when closed
+        for (let i = 0; i < 30; i++) {
+            cy.realPress("Tab");
+            cy.wait(100)
+
+            cy.get('[data-cypress="back-close-fold"]').should('exist').should('not.be.focused')
+            cy.get('[data-cypress="close-menu-control"]').should('exist').should('not.be.focused')
+            cy.get('[data-cypress="jump-to-news"]').should('exist').should('not.be.focused')
+        }
+
+        // open menu & check that focus is trapped correctly
+        cy.get('[data-cypress="jump-to-about"]').should('be.visible').click();
+        cy.get('.slide-menu').should('be.visible');
+        cy.wait(500);
+        // cycle through all menu items multiple times
+        for (let i = 0; i < 30; i++) {
+            cy.realPress("Tab");
+    
+            cy.wait(100)
+    
+            cy.focused()
+                .should('exist')
+                .closest('.slide-menu')
+                .should('exist')
+        }
+        
+        cy.get('[data-cypress="close-menu-control"]').click();
+        cy.wait(500);
+        // check that is still not tabbable after opening & closing
+        for (let i = 0; i < 30; i++) {
+            cy.realPress("Tab");
+            cy.wait(100)
+            
+            cy.get('[data-cypress="back-close-fold"]').should('exist').should('not.be.focused')
+            cy.get('[data-cypress="close-menu-control"]').should('exist').should('not.be.focused')
+            cy.get('[data-cypress="jump-to-news"]').should('exist').should('not.be.focused')
+        }
+    });
+
     // TODO: check if fold is not opening on mobile dimensions
-    // TODO: check if trapping focus is working slides wihtout fold
     // TODO: tabbing & focus Trapping on resizing window
-    // TODO: check tabbing not possible if menu is closed
     // TODO: check if default-open-target is working when it is in 1st menu level and you first navigate to root and then open menu again through default-open-target
 });

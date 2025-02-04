@@ -383,6 +383,7 @@ The following default CSS variables can be overwritten as needed:
 
 ```sh
 # if using with ddev first do
+sudo chmod -R 777 .
 ddev start
 ddev ssh -s frontend
 # then open https://slide-menu.frontend.ddev.site:9999/

@@ -74,6 +74,7 @@ export class SlideMenu {
         // Set the default open target and activate it
         this.activeSubmenu = this.slides[0].activate();
         this.navigateTo((_d = this.defaultOpenTarget) !== null && _d !== void 0 ? _d : this.slides[0], false);
+        this.menuElem.setAttribute('inert', 'true');
         this.slides.forEach((menu) => {
             menu.disableTabbing();
         });
@@ -81,8 +82,8 @@ export class SlideMenu {
         this.triggerEvent(Action.Initialize);
     }
     get defaultOpenTarget() {
-        var _a;
-        const defaultTargetSelector = (_a = this.menuElem.dataset.openDefault) !== null && _a !== void 0 ? _a : 'smdm-sm-no-default-provided';
+        var _a, _b, _c;
+        const defaultTargetSelector = (_c = (_b = (_a = this.menuElem.dataset.openDefault) !== null && _a !== void 0 ? _a : this.menuElem.dataset.openTarget) !== null && _b !== void 0 ? _b : this.menuElem.dataset.defaultOpenTarget) !== null && _c !== void 0 ? _c : 'smdm-sm-no-default-provided';
         return this.getTargetSlideByIdentifier(defaultTargetSelector);
     }
     get isFoldOpen() {
@@ -143,6 +144,7 @@ export class SlideMenu {
         const target = this.options.dynamicOpenDefault
             ? this.getTargetSlideDynamically()
             : this.defaultOpenTarget;
+        this.menuElem.removeAttribute('inert');
         if (target) {
             this.navigateTo(target);
         }
@@ -171,6 +173,7 @@ export class SlideMenu {
         var _a;
         this.triggerEvent(Action.Close);
         this.toggleVisibility(false, animate);
+        this.menuElem.setAttribute('inert', 'true');
         this.slides.forEach((menu) => {
             menu.disableTabbing();
         });
@@ -233,6 +236,7 @@ export class SlideMenu {
             }
         }
         this.updateMenuTitle(nextMenu, firstUnfoldableParent);
+        this.menuElem.removeAttribute('inert');
         this.setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents);
         const currentlyVisibleMenus = [nextMenu, ...parents];
         this.activateVisibleMenus(currentlyVisibleMenus, isNavigatingBack, previousMenu, nextMenu);

@@ -112,6 +112,8 @@ export class SlideMenu {
     // Set the default open target and activate it
     this.activeSubmenu = this.slides[0].activate();
     this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
+    
+    this.menuElem.setAttribute('inert', 'true');
     this.slides.forEach((menu) => {
       menu.disableTabbing();
     });
@@ -122,7 +124,7 @@ export class SlideMenu {
 
   private get defaultOpenTarget(): Slide | undefined {
     const defaultTargetSelector =
-      this.menuElem.dataset.openDefault ?? 'smdm-sm-no-default-provided';
+      this.menuElem.dataset.openDefault?? this.menuElem.dataset.openTarget ?? this.menuElem.dataset.defaultOpenTarget  ?? 'smdm-sm-no-default-provided';
     return this.getTargetSlideByIdentifier(defaultTargetSelector);
   }
 
@@ -193,6 +195,8 @@ export class SlideMenu {
       ? this.getTargetSlideDynamically()
       : this.defaultOpenTarget;
 
+    this.menuElem.removeAttribute('inert');
+
     if (target) {
       this.navigateTo(target);
     }
@@ -225,6 +229,8 @@ export class SlideMenu {
   public close(animate: boolean = true): void {
     this.triggerEvent(Action.Close);
     this.toggleVisibility(false, animate);
+
+    this.menuElem.setAttribute('inert', 'true');
 
     this.slides.forEach((menu) => {
       menu.disableTabbing();
@@ -301,6 +307,7 @@ export class SlideMenu {
     }
 
     this.updateMenuTitle(nextMenu, firstUnfoldableParent);
+    this.menuElem.removeAttribute('inert');
     this.setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents);
 
     const currentlyVisibleMenus = [nextMenu, ...parents];
