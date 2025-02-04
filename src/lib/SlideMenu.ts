@@ -112,7 +112,7 @@ export class SlideMenu {
     // Set the default open target and activate it
     this.activeSubmenu = this.slides[0].activate();
     this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
-    
+
     this.menuElem.setAttribute('inert', 'true');
     this.slides.forEach((menu) => {
       menu.disableTabbing();
@@ -124,7 +124,10 @@ export class SlideMenu {
 
   private get defaultOpenTarget(): Slide | undefined {
     const defaultTargetSelector =
-      this.menuElem.dataset.openDefault?? this.menuElem.dataset.openTarget ?? this.menuElem.dataset.defaultOpenTarget  ?? 'smdm-sm-no-default-provided';
+      this.menuElem.dataset.openDefault ??
+      this.menuElem.dataset.openTarget ??
+      this.menuElem.dataset.defaultOpenTarget ??
+      'smdm-sm-no-default-provided';
     return this.getTargetSlideByIdentifier(defaultTargetSelector);
   }
 
