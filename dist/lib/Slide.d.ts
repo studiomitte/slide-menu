@@ -24,6 +24,7 @@ export declare class Slide {
     disableTabbing(): void;
     appendTo(elem: HTMLElement): this;
     getClosestNotFoldableSlide(): Slide | undefined;
+    getAllFoldableParents(): Slide[];
     /**
      *
      * @returns

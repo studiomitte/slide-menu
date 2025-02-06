@@ -37,9 +37,9 @@ const config = () => {
     dynamicOpenDefault: false,
   });
 
-  if (window.innerWidth > 767) {
-    menuLeft.open(false);
-  }
+  // if (window.innerWidth > 767) {
+  //   menuLeft.open(false);
+  // }
 };
 
 if (window.SlideMenu) {

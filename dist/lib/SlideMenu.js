@@ -23,6 +23,7 @@ let counter = 0;
 export class SlideMenu {
     constructor(elem, options) {
         var _a, _b, _c, _d;
+        this.visibleSlides = new Set();
         this.lastFocusedElement = null;
         this.isOpen = false;
         this.isAnimating = false;
@@ -82,8 +83,9 @@ export class SlideMenu {
         this.triggerEvent(Action.Initialize);
     }
     get defaultOpenTarget() {
-        var _a, _b, _c;
-        const defaultTargetSelector = (_c = (_b = (_a = this.menuElem.dataset.openDefault) !== null && _a !== void 0 ? _a : this.menuElem.dataset.openTarget) !== null && _b !== void 0 ? _b : this.menuElem.dataset.defaultOpenTarget) !== null && _c !== void 0 ? _c : 'smdm-sm-no-default-provided';
+        var _a, _b, _c, _d;
+        const defaultTargetSelector = (_d = (_c = (_b = (_a = this.menuElem.dataset.openDefault) !== null && _a !== void 0 ? _a : this.menuElem.dataset.defaultTarget) !== null && _b !== void 0 ? _b : this.menuElem.dataset.openTarget) !== null && _c !== void 0 ? _c : this.menuElem.dataset.defaultOpenTarget) !== null && _d !== void 0 ? _d : 'smdm-sm-no-default-provided';
+        console.log(defaultTargetSelector);
         return this.getTargetSlideByIdentifier(defaultTargetSelector);
     }
     get isFoldOpen() {
@@ -212,7 +214,10 @@ export class SlideMenu {
      * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
      */
     navigateTo(target, runInForeground = true) {
-        var _a;
+        var _a, _b;
+        this.slides.forEach((slide) => {
+            slide === null || slide === void 0 ? void 0 : slide.menuElem.removeAttribute('hidden');
+        });
         // Open Menu if still closed
         if (runInForeground && !this.isOpen) {
             this.show();
@@ -221,8 +226,9 @@ export class SlideMenu {
         const previousMenu = this.activeSubmenu;
         const parents = nextMenu.getAllParents();
         const firstUnfoldableParent = parents.find((p) => !p.canFold());
+        const foldableParents = (_a = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.getAllFoldableParents()) !== null && _a !== void 0 ? _a : [];
         const isNavigatingBack = previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.getAllParents().map((menu) => menu.id).includes(nextMenu.id);
-        const isNavigatingForward = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.getAllParents().map((menu) => menu.id).includes((_a = previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.id) !== null && _a !== void 0 ? _a : '');
+        const isNavigatingForward = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.getAllParents().map((menu) => menu.id).includes((_b = previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.id) !== null && _b !== void 0 ? _b : '');
         if (runInForeground) {
             this.triggerEvent(Action.Navigate);
             if (isNavigatingBack) {
@@ -253,6 +259,17 @@ export class SlideMenu {
                 // Wait for anmiation to finish to deactivate previous otherwise width of container messes with slide animation
                 previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.deactivate();
             }
+            // hide all non visible menu elements to prevent screen reader confusion
+            const slides = [nextMenu, ...foldableParents];
+            if (firstUnfoldableParent) {
+                slides.push(firstUnfoldableParent);
+            }
+            this.visibleSlides = new Set(slides);
+            this.slides.forEach((slide) => {
+                if (!this.visibleSlides.has(slide)) {
+                    slide.menuElem.setAttribute('hidden', 'true');
+                }
+            });
         }, this.options.transitionDuration);
     }
     setActiveSubmenu(nextMenu) {

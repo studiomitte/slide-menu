@@ -145,6 +145,7 @@ export class Slide {
   public activate(): this {
     this.active = true;
     this.menuElem.classList.add(CLASSES.active);
+    this.menuElem.removeAttribute('hidden');
     if (this.options.navigationButtons) {
       this.navigatorElem?.setAttribute('aria-expanded', 'true');
     } else {
@@ -171,7 +172,11 @@ export class Slide {
   }
 
   public getClosestNotFoldableSlide(): Slide | undefined {
-    return !this.isFoldable ? this : this.getAllParents().find((p) => !p.isFoldable);
+    return this.isFoldable ? this.getAllParents().find((p) => !p.isFoldable) : this;
+  }
+
+  public getAllFoldableParents(): Slide[] {
+    return this.isFoldable ? this.getAllParents().filter((p) => p.isFoldable) : [];
   }
 
   /**

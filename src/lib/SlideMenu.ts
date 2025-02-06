@@ -29,6 +29,7 @@ let counter = 0;
 
 export class SlideMenu {
   private activeSubmenu: Slide | undefined;
+  private visibleSlides: Set<Slide> = new Set<Slide>();
   private lastFocusedElement: Element | null = null;
   private isOpen: boolean = false;
   private isAnimating: boolean = false;
@@ -125,9 +126,11 @@ export class SlideMenu {
   private get defaultOpenTarget(): Slide | undefined {
     const defaultTargetSelector =
       this.menuElem.dataset.openDefault ??
+      this.menuElem.dataset.defaultTarget ??
       this.menuElem.dataset.openTarget ??
       this.menuElem.dataset.defaultOpenTarget ??
       'smdm-sm-no-default-provided';
+    console.log(defaultTargetSelector);
     return this.getTargetSlideByIdentifier(defaultTargetSelector);
   }
 
@@ -234,7 +237,6 @@ export class SlideMenu {
     this.toggleVisibility(false, animate);
 
     this.menuElem.setAttribute('inert', 'true');
-
     this.slides.forEach((menu) => {
       menu.disableTabbing();
     });
@@ -278,6 +280,10 @@ export class SlideMenu {
    * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
   public navigateTo(target: HTMLElement | Slide | string, runInForeground: boolean = true): void {
+    this.slides.forEach((slide) => {
+      slide?.menuElem.removeAttribute('hidden');
+    });
+
     // Open Menu if still closed
     if (runInForeground && !this.isOpen) {
       this.show();
@@ -287,6 +293,7 @@ export class SlideMenu {
     const previousMenu = this.activeSubmenu;
     const parents = nextMenu.getAllParents();
     const firstUnfoldableParent = parents.find((p) => !p.canFold());
+    const foldableParents = nextMenu?.getAllFoldableParents() ?? [];
 
     const isNavigatingBack = previousMenu
       ?.getAllParents()
@@ -310,6 +317,7 @@ export class SlideMenu {
     }
 
     this.updateMenuTitle(nextMenu, firstUnfoldableParent);
+
     this.menuElem.removeAttribute('inert');
     this.setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents);
 
@@ -332,6 +340,18 @@ export class SlideMenu {
         // Wait for anmiation to finish to deactivate previous otherwise width of container messes with slide animation
         previousMenu?.deactivate();
       }
+
+      // hide all non visible menu elements to prevent screen reader confusion
+      const slides = [nextMenu, ...foldableParents];
+      if (firstUnfoldableParent) {
+        slides.push(firstUnfoldableParent);
+      }
+      this.visibleSlides = new Set(slides);
+      this.slides.forEach((slide) => {
+        if (!this.visibleSlides.has(slide)) {
+          slide.menuElem.setAttribute('hidden', 'true');
+        }
+      });
     }, this.options.transitionDuration);
   }
 

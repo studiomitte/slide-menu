@@ -5,6 +5,7 @@ export interface MenuHTMLElement extends HTMLElement {
 }
 export declare class SlideMenu {
     private activeSubmenu;
+    private visibleSlides;
     private lastFocusedElement;
     private isOpen;
     private isAnimating;
