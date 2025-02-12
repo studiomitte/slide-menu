@@ -1,5 +1,5 @@
 import { SlideMenuOptions, Action, CLASSES } from './SlideMenuOptions.js';
-import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn, validateQuery } from './utils/dom.js';
+import { focusFirstTabAbleElemIn, validateQuery } from './utils/dom.js';
 
 let number = 0;
 
@@ -17,6 +17,7 @@ export class Slide {
   public navigatorElem?: HTMLElement;
   public parent?: Slide;
   private active: boolean = false;
+  private visible: boolean = false;
 
   public get isActive(): boolean {
     return this.active;
@@ -134,6 +135,7 @@ export class Slide {
   public deactivate(): this {
     this.active = false;
     this.menuElem.classList.remove(CLASSES.active);
+    this.menuElem.classList.remove(CLASSES.current);
     if (this.options.navigationButtons) {
       this.navigatorElem?.setAttribute('aria-expanded', 'false');
     } else {
@@ -144,8 +146,9 @@ export class Slide {
 
   public activate(): this {
     this.active = true;
+    this.visible = true;
     this.menuElem.classList.add(CLASSES.active);
-    this.menuElem.removeAttribute('hidden');
+    this.menuElem.classList.add(CLASSES.current);
     if (this.options.navigationButtons) {
       this.navigatorElem?.setAttribute('aria-expanded', 'true');
     } else {
@@ -154,16 +157,21 @@ export class Slide {
     return this;
   }
 
+  public setInvisible(): this {
+    this.visible = false;
+    if(this.isActive) {
+      this.menuElem.classList.add(CLASSES.active);
+    }
+    this.menuElem.classList.remove(CLASSES.current);
+    return this;
+  }
+
   public enableTabbing(): void {
-    this.menuElem?.querySelectorAll('[tabindex="-1"]').forEach((elem) => {
-      elem.setAttribute('tabindex', '0');
-    });
+    this.menuElem.removeAttribute('inert');
   }
 
   public disableTabbing(): void {
-    this.menuElem.querySelectorAll(TAB_ABLE_SELECTOR).forEach((elem) => {
-      elem.setAttribute('tabindex', '-1');
-    });
+    this.menuElem.setAttribute('inert', 'true');
   }
 
   public appendTo(elem: HTMLElement): this {
@@ -171,12 +179,20 @@ export class Slide {
     return this;
   }
 
-  public getClosestNotFoldableSlide(): Slide | undefined {
+  public getClosestUnfoldableSlide(): Slide | undefined {
     return this.isFoldable ? this.getAllParents().find((p) => !p.isFoldable) : this;
   }
 
   public getAllFoldableParents(): Slide[] {
     return this.isFoldable ? this.getAllParents().filter((p) => p.isFoldable) : [];
+  }
+
+  public getFirstUnfoldableParent(): Slide | undefined {
+    return this.getAllParents().find((p) => !p.canFold());
+  }
+
+  public hasParent(possibleParentMenu: Slide | undefined): boolean {
+    return this.getAllParents().some(p => p.id === possibleParentMenu?.id);
   }
 
   /**

@@ -23,7 +23,6 @@ let counter = 0;
 export class SlideMenu {
     constructor(elem, options) {
         var _a, _b, _c, _d;
-        this.visibleSlides = new Set();
         this.lastFocusedElement = null;
         this.isOpen = false;
         this.isAnimating = false;
@@ -48,7 +47,7 @@ export class SlideMenu {
         document.documentElement.style.setProperty('--smdm-sm-menu-width', `${this.options.menuWidth}px`);
         document.documentElement.style.setProperty('--smdm-sm-min-width-fold', `${this.options.minWidthFold}px`);
         document.documentElement.style.setProperty('--smdm-sm-transition-duration', `${this.options.transitionDuration}ms`);
-        document.documentElement.style.setProperty('--smdm-sm-menu-level', `0`);
+        document.documentElement.style.setProperty('--smdm-sm-menu-level', '0');
         // Add slider container
         this.sliderElem = document.createElement('div');
         this.sliderElem.classList.add(CLASSES.slider);
@@ -85,7 +84,6 @@ export class SlideMenu {
     get defaultOpenTarget() {
         var _a, _b, _c, _d;
         const defaultTargetSelector = (_d = (_c = (_b = (_a = this.menuElem.dataset.openDefault) !== null && _a !== void 0 ? _a : this.menuElem.dataset.defaultTarget) !== null && _b !== void 0 ? _b : this.menuElem.dataset.openTarget) !== null && _c !== void 0 ? _c : this.menuElem.dataset.defaultOpenTarget) !== null && _d !== void 0 ? _d : 'smdm-sm-no-default-provided';
-        console.log(defaultTargetSelector);
         return this.getTargetSlideByIdentifier(defaultTargetSelector);
     }
     get isFoldOpen() {
@@ -189,7 +187,7 @@ export class SlideMenu {
         const rootSlide = this.slides[0];
         let nextMenu = (_b = (_a = this.activeSubmenu) === null || _a === void 0 ? void 0 : _a.parent) !== null && _b !== void 0 ? _b : rootSlide;
         if (closeFold) {
-            this.activeSubmenu = (_d = (_c = this.activeSubmenu) === null || _c === void 0 ? void 0 : _c.getClosestNotFoldableSlide()) !== null && _d !== void 0 ? _d : rootSlide;
+            this.activeSubmenu = (_d = (_c = this.activeSubmenu) === null || _c === void 0 ? void 0 : _c.getClosestUnfoldableSlide()) !== null && _d !== void 0 ? _d : rootSlide;
             nextMenu = (_f = (_e = this.activeSubmenu) === null || _e === void 0 ? void 0 : _e.parent) !== null && _f !== void 0 ? _f : rootSlide;
             this.closeFold();
         }
@@ -214,10 +212,6 @@ export class SlideMenu {
      * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
      */
     navigateTo(target, runInForeground = true) {
-        var _a, _b;
-        this.slides.forEach((slide) => {
-            slide === null || slide === void 0 ? void 0 : slide.menuElem.removeAttribute('hidden');
-        });
         // Open Menu if still closed
         if (runInForeground && !this.isOpen) {
             this.show();
@@ -225,10 +219,13 @@ export class SlideMenu {
         const nextMenu = this.findNextMenu(target);
         const previousMenu = this.activeSubmenu;
         const parents = nextMenu.getAllParents();
-        const firstUnfoldableParent = parents.find((p) => !p.canFold());
-        const foldableParents = (_a = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.getAllFoldableParents()) !== null && _a !== void 0 ? _a : [];
-        const isNavigatingBack = previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.getAllParents().map((menu) => menu.id).includes(nextMenu.id);
-        const isNavigatingForward = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.getAllParents().map((menu) => menu.id).includes((_b = previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.id) !== null && _b !== void 0 ? _b : '');
+        const firstUnfoldableParent = nextMenu.getFirstUnfoldableParent();
+        const visibleSlides = new Set([nextMenu, ...nextMenu.getAllFoldableParents()]);
+        if (firstUnfoldableParent) {
+            visibleSlides.add(firstUnfoldableParent);
+        }
+        const isNavigatingBack = previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.hasParent(nextMenu);
+        const isNavigatingForward = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.hasParent(previousMenu);
         if (runInForeground) {
             this.triggerEvent(Action.Navigate);
             if (isNavigatingBack) {
@@ -242,10 +239,10 @@ export class SlideMenu {
             }
         }
         this.updateMenuTitle(nextMenu, firstUnfoldableParent);
-        this.menuElem.removeAttribute('inert');
         this.setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents);
-        const currentlyVisibleMenus = [nextMenu, ...parents];
-        this.activateVisibleMenus(currentlyVisibleMenus, isNavigatingBack, previousMenu, nextMenu);
+        // all parents need to be active to calculate slider width and level
+        const nextActiveMenus = [nextMenu, ...parents];
+        this.activateMenus(nextActiveMenus, isNavigatingBack, previousMenu, nextMenu);
         const level = this.setSlideLevel(nextMenu, isNavigatingBack);
         this.hideControlsIfOnRootLevel(level);
         this.setBodyTagSlideLevel(level);
@@ -260,14 +257,9 @@ export class SlideMenu {
                 previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.deactivate();
             }
             // hide all non visible menu elements to prevent screen reader confusion
-            const slides = [nextMenu, ...foldableParents];
-            if (firstUnfoldableParent) {
-                slides.push(firstUnfoldableParent);
-            }
-            this.visibleSlides = new Set(slides);
             this.slides.forEach((slide) => {
-                if (!this.visibleSlides.has(slide)) {
-                    slide.menuElem.setAttribute('hidden', 'true');
+                if (slide.isActive && !visibleSlides.has(slide)) {
+                    slide.setInvisible();
                 }
             });
         }, this.options.transitionDuration);
@@ -280,6 +272,7 @@ export class SlideMenu {
         (_a = document.querySelector('body')) === null || _a === void 0 ? void 0 : _a.setAttribute('data-slide-menu-level', level.toString());
     }
     setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents) {
+        this.menuElem.removeAttribute('inert');
         if (nextMenu.canFold()) {
             this.openFold();
             // Enable Tabbing for foldable Parents
@@ -304,11 +297,11 @@ export class SlideMenu {
         });
         nextMenu.enableTabbing();
     }
-    activateVisibleMenus(currentlyVisibleMenus, isNavigatingBack, previousMenu, nextMenu) {
-        const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu === null || menu === void 0 ? void 0 : menu.id);
+    activateMenus(currentlyActiveMenus, isNavigatingBack, previousMenu, nextMenu) {
+        const currentlyActiveIds = currentlyActiveMenus.map((menu) => menu === null || menu === void 0 ? void 0 : menu.id);
         // Disable all previous active menus not active now
         this.slides.forEach((slide) => {
-            if (!currentlyVisibleIds.includes(slide.id)) {
+            if (!currentlyActiveIds.includes(slide.id)) {
                 // When navigating backwards deactivate (hide) previous after transition to not mess with animation
                 if (isNavigatingBack && slide.id === (previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.id)) {
                     return;
@@ -317,11 +310,9 @@ export class SlideMenu {
                 slide.disableTabbing();
             }
         });
-        // Activate all visible menus
-        currentlyVisibleMenus.forEach((menu) => {
-            if (!(menu === null || menu === void 0 ? void 0 : menu.isActive)) {
-                menu === null || menu === void 0 ? void 0 : menu.activate();
-            }
+        // Activate menus
+        currentlyActiveMenus.forEach((menu) => {
+            menu === null || menu === void 0 ? void 0 : menu.activate();
         });
         nextMenu.enableTabbing();
     }
@@ -365,7 +356,7 @@ export class SlideMenu {
         }
     }
     setSlideLevel(nextMenu, isNavigatingBack = false) {
-        const activeNum = Array.from(this.sliderWrapperElem.querySelectorAll('.' + CLASSES.active)).length;
+        const activeNum = Array.from(this.sliderWrapperElem.querySelectorAll(`.${CLASSES.active}, .${CLASSES.current}`)).length;
         const navDecrement = !(nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.canFold()) ? Number(isNavigatingBack) : 0;
         const level = Math.max(1, activeNum) - 1 - navDecrement;
         this.setBodyTagSlideLevel(level);

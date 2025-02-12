@@ -14,17 +14,21 @@ export declare class Slide {
     navigatorElem?: HTMLElement;
     parent?: Slide;
     private active;
+    private visible;
     get isActive(): boolean;
     constructor(menuElem: SlideHTMLElement, options: SlideMenuOptions, anchorElem?: HTMLAnchorElement | undefined);
     private addBackLink;
     private addNavigatorButton;
     deactivate(): this;
     activate(): this;
+    setInvisible(): this;
     enableTabbing(): void;
     disableTabbing(): void;
     appendTo(elem: HTMLElement): this;
-    getClosestNotFoldableSlide(): Slide | undefined;
+    getClosestUnfoldableSlide(): Slide | undefined;
     getAllFoldableParents(): Slide[];
+    getFirstUnfoldableParent(): Slide | undefined;
+    hasParent(possibleParentMenu: Slide | undefined): boolean;
     /**
      *
      * @returns

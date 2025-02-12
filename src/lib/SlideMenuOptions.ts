@@ -40,6 +40,7 @@ export enum Action {
 export const NAMESPACE = 'slide-menu';
 export const CLASSES = {
   active: `${NAMESPACE}__submenu--active`,
+  current: `${NAMESPACE}__submenu--current`,
   backlink: `${NAMESPACE}__backlink`,
   control: `${NAMESPACE}__control`,
   controls: `${NAMESPACE}__controls`,

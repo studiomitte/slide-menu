@@ -1,5 +1,5 @@
 import { Action, CLASSES } from './SlideMenuOptions.js';
-import { TAB_ABLE_SELECTOR, focusFirstTabAbleElemIn, validateQuery } from './utils/dom.js';
+import { focusFirstTabAbleElemIn, validateQuery } from './utils/dom.js';
 let number = 0;
 export class Slide {
     get isActive() {
@@ -12,6 +12,7 @@ export class Slide {
         this.anchorElem = anchorElem;
         this.isFoldable = false;
         this.active = false;
+        this.visible = false;
         this.ref = '/';
         this.id = menuElem.id ? menuElem.id : 'smdm-' + number;
         menuElem.id = this.id;
@@ -96,6 +97,7 @@ export class Slide {
         var _a, _b;
         this.active = false;
         this.menuElem.classList.remove(CLASSES.active);
+        this.menuElem.classList.remove(CLASSES.current);
         if (this.options.navigationButtons) {
             (_a = this.navigatorElem) === null || _a === void 0 ? void 0 : _a.setAttribute('aria-expanded', 'false');
         }
@@ -107,8 +109,9 @@ export class Slide {
     activate() {
         var _a, _b;
         this.active = true;
+        this.visible = true;
         this.menuElem.classList.add(CLASSES.active);
-        this.menuElem.removeAttribute('hidden');
+        this.menuElem.classList.add(CLASSES.current);
         if (this.options.navigationButtons) {
             (_a = this.navigatorElem) === null || _a === void 0 ? void 0 : _a.setAttribute('aria-expanded', 'true');
         }
@@ -117,26 +120,35 @@ export class Slide {
         }
         return this;
     }
+    setInvisible() {
+        this.visible = false;
+        if (this.isActive) {
+            this.menuElem.classList.add(CLASSES.active);
+        }
+        this.menuElem.classList.remove(CLASSES.current);
+        return this;
+    }
     enableTabbing() {
-        var _a;
-        (_a = this.menuElem) === null || _a === void 0 ? void 0 : _a.querySelectorAll('[tabindex="-1"]').forEach((elem) => {
-            elem.setAttribute('tabindex', '0');
-        });
+        this.menuElem.removeAttribute('inert');
     }
     disableTabbing() {
-        this.menuElem.querySelectorAll(TAB_ABLE_SELECTOR).forEach((elem) => {
-            elem.setAttribute('tabindex', '-1');
-        });
+        this.menuElem.setAttribute('inert', 'true');
     }
     appendTo(elem) {
         elem.appendChild(this.menuElem);
         return this;
     }
-    getClosestNotFoldableSlide() {
+    getClosestUnfoldableSlide() {
         return this.isFoldable ? this.getAllParents().find((p) => !p.isFoldable) : this;
     }
     getAllFoldableParents() {
         return this.isFoldable ? this.getAllParents().filter((p) => p.isFoldable) : [];
+    }
+    getFirstUnfoldableParent() {
+        return this.getAllParents().find((p) => !p.canFold());
+    }
+    hasParent(possibleParentMenu) {
+        return this.getAllParents().some(p => p.id === (possibleParentMenu === null || possibleParentMenu === void 0 ? void 0 : possibleParentMenu.id));
     }
     /**
      *

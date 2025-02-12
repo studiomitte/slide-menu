@@ -36,6 +36,7 @@ export declare enum Action {
 export declare const NAMESPACE = "slide-menu";
 export declare const CLASSES: {
     active: string;
+    current: string;
     backlink: string;
     control: string;
     controls: string;

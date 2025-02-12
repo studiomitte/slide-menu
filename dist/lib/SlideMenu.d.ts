@@ -5,7 +5,6 @@ export interface MenuHTMLElement extends HTMLElement {
 }
 export declare class SlideMenu {
     private activeSubmenu;
-    private visibleSlides;
     private lastFocusedElement;
     private isOpen;
     private isAnimating;
@@ -54,7 +53,7 @@ export declare class SlideMenu {
     private setActiveSubmenu;
     private setBodyTagSlideLevel;
     private setTabbing;
-    private activateVisibleMenus;
+    private activateMenus;
     private findNextMenu;
     private hideControlsIfOnRootLevel;
     private setSlideLevel;

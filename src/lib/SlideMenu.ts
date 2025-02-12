@@ -29,7 +29,6 @@ let counter = 0;
 
 export class SlideMenu {
   private activeSubmenu: Slide | undefined;
-  private visibleSlides: Set<Slide> = new Set<Slide>();
   private lastFocusedElement: Element | null = null;
   private isOpen: boolean = false;
   private isAnimating: boolean = false;
@@ -79,7 +78,7 @@ export class SlideMenu {
       '--smdm-sm-transition-duration',
       `${this.options.transitionDuration}ms`,
     );
-    document.documentElement.style.setProperty('--smdm-sm-menu-level', `0`);
+    document.documentElement.style.setProperty('--smdm-sm-menu-level', '0');
 
     // Add slider container
     this.sliderElem = document.createElement('div');
@@ -130,7 +129,6 @@ export class SlideMenu {
       this.menuElem.dataset.openTarget ??
       this.menuElem.dataset.defaultOpenTarget ??
       'smdm-sm-no-default-provided';
-    console.log(defaultTargetSelector);
     return this.getTargetSlideByIdentifier(defaultTargetSelector);
   }
 
@@ -251,7 +249,7 @@ export class SlideMenu {
     const rootSlide = this.slides[0];
     let nextMenu = this.activeSubmenu?.parent ?? rootSlide;
     if (closeFold) {
-      this.activeSubmenu = this.activeSubmenu?.getClosestNotFoldableSlide() ?? rootSlide;
+      this.activeSubmenu = this.activeSubmenu?.getClosestUnfoldableSlide() ?? rootSlide;
       nextMenu = this.activeSubmenu?.parent ?? rootSlide;
       this.closeFold();
     }
@@ -280,9 +278,6 @@ export class SlideMenu {
    * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
   public navigateTo(target: HTMLElement | Slide | string, runInForeground: boolean = true): void {
-    this.slides.forEach((slide) => {
-      slide?.menuElem.removeAttribute('hidden');
-    });
 
     // Open Menu if still closed
     if (runInForeground && !this.isOpen) {
@@ -292,18 +287,14 @@ export class SlideMenu {
     const nextMenu: Slide = this.findNextMenu(target);
     const previousMenu = this.activeSubmenu;
     const parents = nextMenu.getAllParents();
-    const firstUnfoldableParent = parents.find((p) => !p.canFold());
-    const foldableParents = nextMenu?.getAllFoldableParents() ?? [];
+    const firstUnfoldableParent = nextMenu.getFirstUnfoldableParent();
+    const visibleSlides = new Set([nextMenu, ...nextMenu.getAllFoldableParents()]);
+    if (firstUnfoldableParent) {
+      visibleSlides.add(firstUnfoldableParent);
+    }
 
-    const isNavigatingBack = previousMenu
-      ?.getAllParents()
-      .map((menu) => menu.id)
-      .includes(nextMenu.id);
-
-    const isNavigatingForward = nextMenu
-      ?.getAllParents()
-      .map((menu) => menu.id)
-      .includes(previousMenu?.id ?? '');
+    const isNavigatingBack = previousMenu?.hasParent(nextMenu);
+    const isNavigatingForward = nextMenu?.hasParent(previousMenu);
 
     if (runInForeground) {
       this.triggerEvent(Action.Navigate);
@@ -318,11 +309,11 @@ export class SlideMenu {
 
     this.updateMenuTitle(nextMenu, firstUnfoldableParent);
 
-    this.menuElem.removeAttribute('inert');
     this.setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents);
 
-    const currentlyVisibleMenus = [nextMenu, ...parents];
-    this.activateVisibleMenus(currentlyVisibleMenus, isNavigatingBack, previousMenu, nextMenu);
+    // all parents need to be active to calculate slider width and level
+    const nextActiveMenus = [nextMenu, ...parents];
+    this.activateMenus(nextActiveMenus, isNavigatingBack, previousMenu, nextMenu);
 
     const level = this.setSlideLevel(nextMenu, isNavigatingBack);
 
@@ -342,14 +333,9 @@ export class SlideMenu {
       }
 
       // hide all non visible menu elements to prevent screen reader confusion
-      const slides = [nextMenu, ...foldableParents];
-      if (firstUnfoldableParent) {
-        slides.push(firstUnfoldableParent);
-      }
-      this.visibleSlides = new Set(slides);
-      this.slides.forEach((slide) => {
-        if (!this.visibleSlides.has(slide)) {
-          slide.menuElem.setAttribute('hidden', 'true');
+      this.slides.forEach((slide: Slide) => {
+        if(slide.isActive && !visibleSlides.has(slide)) {
+          slide.setInvisible();
         }
       });
     }, this.options.transitionDuration);
@@ -369,6 +355,8 @@ export class SlideMenu {
     previousMenu: Slide | undefined,
     parents: Slide[],
   ): void {
+    this.menuElem.removeAttribute('inert');
+
     if (nextMenu.canFold()) {
       this.openFold();
 
@@ -400,16 +388,16 @@ export class SlideMenu {
     nextMenu.enableTabbing();
   }
 
-  private activateVisibleMenus(
-    currentlyVisibleMenus: Slide[],
+  private activateMenus(
+    currentlyActiveMenus: Slide[],
     isNavigatingBack: boolean | undefined,
     previousMenu: Slide | undefined,
     nextMenu: Slide,
   ): void {
-    const currentlyVisibleIds = currentlyVisibleMenus.map((menu) => menu?.id);
+    const currentlyActiveIds = currentlyActiveMenus.map((menu) => menu?.id);
     // Disable all previous active menus not active now
     this.slides.forEach((slide) => {
-      if (!currentlyVisibleIds.includes(slide.id)) {
+      if (!currentlyActiveIds.includes(slide.id)) {
         // When navigating backwards deactivate (hide) previous after transition to not mess with animation
         if (isNavigatingBack && slide.id === previousMenu?.id) {
           return;
@@ -420,11 +408,9 @@ export class SlideMenu {
       }
     });
 
-    // Activate all visible menus
-    currentlyVisibleMenus.forEach((menu) => {
-      if (!menu?.isActive) {
+    // Activate menus
+    currentlyActiveMenus.forEach((menu) => {
         menu?.activate();
-      }
     });
     nextMenu.enableTabbing();
   }
@@ -473,7 +459,7 @@ export class SlideMenu {
 
   private setSlideLevel(nextMenu?: Slide, isNavigatingBack: boolean = false): number {
     const activeNum = Array.from(
-      this.sliderWrapperElem.querySelectorAll('.' + CLASSES.active),
+      this.sliderWrapperElem.querySelectorAll(`.${CLASSES.active}, .${CLASSES.current}`),
     ).length;
     const navDecrement = !nextMenu?.canFold() ? Number(isNavigatingBack) : 0;
     const level = Math.max(1, activeNum) - 1 - navDecrement;

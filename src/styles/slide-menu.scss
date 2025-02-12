@@ -101,6 +101,12 @@
 
     &--active {
       display: block;
+      visibility: hidden;
+    }
+
+    &--current {
+      display: block;
+      visibility: visible!important;
     }
 
     & > .slide-menu__listitem {
