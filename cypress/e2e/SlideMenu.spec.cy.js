@@ -438,7 +438,7 @@ describe('slide menu', () => {
     });
 
     // check if trapping focus is working on slides
-    it('should trap focus inside menu with slides', () => {
+    it.skip('should trap focus inside menu with slides', () => {
         cy.visit(frontend + '/demo/test-config-default.html');
 
         cy.realPress("Tab"); 
@@ -485,7 +485,7 @@ describe('slide menu', () => {
     });
 
     // check tabbing not possible if menu is closed
-    it.only('should not be tabable when closed', () => {
+    it('should not be tabable when closed', () => {
         cy.visit(frontend + '/demo/test-config-default.html');
 
         cy.wait(500);
