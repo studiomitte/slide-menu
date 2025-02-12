@@ -278,7 +278,6 @@ export class SlideMenu {
    * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
    */
   public navigateTo(target: HTMLElement | Slide | string, runInForeground: boolean = true): void {
-
     // Open Menu if still closed
     if (runInForeground && !this.isOpen) {
       this.show();
@@ -334,7 +333,7 @@ export class SlideMenu {
 
       // hide all non visible menu elements to prevent screen reader confusion
       this.slides.forEach((slide: Slide) => {
-        if(slide.isActive && !visibleSlides.has(slide)) {
+        if (slide.isActive && !visibleSlides.has(slide)) {
           slide.setInvisible();
         }
       });
@@ -410,7 +409,7 @@ export class SlideMenu {
 
     // Activate menus
     currentlyActiveMenus.forEach((menu) => {
-        menu?.activate();
+      menu?.activate();
     });
     nextMenu.enableTabbing();
   }

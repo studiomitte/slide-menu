@@ -148,7 +148,7 @@ export class Slide {
         return this.getAllParents().find((p) => !p.canFold());
     }
     hasParent(possibleParentMenu) {
-        return this.getAllParents().some(p => p.id === (possibleParentMenu === null || possibleParentMenu === void 0 ? void 0 : possibleParentMenu.id));
+        return this.getAllParents().some((p) => p.id === (possibleParentMenu === null || possibleParentMenu === void 0 ? void 0 : possibleParentMenu.id));
     }
     /**
      *

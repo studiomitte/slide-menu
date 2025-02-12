@@ -159,7 +159,7 @@ export class Slide {
 
   public setInvisible(): this {
     this.visible = false;
-    if(this.isActive) {
+    if (this.isActive) {
       this.menuElem.classList.add(CLASSES.active);
     }
     this.menuElem.classList.remove(CLASSES.current);
@@ -192,7 +192,7 @@ export class Slide {
   }
 
   public hasParent(possibleParentMenu: Slide | undefined): boolean {
-    return this.getAllParents().some(p => p.id === possibleParentMenu?.id);
+    return this.getAllParents().some((p) => p.id === possibleParentMenu?.id);
   }
 
   /**
