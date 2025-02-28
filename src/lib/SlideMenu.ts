@@ -354,7 +354,10 @@ export class SlideMenu {
     previousMenu: Slide | undefined,
     parents: Slide[],
   ): void {
-    this.menuElem.removeAttribute('inert');
+
+    if (this.isOpen) {
+      this.menuElem.removeAttribute('inert');
+    }
 
     if (nextMenu.canFold()) {
       this.openFold();
