@@ -272,7 +272,9 @@ export class SlideMenu {
         (_a = document.querySelector('body')) === null || _a === void 0 ? void 0 : _a.setAttribute('data-slide-menu-level', level.toString());
     }
     setTabbing(nextMenu, firstUnfoldableParent, previousMenu, parents) {
-        this.menuElem.removeAttribute('inert');
+        if (this.isOpen) {
+            this.menuElem.removeAttribute('inert');
+        }
         if (nextMenu.canFold()) {
             this.openFold();
             // Enable Tabbing for foldable Parents
