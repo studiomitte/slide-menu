@@ -195,9 +195,9 @@ export class SlideMenu {
   }
 
   public open(animate: boolean = true): void {
-    const target = this.options.dynamicOpenDefault
+    const target = (this.options.dynamicOpenDefault
       ? this.getTargetSlideDynamically()
-      : this.defaultOpenTarget;
+      : this.defaultOpenTarget) ?? this.activeSubmenu;
 
     this.menuElem.removeAttribute('inert');
 
@@ -354,7 +354,6 @@ export class SlideMenu {
     previousMenu: Slide | undefined,
     parents: Slide[],
   ): void {
-
     if (this.isOpen) {
       this.menuElem.removeAttribute('inert');
     }
