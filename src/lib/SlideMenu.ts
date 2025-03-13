@@ -195,9 +195,10 @@ export class SlideMenu {
   }
 
   public open(animate: boolean = true): void {
-    const target = (this.options.dynamicOpenDefault
-      ? this.getTargetSlideDynamically()
-      : this.defaultOpenTarget) ?? this.activeSubmenu;
+    const target =
+      (this.options.dynamicOpenDefault
+        ? this.getTargetSlideDynamically()
+        : this.defaultOpenTarget) ?? this.activeSubmenu;
 
     this.menuElem.removeAttribute('inert');
 

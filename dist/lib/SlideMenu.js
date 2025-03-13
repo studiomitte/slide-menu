@@ -141,9 +141,10 @@ export class SlideMenu {
         return currentPathItem !== null && currentPathItem !== void 0 ? currentPathItem : currentHashItem;
     }
     open(animate = true) {
-        const target = this.options.dynamicOpenDefault
+        var _a;
+        const target = (_a = (this.options.dynamicOpenDefault
             ? this.getTargetSlideDynamically()
-            : this.defaultOpenTarget;
+            : this.defaultOpenTarget)) !== null && _a !== void 0 ? _a : this.activeSubmenu;
         this.menuElem.removeAttribute('inert');
         if (target) {
             this.navigateTo(target);
