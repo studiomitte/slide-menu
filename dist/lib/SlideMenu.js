@@ -367,7 +367,7 @@ export class SlideMenu {
         return level;
     }
     updateMenuTitle(nextMenu, firstUnfoldableParent) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         if (this.menuTitle) {
             let anchorText = (_b = (_a = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.anchorElem) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : this.menuTitleDefaultText;
             const navigatorTextAfter = (_d = (_c = this.options) === null || _c === void 0 ? void 0 : _c.navigationButtons) !== null && _d !== void 0 ? _d : '';
@@ -380,6 +380,10 @@ export class SlideMenu {
             }
             if (navigatorTextBefore && typeof navigatorTextBefore === 'string') {
                 anchorText = anchorText.replace(navigatorTextBefore, '');
+            }
+            if (this.menuTitle.tagName === 'A') {
+                // @ts-expect-error // menuTitle is HTMLElement | null
+                this.menuTitle.href = (_k = (_j = nextMenu.anchorElem) === null || _j === void 0 ? void 0 : _j.href) !== null && _k !== void 0 ? _k : '#';
             }
             this.menuTitle.innerText = anchorText.trim();
         }

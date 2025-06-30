@@ -489,7 +489,7 @@ export class SlideMenu {
 
       if (this.menuTitle.tagName === 'A') {
         // @ts-expect-error // menuTitle is HTMLElement | null
-        this.menuTitle.href = nextMenu.anchorElem?.href ?? '#';
+        this.menuTitle.href = nextMenu.ref;
       }
 
       this.menuTitle.innerText = anchorText.trim();
