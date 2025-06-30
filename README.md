@@ -67,6 +67,38 @@ All you need is the traditional menu HTML markup and a wrapper with the class `s
   </ul>
 </nav>
 ```
+
+### Migrate from MMenu.js
+
+Follow these steps to migrate to smdm-slide-menu from [MMenu](https://mmenujs.com/) in a Typo3-Projekt:
+- Add the JS-Config for the menu:
+```js
+const menuElement = document.getElementById('smdm-slide-menu');
+new SlideMenu(menuElement, {
+    position: 'right',
+    keyClose: 'Escape',
+    showBackLink: false,
+    closeOnClickOutside: true,
+    navigationButtons: true,
+    navigationButtonsLabel: 'Öffne Submenü',
+    menuWidth: 440,
+})
+```
+- Add the `MenuRootlineViewHelper.php` and get the closest page id of maneu rootline `<f:variable name="closestInMenuRootline" value="{theme:menuRootline(depth: 3)}"></f:variable>`
+- Add open button with `<button class="slide-menu__control" data-target="#smdm-slide-menu" data-action="open" data-arg="slide-menu-{closestInMenuRootline}">`
+- Add `<nav id="smdm-slide-menu" class="slide-menu" data-open-target="slide-menu-{closestInMenuRootline}" aria-label="Mobile Navigation">`
+- Add `<a id="slide-menu-{page.uid}" ...>` to the menu links
+- Add Menu Header and controls:
+```html
+<div class="slide-menu__controls">
+  <button class="slide-menu__control slide-menu--invisible-on-root-level" data-action="back" data-arg="close-fold" aria-label="Eine Menüebene zurück navigieren" title="Zurück"></button>
+  <div class="slide-menu__title">Menü  Titel</div>
+  <button class="slide-menu__control" data-action="close" aria-label="Menü schließen" title="Schließen">╳</button>
+</div>
+```
+- Adopt Styling to your needs
+
+
  
 ## Options
 
@@ -203,7 +235,7 @@ To open a specific submenu with the `open` or `toggle` action you can give the s
 To add an overlay over the screen while the menu is open add an element with `class="slide-menu__overlay"` before the slide menu. It uses `--smdm-sm-color-overlay` as default color which can be adjusted as needed.
 
 ```html
-<div class="slide-menu__overlay">
+<div class="slide-menu__overlay"></div>
 <nav class="slide-menu" id="example-menu">
   ...
 </nav>

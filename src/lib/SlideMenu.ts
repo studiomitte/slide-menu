@@ -487,6 +487,11 @@ export class SlideMenu {
         anchorText = anchorText.replace(navigatorTextBefore, '');
       }
 
+      if (this.menuTitle.tagName === 'A') {
+        // @ts-expect-error // menuTitle is HTMLElement | null
+        this.menuTitle.href = nextMenu.anchorElem?.href ?? '#';
+      }
+
       this.menuTitle.innerText = anchorText.trim();
     }
   }
