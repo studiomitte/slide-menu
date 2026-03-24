@@ -10,18 +10,11 @@
   --smdm-sm-color-overlay: rgba(0, 0, 0, 0.3);
   --smdm-sm-item-padding: 0.9rem 1.5rem;
 
-  // Defaults ovewritten by JS
+  // Fallback defaults — JS sets actual values on each .slide-menu instance
   --smdm-sm-menu-width: 320px;
   --smdm-sm-menu-level: 0;
   --smdm-sm-transition-duration: 300ms;
   --smdm-sm-min-width-fold: 640px;
-
-  // Calculated
-  --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
-  --smdm-sm-calc-slide-width: min(100vw, var(--smdm-sm-calc-menu-width));
-  --smdm-sm-calc-wrapper-translation: calc(
-    var(--smdm-sm-calc-slide-width) * var(--smdm-sm-menu-level) * -1
-  );
 }
 
 // // If screen is larger, set to JS configured menu width
@@ -32,6 +25,13 @@
 // }
 
 .slide-menu {
+  // Calculated per-instance so each .slide-menu uses its own JS-set vars
+  --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
+  --smdm-sm-calc-slide-width: min(100vw, var(--smdm-sm-calc-menu-width));
+  --smdm-sm-calc-wrapper-translation: calc(
+    var(--smdm-sm-calc-slide-width) * var(--smdm-sm-menu-level) * -1
+  );
+
   position: fixed;
   max-width: 100%;
 

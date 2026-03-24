@@ -90,21 +90,19 @@ export function trapFocus(
   const firstFocusableElement = firstElement ?? focusableElements[0];
   const lastFocusableElement = lastElement ?? focusableElements[focusableElements.length - 1];
 
-  const KEYCODE_TAB = 9;
-
-  const isTabPressed = event.key === 'Tab' || event.keyCode === KEYCODE_TAB;
+  const isTabPressed = event.key === 'Tab';
 
   if (!isTabPressed) {
     return;
   }
 
   if (event.shiftKey) {
-    /* shift + tab */ if (document.activeElement === firstFocusableElement) {
+    if (document.activeElement === firstFocusableElement) {
       // @ts-ignore
       lastFocusableElement.focus();
       event.preventDefault();
     }
-  } /* tab */ else {
+  } else {
     if (document.activeElement === lastFocusableElement) {
       // @ts-ignore
       firstFocusableElement.focus();

@@ -26,6 +26,7 @@ const DEFAULT_OPTIONS: SlideMenuOptions = {
 };
 
 let counter = 0;
+let initialized = false;
 
 export class SlideMenu {
   private activeSubmenu: Slide | undefined;
@@ -35,6 +36,7 @@ export class SlideMenu {
   private lastAction: Action | null = null;
 
   private readonly slides: Slide[] = [];
+  private readonly sortedSlides: Slide[] = [];
 
   private readonly options: SlideMenuOptions;
 
@@ -45,6 +47,15 @@ export class SlideMenu {
   private readonly menuTitle: HTMLElement | null;
   private readonly sliderWrapperElem: HTMLElement;
   private readonly foldableWrapperElem: HTMLElement;
+
+  // Stored references for cleanup
+  private resizeObserver: ResizeObserver | null = null;
+  private readonly boundOnTransitionEnd = this.onTransitionEnd.bind(this);
+  private outsideClickHandler: ((event: MouseEvent) => void) | null = null;
+  private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
+  private menuKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
+  private visibilityTimeoutId: ReturnType<typeof setTimeout> | undefined;
+  private navigateTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
   public constructor(elem?: HTMLElement | null, options?: Partial<SlideMenuOptions>) {
     if (elem === null) {
@@ -57,6 +68,10 @@ export class SlideMenu {
     this.menuElem = elem as MenuHTMLElement;
     this.options.id = this.menuElem.id ? this.menuElem.id : 'smdm-slide-menu-' + counter;
     counter++;
+    if (!initialized) {
+      initialized = true;
+      initSlideMenuGlobal();
+    }
     this.menuElem.id = this.options.id;
     this.menuElem.classList.add(NAMESPACE);
     this.menuElem.classList.add(this.options.position);
@@ -65,20 +80,14 @@ export class SlideMenu {
     // Save this instance in menu to DOM node
     this.menuElem._slideMenu = this;
 
-    // Set CSS Base Variables based on configuration options
-    document.documentElement.style.setProperty(
-      '--smdm-sm-menu-width',
-      `${this.options.menuWidth}px`,
-    );
-    document.documentElement.style.setProperty(
-      '--smdm-sm-min-width-fold',
-      `${this.options.minWidthFold}px`,
-    );
-    document.documentElement.style.setProperty(
+    // Set instance-specific CSS variables on the menu element (width, duration).
+    this.menuElem.style.setProperty('--smdm-sm-menu-width', `${this.options.menuWidth}px`);
+    this.menuElem.style.setProperty('--smdm-sm-min-width-fold', `${this.options.minWidthFold}px`);
+    this.menuElem.style.setProperty(
       '--smdm-sm-transition-duration',
       `${this.options.transitionDuration}ms`,
     );
-    document.documentElement.style.setProperty('--smdm-sm-menu-level', '0');
+    this.menuElem.style.setProperty('--smdm-sm-menu-level', '0');
 
     // Add slider container
     this.sliderElem = document.createElement('div');
@@ -104,14 +113,20 @@ export class SlideMenu {
 
     this.initMenu();
     this.initSlides();
+    this.sortedSlides = this.slides.slice().sort((a, b) => {
+      const depthA = a.ref.split('/').length;
+      const depthB = b.ref.split('/').length;
+      if (depthB !== depthA) return depthB - depthA;
+      return b.ref.length - a.ref.length;
+    });
     this.initEventHandlers();
 
     // Enable Menu
     this.menuElem.style.display = 'flex';
 
     // Set the default open target and activate it
-    this.activeSubmenu = this.slides[0].activate();
-    this.navigateTo(this.defaultOpenTarget ?? this.slides[0], false);
+    this.activeSubmenu = this.rootSlide.activate();
+    this.navigateTo(this.defaultOpenTarget ?? this.rootSlide, false);
 
     this.menuElem.setAttribute('inert', 'true');
     this.slides.forEach((menu) => {
@@ -127,13 +142,46 @@ export class SlideMenu {
       this.menuElem.dataset.openDefault ??
       this.menuElem.dataset.defaultTarget ??
       this.menuElem.dataset.openTarget ??
-      this.menuElem.dataset.defaultOpenTarget ??
-      'smdm-sm-no-default-provided';
+      this.menuElem.dataset.defaultOpenTarget;
+    if (!defaultTargetSelector) return undefined;
     return this.getTargetSlideByIdentifier(defaultTargetSelector);
+  }
+
+  private get rootSlide(): Slide {
+    return this.slides[0];
   }
 
   public get isFoldOpen(): boolean {
     return this.menuElem.classList.contains(CLASSES.foldOpen);
+  }
+
+  /**
+   * Clean up all event listeners, observers, and pending timeouts
+   */
+  public destroy(): void {
+    clearTimeout(this.visibilityTimeoutId);
+    clearTimeout(this.navigateTimeoutId);
+
+    this.menuElem.removeEventListener('transitionend', this.boundOnTransitionEnd);
+    this.sliderElem.removeEventListener('transitionend', this.boundOnTransitionEnd);
+
+    if (this.outsideClickHandler) {
+      document.removeEventListener('click', this.outsideClickHandler);
+    }
+    if (this.keydownHandler) {
+      document.removeEventListener('keydown', this.keydownHandler);
+    }
+    if (this.menuKeydownHandler) {
+      this.menuElem.removeEventListener('keydown', this.menuKeydownHandler);
+    }
+
+    this.resizeObserver?.disconnect();
+
+    this.menuElem.removeAttribute('inert');
+    document.body?.classList.remove(CLASSES.open);
+    document.body?.removeAttribute('data-slide-menu-level');
+
+    delete (this.menuElem as Partial<MenuHTMLElement>)._slideMenu;
   }
 
   public debugLog(...args: any[]): void {
@@ -150,9 +198,15 @@ export class SlideMenu {
     let offset;
 
     if (show === undefined) {
-      this.isOpen ? this.close(animate) : this.show(animate);
+      if (this.isOpen) {
+        this.close(animate);
+      } else {
+        this.show(animate);
+      }
       return;
     }
+
+    clearTimeout(this.visibilityTimeoutId);
 
     if (show) {
       offset = 0;
@@ -160,7 +214,7 @@ export class SlideMenu {
       this.lastFocusedElement = document.activeElement;
 
       // Can mess with animation - set focus after animation is done
-      setTimeout(() => {
+      this.visibilityTimeoutId = setTimeout(() => {
         this.activeSubmenu?.focusFirstElem();
       }, this.options.transitionDuration);
     } else {
@@ -168,7 +222,7 @@ export class SlideMenu {
 
       // Deactivate all menus and hide fold
       // Timeout to not mess with animation because of setting the focus
-      setTimeout(() => {
+      this.visibilityTimeoutId = setTimeout(() => {
         this.slides.forEach((menu) => !menu.isActive && menu.deactivate());
         // Refocus last focused element before opening menu
         // @ts-expect-error // possibly has no focus() function
@@ -225,7 +279,7 @@ export class SlideMenu {
     this.triggerEvent(Action.Open);
     this.toggleVisibility(true, animate);
 
-    document.querySelector('body')?.classList.add(CLASSES.open);
+    document.body?.classList.add(CLASSES.open);
   }
 
   /**
@@ -240,18 +294,17 @@ export class SlideMenu {
       menu.disableTabbing();
     });
 
-    document.querySelector('body')?.classList.remove(CLASSES.open);
+    document.body?.classList.remove(CLASSES.open);
   }
 
   /**
    * Navigate one menu hierarchy back if possible
    */
   public back(closeFold: boolean = false): void {
-    const rootSlide = this.slides[0];
-    let nextMenu = this.activeSubmenu?.parent ?? rootSlide;
+    let nextMenu = this.activeSubmenu?.parent ?? this.rootSlide;
     if (closeFold) {
-      this.activeSubmenu = this.activeSubmenu?.getClosestUnfoldableSlide() ?? rootSlide;
-      nextMenu = this.activeSubmenu?.parent ?? rootSlide;
+      this.activeSubmenu = this.activeSubmenu?.getClosestUnfoldableSlide() ?? this.rootSlide;
+      nextMenu = this.activeSubmenu?.parent ?? this.rootSlide;
       this.closeFold();
     }
 
@@ -318,17 +371,17 @@ export class SlideMenu {
     const level = this.setSlideLevel(nextMenu, isNavigatingBack);
 
     this.hideControlsIfOnRootLevel(level);
-    this.setBodyTagSlideLevel(level);
-    this.setActiveSubmenu(nextMenu);
+    this.activeSubmenu = nextMenu;
 
-    setTimeout(() => {
+    clearTimeout(this.navigateTimeoutId);
+    this.navigateTimeoutId = setTimeout(() => {
       if (runInForeground) {
-        // Wait for anmiation to finish to focus next link in nav otherwise focus messes with slide animation
+        // Wait for animation to finish to focus next link in nav otherwise focus messes with slide animation
         nextMenu.focusFirstElem();
       }
 
       if (isNavigatingBack) {
-        // Wait for anmiation to finish to deactivate previous otherwise width of container messes with slide animation
+        // Wait for animation to finish to deactivate previous otherwise width of container messes with slide animation
         previousMenu?.deactivate();
       }
 
@@ -341,12 +394,8 @@ export class SlideMenu {
     }, this.options.transitionDuration);
   }
 
-  private setActiveSubmenu(nextMenu: Slide): void {
-    this.activeSubmenu = nextMenu;
-  }
-
   private setBodyTagSlideLevel(level: number): void {
-    document.querySelector('body')?.setAttribute('data-slide-menu-level', level.toString());
+    document.body?.setAttribute('data-slide-menu-level', level.toString());
   }
 
   private setTabbing(
@@ -466,15 +515,15 @@ export class SlideMenu {
     const navDecrement = !nextMenu?.canFold() ? Number(isNavigatingBack) : 0;
     const level = Math.max(1, activeNum) - 1 - navDecrement;
     this.setBodyTagSlideLevel(level);
-    document.documentElement.style.setProperty('--smdm-sm-menu-level', `${level}`);
+    this.menuElem.style.setProperty('--smdm-sm-menu-level', `${level}`);
     return level;
   }
 
   private updateMenuTitle(nextMenu: Slide, firstUnfoldableParent?: Slide): void {
     if (this.menuTitle) {
       let anchorText = nextMenu?.anchorElem?.textContent ?? this.menuTitleDefaultText;
-      const navigatorTextAfter = this.options?.navigationButtons ?? '';
-      const navigatorTextBefore = this.options?.submenuLinkBefore ?? '';
+      const navigatorTextAfter = this.options.navigationButtons ?? '';
+      const navigatorTextBefore = this.options.submenuLinkBefore ?? '';
 
       if (nextMenu.canFold() && firstUnfoldableParent) {
         anchorText = firstUnfoldableParent.anchorElem?.textContent ?? anchorText;
@@ -488,8 +537,7 @@ export class SlideMenu {
       }
 
       if (this.menuTitle.tagName === 'A') {
-        // @ts-expect-error // menuTitle is HTMLElement | null
-        this.menuTitle.href = nextMenu.ref;
+        (this.menuTitle as HTMLAnchorElement).href = nextMenu.ref;
       }
 
       this.menuTitle.innerText = anchorText.trim();
@@ -497,23 +545,10 @@ export class SlideMenu {
   }
 
   /**
-   *
-   * @param targetMenuIdHrefOrSelector a selector or Slide ID or Slug of Href
-   * @returns
+   * @param targetMenuIdAnchorHrefOrSelector a selector or Slide ID or Slug of Href
    */
   private getTargetSlideByIdentifier(targetMenuIdAnchorHrefOrSelector: string): Slide | undefined {
-    // search from bottom to top
-    const sortedByTreeDepth = this.slides.slice().sort((a, b) => {
-      const depthA = a.ref.split('/').length;
-      const depthB = b.ref.split('/').length;
-
-      if (depthB !== depthA) {
-        return depthB - depthA;
-      }
-
-      return b.ref.length - a.ref.length;
-    });
-    return sortedByTreeDepth.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector));
+    return this.sortedSlides.find((menu) => menu.matches(targetMenuIdAnchorHrefOrSelector));
   }
 
   /**
@@ -521,23 +556,22 @@ export class SlideMenu {
    */
   private initEventHandlers(): void {
     // Handler for end of CSS transition
-    this.menuElem.addEventListener('transitionend', this.onTransitionEnd.bind(this));
-    this.sliderElem.addEventListener('transitionend', this.onTransitionEnd.bind(this));
+    this.menuElem.addEventListener('transitionend', this.boundOnTransitionEnd);
+    this.sliderElem.addEventListener('transitionend', this.boundOnTransitionEnd);
 
     // Hide menu on click outside menu
     if (this.options.closeOnClickOutside) {
-      document.addEventListener('click', (event) => {
+      this.outsideClickHandler = (event: MouseEvent) => {
         if (
           this.isOpen &&
           !this.isAnimating &&
-          // @ts-expect-error // Event Target will always be Element
-          !this.menuElem.contains(event.target) &&
-          // @ts-expect-error // Event Target will always be Element
-          !event.target?.closest('.' + CLASSES.control)
+          !this.menuElem.contains(event.target as Node) &&
+          !(event.target as Element)?.closest('.' + CLASSES.control)
         ) {
           this.close();
         }
-      });
+      };
+      document.addEventListener('click', this.outsideClickHandler);
     }
 
     this.initKeybindings();
@@ -564,7 +598,7 @@ export class SlideMenu {
   }
 
   private initKeybindings(): void {
-    document.addEventListener('keydown', (event) => {
+    this.keydownHandler = (event: KeyboardEvent) => {
       const elem = document.activeElement;
 
       switch (event.key) {
@@ -577,11 +611,11 @@ export class SlideMenu {
           this.show();
           break;
         case 'Enter':
-          // @ts-expect-error // simulate click event
-          if (elem?.classList.contains(CLASSES.navigator)) elem.click();
+          if (elem?.classList.contains(CLASSES.navigator)) (elem as HTMLElement).click();
           break;
       }
-    });
+    };
+    document.addEventListener('keydown', this.keydownHandler);
   }
 
   /**
@@ -650,7 +684,7 @@ export class SlideMenu {
       this.slides.push(new Slide(rootMenu, this.options));
     }
 
-    this.menuElem.addEventListener('keydown', (event) => {
+    this.menuKeydownHandler = (event: KeyboardEvent) => {
       // WCAG - if anchors are used for navigation make them usable with space
       if (
         event.key === ' ' &&
@@ -666,9 +700,10 @@ export class SlideMenu {
         `.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`,
       ) as HTMLElement | undefined;
       trapFocus(event, this.activeSubmenu?.menuElem ?? this.menuElem, firstControl);
-    });
+    };
+    this.menuElem.addEventListener('keydown', this.menuKeydownHandler);
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    this.resizeObserver = new ResizeObserver((entries) => {
       if (entries.length === 0) {
         return;
       }
@@ -680,13 +715,12 @@ export class SlideMenu {
         const parents = this.activeSubmenu?.getAllParents();
         const firstUnfoldableParent = parents?.find((p) => !p.canFold());
         this.setTabbing(
-          this.activeSubmenu ?? this.slides[0],
+          this.activeSubmenu ?? this.rootSlide,
           firstUnfoldableParent,
           this.activeSubmenu,
           parents ?? [],
         );
-        this.setSlideLevel(this.activeSubmenu ?? this.slides[0]);
-        this.setTabbing(this.activeSubmenu ?? this.slides[0], undefined, undefined, []);
+        this.setSlideLevel(this.activeSubmenu ?? this.rootSlide);
       }
 
       if (bodyContentWidth > this.options.minWidthFold && !this.isFoldOpen) {
@@ -694,15 +728,15 @@ export class SlideMenu {
         const parents = this.activeSubmenu?.getAllParents();
         const firstUnfoldableParent = parents?.find((p) => !p.canFold());
         this.setTabbing(
-          this.activeSubmenu ?? this.slides[0],
+          this.activeSubmenu ?? this.rootSlide,
           firstUnfoldableParent,
           this.activeSubmenu,
           parents ?? [],
         );
-        this.setSlideLevel(this.activeSubmenu ?? this.slides[0]);
+        this.setSlideLevel(this.activeSubmenu ?? this.rootSlide);
       }
     });
-    resizeObserver.observe(document.body);
+    this.resizeObserver.observe(document.body);
   }
 
   /**
@@ -725,7 +759,7 @@ export class SlideMenu {
    * Enhance the markup of menu items which contain a submenu and move them into the slider
    */
   private initSlides(): void {
-    this.menuElem.querySelectorAll('a').forEach((anchor: HTMLAnchorElement, index: number) => {
+    this.menuElem.querySelectorAll('a').forEach((anchor: HTMLAnchorElement) => {
       if (anchor.parentElement === null) {
         return;
       }
@@ -752,79 +786,91 @@ export class SlideMenu {
   }
 }
 
-// Link control buttons with the API
-document.addEventListener('click', (event) => {
-  const canControlMenu = (elem: Element | undefined | null): boolean => {
-    if (!elem) {
-      return false;
-    }
-    return (
-      elem.classList.contains(CLASSES.control) ||
-      elem.classList.contains(CLASSES.hasSubMenu) ||
-      elem.classList.contains(CLASSES.navigator)
-    );
-  };
+// Public methods callable via data-action attributes
+const ALLOWED_ACTIONS: ReadonlySet<string> = new Set([
+  'open',
+  'close',
+  'toggle',
+  'show',
+  'back',
+  'navigateTo',
+  'markSelectedItem',
+]);
 
-  const btn = canControlMenu(event.target as Element)
-    ? event.target
-    : // @ts-expect-error target is Element | null | undefined
-      event.target?.closest(
-        `.${CLASSES.navigator}[data-action], .${CLASSES.control}[data-action], .${CLASSES.hasSubMenu}[data-action]`,
-      );
-  if (!btn || !canControlMenu(btn as Element)) {
-    return;
-  }
-
-  // Find Slide-Menu that should be controlled
-  const target = btn.getAttribute('data-target');
-  const menu =
-    !target || target === 'this'
-      ? parentsOne(btn as Node, `.${NAMESPACE}`)
-      : document.getElementById(target as string) ?? document.querySelector(target); // assumes #id
-
-  if (!menu) {
-    throw new Error(`Unable to find menu ${target}`);
-  }
-
-  const slideMenuInstance = (menu as MenuHTMLElement)._slideMenu;
-
-  // Always prevent opening of links if not onlyNavigateDecorator
-  if (slideMenuInstance && !slideMenuInstance.onlyNavigateDecorator) {
-    event.preventDefault();
-  }
-
-  // Only prevent opening of links when clicking the decorator when onlyNavigateDecorator
-  // if (slideMenuInstance && slideMenuInstance.onlyNavigateDecorator) {
-  //   event.preventDefault();
-  // }
-
-  const methodName = btn.getAttribute('data-action');
-  const dataArg = btn.getAttribute('data-arg') ?? btn.href;
-
-  const dataArgMapping = {
-    false: false,
-    true: true,
-    null: null,
-    undefined,
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const arg = Object.keys(dataArgMapping).includes(dataArg?.toString() ?? '')
-    ? // @ts-expect-error // user input can be undefined
-      dataArgMapping[dataArg]
-    : dataArg;
-
-  // console.log(slideMenuInstance, methodName, arg);
-
-  // @ts-expect-error // make functions dynamically accessible from outside context
-  if (slideMenuInstance && methodName && typeof slideMenuInstance[methodName] === 'function') {
-    // @ts-expect-error // make functions dynamically accessible from outside context
-    arg ? slideMenuInstance[methodName](arg) : slideMenuInstance[methodName]();
-  }
-});
-
+// Expose SlideMenu to the global namespace and signal readiness immediately on module load,
+// so that user code listening for 'sm.ready' can run before any instance is created.
 // @ts-expect-error // Expose SlideMenu to the global namespace
 window.SlideMenu = SlideMenu;
-
-// send global event when SlideMenu is ready and available in global namespace
 window.dispatchEvent(new Event('sm.ready'));
+
+function initSlideMenuGlobal(): void {
+  // Link control buttons with the API
+  document.addEventListener('click', (event) => {
+    const canControlMenu = (elem: Element | undefined | null): boolean => {
+      if (!elem) {
+        return false;
+      }
+      return (
+        elem.classList.contains(CLASSES.control) ||
+        elem.classList.contains(CLASSES.hasSubMenu) ||
+        elem.classList.contains(CLASSES.navigator)
+      );
+    };
+
+    const btn = canControlMenu(event.target as Element)
+      ? event.target
+      : // @ts-expect-error target is Element | null | undefined
+        event.target?.closest(
+          `.${CLASSES.navigator}[data-action], .${CLASSES.control}[data-action], .${CLASSES.hasSubMenu}[data-action]`,
+        );
+    if (!btn || !canControlMenu(btn as Element)) {
+      return;
+    }
+
+    // Find Slide-Menu that should be controlled
+    const target = btn.getAttribute('data-target');
+    const menu =
+      !target || target === 'this'
+        ? parentsOne(btn as Node, `.${NAMESPACE}`)
+        : (document.getElementById(target as string) ?? document.querySelector(target)); // assumes #id
+
+    if (!menu) {
+      throw new Error(`Unable to find menu ${target}`);
+    }
+
+    const slideMenuInstance = (menu as MenuHTMLElement)._slideMenu;
+
+    // Always prevent opening of links if not onlyNavigateDecorator
+    if (slideMenuInstance && !slideMenuInstance.onlyNavigateDecorator) {
+      event.preventDefault();
+    }
+
+    const methodName = (btn as Element).getAttribute('data-action');
+    const dataArg = btn.getAttribute('data-arg') ?? btn.href;
+
+    const dataArgMapping = {
+      false: false,
+      true: true,
+      null: null,
+      undefined,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const arg = Object.keys(dataArgMapping).includes(dataArg?.toString() ?? '')
+      ? // @ts-expect-error // user input can be undefined
+        dataArgMapping[dataArg]
+      : dataArg;
+
+    if (slideMenuInstance && methodName && ALLOWED_ACTIONS.has(methodName)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const instance = slideMenuInstance as Record<string, any>;
+      if (typeof instance[methodName] === 'function') {
+        if (arg) {
+          instance[methodName](arg);
+        } else {
+          instance[methodName]();
+        }
+      }
+    }
+  });
+}

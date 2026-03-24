@@ -1,5 +1,5 @@
-const { defineConfig } = require('cypress')
-const { pa11y, prepareAudit } = require("@cypress-audit/pa11y");
+const { defineConfig } = require('cypress');
+const { pa11y, prepareAudit } = require('@cypress-audit/pa11y');
 
 module.exports = defineConfig({
   e2e: {
@@ -8,14 +8,13 @@ module.exports = defineConfig({
     testIsolation: false,
     setupNodeEvents(on, config) {
       // implement node event listeners here
-      on("before:browser:launch", (browser = {}, launchOptions) => {
+      on('before:browser:launch', (browser = {}, launchOptions) => {
         prepareAudit(launchOptions);
       });
 
-      on("task", {
+      on('task', {
         pa11y: pa11y(),
       });
     },
   },
 });
-

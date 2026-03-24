@@ -17,7 +17,6 @@ export class Slide {
   public navigatorElem?: HTMLElement;
   public parent?: Slide;
   private active: boolean = false;
-  private visible: boolean = false;
 
   public get isActive(): boolean {
     return this.active;
@@ -146,7 +145,6 @@ export class Slide {
 
   public activate(): this {
     this.active = true;
-    this.visible = true;
     this.menuElem.classList.add(CLASSES.active);
     this.menuElem.classList.add(CLASSES.current);
     if (this.options.navigationButtons) {
@@ -158,7 +156,6 @@ export class Slide {
   }
 
   public setInvisible(): this {
-    this.visible = false;
     if (this.isActive) {
       this.menuElem.classList.add(CLASSES.active);
     }
@@ -206,7 +203,7 @@ export class Slide {
 
     while (parent) {
       parents.push(parent);
-      parent = parent?.parent;
+      parent = parent.parent;
     }
 
     return parents;
@@ -239,9 +236,5 @@ export class Slide {
 
   public contains(elem: HTMLElement): boolean {
     return this.anchorElem === elem || this.menuElem.contains(elem);
-  }
-
-  public focus(): void {
-    this.focusFirstElem();
   }
 }

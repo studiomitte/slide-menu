@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+## Description: Run Cypress e2e tests, starting the Vite dev server if needed
+## Usage: test
+## Example: ddev test
+
+set -e
+
+# Check if the Vite dev server is reachable from inside the ddev network
+if ! ddev exec -s cypress wget -q --spider http://frontend:8080 > /dev/null 2>&1; then
+  echo "[test] Dev server not running — starting npm run watch in frontend container..."
+  ddev exec -s frontend sh -c 'nohup npm run watch > /tmp/watch.log 2>&1 &'
+
+  echo "[test] Waiting for dev server at http://frontend:8080..."
+  for i in $(seq 1 30); do
+    if ddev exec -s cypress wget -q --spider http://frontend:8080 > /dev/null 2>&1; then
+      echo "[test] Dev server ready."
+      break
+    fi
+    if [ "$i" -eq 30 ]; then
+      echo "[test] Timeout: dev server did not become ready in 30s" >&2
+      exit 1
+    fi
+    sleep 1
+  done
+fi
+
+echo 'cypress run' | ddev ssh -s cypress

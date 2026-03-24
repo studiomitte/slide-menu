@@ -1,10 +1,10 @@
 name: slide-menu
 type: php
-docroot: ""
-php_version: "8.2"
+docroot: "dist"
+php_version: "8.5"
 webserver_type: nginx-fpm
 xdebug_enabled: false
-additional_hostnames: 
+additional_hostnames:
   - slide-menu.frontend
   - slide-menu.cypress
 additional_fqdns: []
@@ -14,7 +14,7 @@ database:
 use_dns_when_possible: true
 composer_version: "2"
 web_environment: []
-nodejs_version: "20"
+nodejs_version: "24"
 
 webimage_extra_packages: ["chromium"] # for pa11y
 
