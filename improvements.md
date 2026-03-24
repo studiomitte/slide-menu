@@ -229,33 +229,37 @@ navigateTo calls nextMenu.getAllParents() (line 359), then getAllFoldableParents
 
 Recommendations
 
-# Finding
-
-1 undefined guard
-2 Double setLastAction
-3 Timeout race (focus)
-4 DOM query for level
-5 Duplicate classList.add
-6 defaultOpenTarget re-computed
-7 hideControlsIfOnRootLevel global scope
-8 Dead lastAction field
-9 FoldController.close re-appends all
-10 Double show() in open()
-11 toggleVisibility re-entrancy
-12 Unguarded module-level side effects
-13 window.innerWidth in Slide
-14 Redundant getAllParents calls
-15 Direction dead export
-16 debugLog public
-17 Slide.options full bag
+| #   | Finding                                | Status   |
+| --- | -------------------------------------- | -------- |
+| 1   | undefined guard                        | ✅ Fixed |
+| 2   | Double setLastAction                   | ✅ Fixed |
+| 3   | Timeout race (focus)                   | ⬜ Open  |
+| 4   | DOM query for level                    | ⬜ Open  |
+| 5   | Duplicate classList.add                | ✅ Fixed |
+| 6   | defaultOpenTarget re-computed          | ✅ Fixed |
+| 7   | hideControlsIfOnRootLevel global scope | ⬜ Open  |
+| 8   | Dead lastAction field                  | ✅ Fixed |
+| 9   | FoldController.close re-appends all    | ✅ Fixed |
+| 10  | Double show() in open()                | ⬜ Open  |
+| 11  | toggleVisibility re-entrancy           | ⬜ Open  |
+| 12  | Unguarded module-level side effects    | ⬜ Open  |
+| 13  | window.innerWidth in Slide             | ⬜ Open  |
+| 14  | Redundant getAllParents calls          | ⬜ Open  |
+| 15  | Direction dead export                  | ⬜ Open  |
+| 16  | debugLog public                        | ✅ Fixed |
+| 17  | Slide.options full bag                 | ⬜ Open  |
 
 ---
 
 ### Trade-offs
 
-- **Items 1, 5, 8, 15, 16** — zero risk, zero trade-off, purely additive correctness/cleanliness
+- **Items 1, 5, 8, 16** — fixed (zero risk)
+- **Items 2, 6, 9** — fixed (correctness improvements)
 - **Items 3, 4, 10, 11** — behavioural changes that need test coverage for the race/double-fire scenarios; the existing Cypress suite covers the visible outcome but not timing-sensitive edge cases
+- **Item 12** — unguarded `window.*` at module scope; low risk in browser-only usage but blocks SSR/Node environments
 - **Item 13** — making `canFold` accept injected width is a clean-cut improvement but changes the `Slide` interface, which is public API (exported in `index.ts`)
+- **Item 14** — pure performance improvement; cache `getAllParents()` result per navigation call site
+- **Item 15** — dead `Direction` export; removing it is a minor semver breaking change but keeps the public API surface clean
 - **Item 17** — narrowing `Slide` constructor options is a breaking change for any downstream consumers who construct `Slide` directly; could be done with an adapter type
 
 ---

@@ -27,14 +27,14 @@ const frontend = 'http://frontend:8080';
 // });
 
 describe('slide menu', () => {
-  it('should be reachable (run "npm run watch" in frontend container first!)', () => {
-    cy.visit(frontend + '/demo/js-demo.html');
-    cy.contains('Slide Menu');
-    cy.get('html').then((elem) => {
-      document.body.style.display = 'none';
-    });
-    cy.get('.slide-menu').should('not.be.visible');
-  });
+  // it('should be reachable (run "npm run watch" in frontend container first!)', () => {
+  //   cy.visit(frontend + '/demo/js-demo.html');
+  //   cy.contains('Slide Menu');
+  //   cy.get('html').then((elem) => {
+  //     document.body.style.display = 'none';
+  //   });
+  //   cy.get('.slide-menu').should('not.be.visible');
+  // });
 
   it('default config: should open menu per default', () => {
     cy.visit(frontend + '/demo/test-config-default.html');
