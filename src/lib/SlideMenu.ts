@@ -1,6 +1,9 @@
 import { Slide } from './Slide.js';
+import { FoldController, ActiveFoldController, NoopFoldController } from './FoldController.js';
+import { AnimationController } from './AnimationController.js';
+import { KeyboardController } from './KeyboardController.js';
 import { Action, SlideMenuOptions, MenuPosition, CLASSES, NAMESPACE } from './SlideMenuOptions.js';
-import { parentsOne, trapFocus } from './utils/dom.js';
+import { parentsOne } from './utils/dom.js';
 
 export interface MenuHTMLElement extends HTMLElement {
   _slideMenu: SlideMenu;
@@ -32,12 +35,14 @@ export class SlideMenu {
   private activeSubmenu: Slide | undefined;
   private lastFocusedElement: Element | null = null;
   private isOpen: boolean = false;
-  private isAnimating: boolean = false;
   private lastAction: Action | null = null;
 
   private readonly slides: Slide[] = [];
   private readonly sortedSlides: Slide[] = [];
   private readonly slidesByElem = new WeakMap<HTMLElement, Slide>();
+  private readonly fold: FoldController;
+  private readonly animation: AnimationController;
+  private readonly keyboard: KeyboardController;
 
   private readonly options: SlideMenuOptions;
 
@@ -51,10 +56,7 @@ export class SlideMenu {
 
   // Stored references for cleanup
   private resizeObserver: ResizeObserver | null = null;
-  private readonly boundOnTransitionEnd = this.onTransitionEnd.bind(this);
   private outsideClickHandler: ((event: MouseEvent) => void) | null = null;
-  private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
-  private menuKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
   private visibilityTimeoutId: ReturnType<typeof setTimeout> | undefined;
   private navigateTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -112,14 +114,50 @@ export class SlideMenu {
     this.menuTitle = this.menuElem.querySelector(`.${CLASSES.title}`) as HTMLElement;
     this.menuTitleDefaultText = this.menuTitle?.textContent?.trim() ?? this.menuTitleDefaultText;
 
+    // Wire up AnimationController early — initMenu() uses runWithoutAnimation
+    this.animation = new AnimationController(
+      this.menuElem,
+      this.sliderElem,
+      this.foldableWrapperElem,
+      this.sliderWrapperElem,
+      (action, afterAnimation) => this.triggerEvent(action, afterAnimation),
+    );
+
     this.initMenu();
     this.initSlides();
+
+    const hasFoldable = this.slides.some((s) => s.isFoldable);
+    this.fold = hasFoldable
+      ? new ActiveFoldController(
+          this.slides,
+          this.sliderWrapperElem,
+          this.foldableWrapperElem,
+          this.menuElem,
+        )
+      : new NoopFoldController();
+
+    if (hasFoldable) {
+      this.initResizeObserver();
+    }
+
     this.sortedSlides = this.slides.slice().sort((a, b) => {
       const depthA = a.ref.split('/').length;
       const depthB = b.ref.split('/').length;
       if (depthB !== depthA) return depthB - depthA;
       return b.ref.length - a.ref.length;
     });
+
+    // Wire up KeyboardController
+    this.keyboard = new KeyboardController(
+      { keyClose: this.options.keyClose, keyOpen: this.options.keyOpen },
+      {
+        close: () => this.close(),
+        show: () => this.show(),
+        getActiveSubmenu: () => this.activeSubmenu,
+        getMenuElem: () => this.menuElem,
+      },
+    );
+
     this.initEventHandlers();
 
     // Enable Menu
@@ -153,7 +191,7 @@ export class SlideMenu {
   }
 
   public get isFoldOpen(): boolean {
-    return this.menuElem.classList.contains(CLASSES.foldOpen);
+    return this.fold.isOpen;
   }
 
   /**
@@ -163,17 +201,11 @@ export class SlideMenu {
     clearTimeout(this.visibilityTimeoutId);
     clearTimeout(this.navigateTimeoutId);
 
-    this.menuElem.removeEventListener('transitionend', this.boundOnTransitionEnd);
-    this.sliderElem.removeEventListener('transitionend', this.boundOnTransitionEnd);
+    this.animation.destroy();
+    this.keyboard.destroy();
 
     if (this.outsideClickHandler) {
       document.removeEventListener('click', this.outsideClickHandler);
-    }
-    if (this.keydownHandler) {
-      document.removeEventListener('keydown', this.keydownHandler);
-    }
-    if (this.menuKeydownHandler) {
-      this.menuElem.removeEventListener('keydown', this.menuKeydownHandler);
     }
 
     this.resizeObserver?.disconnect();
@@ -228,13 +260,13 @@ export class SlideMenu {
         // Refocus last focused element before opening menu
         // @ts-expect-error // possibly has no focus() function
         this.lastFocusedElement?.focus();
-        this.menuElem.classList.remove(CLASSES.foldOpen);
+        this.fold.close();
       }, this.options.transitionDuration);
     }
 
     this.isOpen = !!show;
 
-    this.moveElem(this.menuElem, offset);
+    this.animation.moveElem(this.menuElem, offset);
   }
 
   /**
@@ -306,27 +338,11 @@ export class SlideMenu {
     if (closeFold) {
       this.activeSubmenu = this.activeSubmenu?.getClosestUnfoldableSlide() ?? this.rootSlide;
       nextMenu = this.activeSubmenu?.parent ?? this.rootSlide;
-      this.closeFold();
+      this.fold.close();
     }
 
     // Event is triggered in navigate()
     this.navigateTo(nextMenu);
-  }
-
-  private closeFold(): void {
-    this.slides.forEach((menu) => {
-      menu.appendTo(this.sliderWrapperElem);
-    });
-    this.menuElem.classList.remove(CLASSES.foldOpen);
-  }
-
-  private openFold(): void {
-    this.slides.forEach((menu) => {
-      if (menu.isFoldable) {
-        menu.appendTo(this.foldableWrapperElem);
-      }
-    });
-    this.menuElem.classList.add(CLASSES.foldOpen);
   }
 
   /**
@@ -410,7 +426,7 @@ export class SlideMenu {
     }
 
     if (nextMenu.canFold()) {
-      this.openFold();
+      this.fold.open();
 
       // Enable Tabbing for foldable Parents
       nextMenu.getAllParents().forEach((menu) => {
@@ -430,8 +446,7 @@ export class SlideMenu {
     }
 
     if (previousMenu?.canFold() && !nextMenu.canFold()) {
-      // close fold
-      this.closeFold();
+      this.fold.close();
     }
 
     parents.forEach((menu) => {
@@ -556,16 +571,12 @@ export class SlideMenu {
    * Set up all event handlers
    */
   private initEventHandlers(): void {
-    // Handler for end of CSS transition
-    this.menuElem.addEventListener('transitionend', this.boundOnTransitionEnd);
-    this.sliderElem.addEventListener('transitionend', this.boundOnTransitionEnd);
-
     // Hide menu on click outside menu
     if (this.options.closeOnClickOutside) {
       this.outsideClickHandler = (event: MouseEvent) => {
         if (
           this.isOpen &&
-          !this.isAnimating &&
+          !this.animation.isAnimating &&
           !this.menuElem.contains(event.target as Node) &&
           !(event.target as Element)?.closest('.' + CLASSES.control)
         ) {
@@ -575,48 +586,7 @@ export class SlideMenu {
       document.addEventListener('click', this.outsideClickHandler);
     }
 
-    this.initKeybindings();
-  }
-
-  private onTransitionEnd(event: Event): void {
-    // Ensure the transitionEnd event was fired by the correct element
-    // (elements inside the menu might use CSS transitions as well)
-    if (
-      event.target !== this.menuElem &&
-      event.target !== this.sliderElem &&
-      event.target !== this.foldableWrapperElem &&
-      event.target !== this.sliderWrapperElem
-    ) {
-      return;
-    }
-
-    this.isAnimating = false;
-
-    if (this.lastAction) {
-      this.triggerEvent(this.lastAction, true);
-      this.lastAction = null;
-    }
-  }
-
-  private initKeybindings(): void {
-    this.keydownHandler = (event: KeyboardEvent) => {
-      const elem = document.activeElement;
-
-      switch (event.key) {
-        case this.options.keyClose:
-          event.preventDefault();
-          this.close();
-          break;
-        case this.options.keyOpen:
-          event.preventDefault();
-          this.show();
-          break;
-        case 'Enter':
-          if (elem?.classList.contains(CLASSES.navigator)) (elem as HTMLElement).click();
-          break;
-      }
-    };
-    document.addEventListener('keydown', this.keydownHandler);
+    this.keyboard.init();
   }
 
   /**
@@ -624,6 +594,7 @@ export class SlideMenu {
    */
   private triggerEvent(action: Action, afterAnimation: boolean = false): void {
     this.lastAction = action;
+    this.animation.setLastAction(action);
 
     const name = `sm.${action}${afterAnimation ? '-after' : ''}`;
     const event = new CustomEvent(name);
@@ -639,28 +610,10 @@ export class SlideMenu {
   }
 
   /**
-   * Start the slide animation (the CSS transition)
-   */
-  private moveElem(elem: HTMLElement, offset: string | number, unit: string = '%'): void {
-    setTimeout(() => {
-      // Add percentage sign
-      if (!offset.toString().includes(unit)) {
-        offset += unit;
-      }
-
-      const newTranslateX = `translateX(${offset})`;
-      if (elem.style.transform !== newTranslateX) {
-        this.isAnimating = true;
-        elem.style.transform = newTranslateX;
-      }
-    }, 0);
-  }
-
-  /**
    * Initialize the menu
    */
   private initMenu(): void {
-    this.runWithoutAnimation(() => {
+    this.animation.runWithoutAnimation(() => {
       switch (this.options.position) {
         case MenuPosition.Left:
           Object.assign(this.menuElem.style, {
@@ -687,26 +640,13 @@ export class SlideMenu {
       rootSlide.mount();
       this.slides.push(rootSlide);
     }
+  }
 
-    this.menuKeydownHandler = (event: KeyboardEvent) => {
-      // WCAG - if anchors are used for navigation make them usable with space
-      if (
-        event.key === ' ' &&
-        event.target instanceof HTMLAnchorElement &&
-        event.target.role === 'button'
-      ) {
-        event.preventDefault();
-        event.target.click();
-      }
-
-      // WCAG - trap focus in menu
-      const firstControl = this.menuElem.querySelector(
-        `.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`,
-      ) as HTMLElement | undefined;
-      trapFocus(event, this.activeSubmenu?.menuElem ?? this.menuElem, firstControl);
-    };
-    this.menuElem.addEventListener('keydown', this.menuKeydownHandler);
-
+  /**
+   * Set up the ResizeObserver that opens/closes the fold at the minWidthFold breakpoint.
+   * Only called when the menu actually has foldable items.
+   */
+  private initResizeObserver(): void {
     this.resizeObserver = new ResizeObserver((entries) => {
       if (entries.length === 0) {
         return;
@@ -714,8 +654,8 @@ export class SlideMenu {
 
       const bodyContentWidth = entries[0].contentRect.width;
 
-      if (bodyContentWidth < this.options.minWidthFold && this.isFoldOpen) {
-        this.closeFold();
+      if (bodyContentWidth < this.options.minWidthFold && this.fold.isOpen) {
+        this.fold.close();
         const parents = this.activeSubmenu?.getAllParents();
         const firstUnfoldableParent = parents?.find((p) => !p.canFold());
         this.setTabbing(
@@ -727,8 +667,8 @@ export class SlideMenu {
         this.setSlideLevel(this.activeSubmenu ?? this.rootSlide);
       }
 
-      if (bodyContentWidth > this.options.minWidthFold && !this.isFoldOpen) {
-        this.openFold();
+      if (bodyContentWidth > this.options.minWidthFold && !this.fold.isOpen) {
+        this.fold.open();
         const parents = this.activeSubmenu?.getAllParents();
         const firstUnfoldableParent = parents?.find((p) => !p.canFold());
         this.setTabbing(
@@ -741,22 +681,6 @@ export class SlideMenu {
       }
     });
     this.resizeObserver.observe(document.body);
-  }
-
-  /**
-   * Pause the CSS transitions, to apply CSS changes directly without an animation
-   */
-  private runWithoutAnimation(action: () => void): void {
-    const transitionElems = [this.menuElem, this.sliderElem];
-    transitionElems.forEach((elem) => (elem.style.transition = 'none'));
-
-    action();
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    this.menuElem.offsetHeight; // Trigger a reflow, flushing the CSS changes
-    transitionElems.forEach((elem) => elem.style.removeProperty('transition'));
-
-    this.isAnimating = false;
   }
 
   /**

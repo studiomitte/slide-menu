@@ -42,7 +42,7 @@ Fix: Split into SlideMenuEvent (internal pub/sub) and a narrowly typed DataActio
 
 ---
 
-5. Slide Constructor Does Too Much (untestable)
+5. Slide Constructor Does Too Much (untestable) ✅
 
 The constructor simultaneously assigns identity, adds CSS classes, injects back-link <li> elements, inserts navigator buttons, and
 monkey-patches the DOM node (menuElem.\_slide = this). Testing any Slide logic requires a full live DOM subtree as a side effect.
@@ -52,7 +52,7 @@ WeakMap<HTMLElement, Slide> on the SlideMenu level to eliminate the circular ref
 
 ---
 
-6. Fold Feature Entanglement (change amplification)
+6. Fold Feature Entanglement (change amplification) ✅
 
 The responsive "fold" behavior is spread across 7+ locations: multiple branches in navigateTo, setTabbing, activateMenus,
 setSlideLevel, updateMenuTitle, and the ResizeObserver. Fold state is inferred from a CSS class check rather than an authoritative
@@ -63,7 +63,7 @@ implementation — eliminating all fold branches from the navigation logic.
 
 ---
 
-7. God Class Decomposition (after 1–4 are fixed)
+7. God Class Decomposition (after 1–4 are fixed) ✅
 
 SlideMenu handles 8 distinct responsibilities in 830 lines. Natural extraction points:
 
