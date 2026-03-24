@@ -3,4 +3,4 @@ import { Slide } from './lib/Slide.js';
 import { SlideMenu } from './lib/SlideMenu.js';
 import { AnimationController } from './lib/AnimationController.js';
 import { KeyboardController } from './lib/KeyboardController.js';
-export { MenuPosition, Direction, Action, CLASSES, Slide, SlideMenu, AnimationController, KeyboardController };
+export { MenuPosition, Direction, Action, CLASSES, Slide, SlideMenu, AnimationController, KeyboardController, };

@@ -92,11 +92,7 @@ export class KeyboardController {
         `.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`,
       ) as HTMLElement | undefined;
 
-      trapFocus(
-        event,
-        this.callbacks.getActiveSubmenu()?.menuElem ?? menuElem,
-        firstControl,
-      );
+      trapFocus(event, this.callbacks.getActiveSubmenu()?.menuElem ?? menuElem, firstControl);
     };
 
     menuElem.addEventListener('keydown', this.menuKeydownHandler);
