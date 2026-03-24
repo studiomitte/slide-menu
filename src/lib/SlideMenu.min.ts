@@ -1,3 +1,4 @@
+// @ts-ignore
 import '../styles/slide-menu.scss';
 
 import { SlideMenu } from './SlideMenu.js';

@@ -14,7 +14,6 @@ export declare class Slide {
     navigatorElem?: HTMLElement;
     parent?: Slide;
     private active;
-    private visible;
     get isActive(): boolean;
     constructor(menuElem: SlideHTMLElement, options: SlideMenuOptions, anchorElem?: HTMLAnchorElement | undefined);
     private addBackLink;
@@ -42,5 +41,4 @@ export declare class Slide {
     canFold(): boolean;
     matches(idHrefOrSelector: string): boolean;
     contains(elem: HTMLElement): boolean;
-    focus(): void;
 }

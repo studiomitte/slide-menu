@@ -12,7 +12,6 @@ export class Slide {
         this.anchorElem = anchorElem;
         this.isFoldable = false;
         this.active = false;
-        this.visible = false;
         this.ref = '/';
         this.id = menuElem.id ? menuElem.id : 'smdm-' + number;
         menuElem.id = this.id;
@@ -109,7 +108,6 @@ export class Slide {
     activate() {
         var _a, _b;
         this.active = true;
-        this.visible = true;
         this.menuElem.classList.add(CLASSES.active);
         this.menuElem.classList.add(CLASSES.current);
         if (this.options.navigationButtons) {
@@ -121,7 +119,6 @@ export class Slide {
         return this;
     }
     setInvisible() {
-        this.visible = false;
         if (this.isActive) {
             this.menuElem.classList.add(CLASSES.active);
         }
@@ -159,7 +156,7 @@ export class Slide {
         let parent = this.parent;
         while (parent) {
             parents.push(parent);
-            parent = parent === null || parent === void 0 ? void 0 : parent.parent;
+            parent = parent.parent;
         }
         return parents;
     }
@@ -185,8 +182,5 @@ export class Slide {
     }
     contains(elem) {
         return this.anchorElem === elem || this.menuElem.contains(elem);
-    }
-    focus() {
-        this.focusFirstElem();
     }
 }

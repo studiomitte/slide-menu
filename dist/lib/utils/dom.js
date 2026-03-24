@@ -65,18 +65,17 @@ export function trapFocus(event, targetElement, firstElement, lastElement) {
     const focusableElements = targetElement.querySelectorAll(TAB_ABLE_SELECTOR);
     const firstFocusableElement = firstElement !== null && firstElement !== void 0 ? firstElement : focusableElements[0];
     const lastFocusableElement = lastElement !== null && lastElement !== void 0 ? lastElement : focusableElements[focusableElements.length - 1];
-    const KEYCODE_TAB = 9;
-    const isTabPressed = event.key === 'Tab' || event.keyCode === KEYCODE_TAB;
+    const isTabPressed = event.key === 'Tab';
     if (!isTabPressed) {
         return;
     }
     if (event.shiftKey) {
-        /* shift + tab */ if (document.activeElement === firstFocusableElement) {
+        if (document.activeElement === firstFocusableElement) {
             // @ts-ignore
             lastFocusableElement.focus();
             event.preventDefault();
         }
-    } /* tab */
+    }
     else {
         if (document.activeElement === lastFocusableElement) {
             // @ts-ignore

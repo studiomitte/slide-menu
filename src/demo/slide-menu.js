@@ -39,7 +39,7 @@ const r = 'slide-menu',
 function L(o, t, e) {
   const i = [];
   for (; o && o.parentElement !== null && i.length < e; )
-    o instanceof HTMLElement && o.matches(t) && i.push(o), (o = o.parentElement);
+    (o instanceof HTMLElement && o.matches(t) && i.push(o), (o = o.parentElement));
   return i;
 }
 function k(o, t) {
@@ -75,7 +75,7 @@ let v = 0;
 class p {
   constructor(t, e, i) {
     var s, a, n;
-    (this.menuElem = t),
+    ((this.menuElem = t),
       (this.options = e),
       (this.anchorElem = i),
       (this.isFoldable = !1),
@@ -101,7 +101,7 @@ class p {
       this.isFoldable && t.classList.add(l.foldableSubmenu),
       e.showBackLink && this.addBackLink(e),
       this.addLinkDecorator(e),
-      (t._slide = this);
+      (t._slide = this));
   }
   get isActive() {
     return this.active;
@@ -110,44 +110,44 @@ class p {
     var a;
     const e = ((a = this.anchorElem) == null ? void 0 : a.textContent) ?? '',
       i = document.createElement('a');
-    (i.innerHTML = (t.backLinkBefore ?? '') + e + (t.backLinkAfter ?? '')),
+    ((i.innerHTML = (t.backLinkBefore ?? '') + e + (t.backLinkAfter ?? '')),
       i.classList.add(l.backlink, l.control, l.item),
       (i.dataset.action = c.Back),
-      i.setAttribute('href', '#');
+      i.setAttribute('href', '#'));
     const s = document.createElement('li');
-    return s.appendChild(i), this.menuElem.insertBefore(s, this.menuElem.firstChild), i;
+    return (s.appendChild(i), this.menuElem.insertBefore(s, this.menuElem.firstChild), i);
   }
   addLinkDecorator(t) {
     var i, s, a;
     const e = 'span';
     if (t.submenuLinkBefore) {
       const n = document.createElement(e);
-      n.classList.add(l.decorator),
+      (n.classList.add(l.decorator),
         (n.innerHTML = t.submenuLinkBefore),
         (n.dataset.action = c.NavigateTo),
         (n.dataset.target = this.options.id),
         (n.dataset.arg = this.id),
         this.options.onlyNavigateDecorator && n.setAttribute('tabindex', '0'),
         (s = this.anchorElem) == null ||
-          s.insertBefore(n, (i = this.anchorElem) == null ? void 0 : i.firstChild);
+          s.insertBefore(n, (i = this.anchorElem) == null ? void 0 : i.firstChild));
     }
     if (t.submenuLinkAfter) {
       const n = document.createElement(e);
-      n.classList.add(l.decorator),
+      (n.classList.add(l.decorator),
         (n.innerHTML = t.submenuLinkAfter),
         (n.dataset.action = c.NavigateTo),
         (n.dataset.target = this.options.id),
         (n.dataset.arg = this.id),
         this.options.onlyNavigateDecorator && n.setAttribute('tabindex', '0'),
-        (a = this.anchorElem) == null || a.appendChild(n);
+        (a = this.anchorElem) == null || a.appendChild(n));
     }
     return this.anchorElem;
   }
   deactivate() {
-    return (this.active = !1), this.menuElem.classList.remove(l.active), this;
+    return ((this.active = !1), this.menuElem.classList.remove(l.active), this);
   }
   activate() {
-    return (this.active = !0), this.menuElem.classList.add(l.active), this;
+    return ((this.active = !0), this.menuElem.classList.add(l.active), this);
   }
   enableTabbing() {
     var t;
@@ -162,10 +162,10 @@ class p {
     });
   }
   appendTo(t) {
-    return t.appendChild(this.menuElem), this;
+    return (t.appendChild(this.menuElem), this);
   }
   postionTop(t) {
-    return (this.menuElem.style.top = t + 'px'), this;
+    return ((this.menuElem.style.top = t + 'px'), this);
   }
   getClosestNotFoldableSlide() {
     return this.isFoldable ? this.getAllParents().find((t) => !t.isFoldable) : this;
@@ -173,7 +173,7 @@ class p {
   getAllParents() {
     const t = [];
     let e = this.parent;
-    for (; e; ) t.push(e), (e = e == null ? void 0 : e.parent);
+    for (; e; ) (t.push(e), (e = e == null ? void 0 : e.parent));
     return t;
   }
   focusFirstElem() {
@@ -256,10 +256,9 @@ class w {
         this.sliderElem = document.createElement('div'),
         this.sliderElem.classList.add(l.slider);
       this.menuElem.firstChild;
-
     )
       this.sliderElem.appendChild(this.menuElem.firstChild);
-    this.menuElem.appendChild(this.sliderElem),
+    (this.menuElem.appendChild(this.sliderElem),
       (this.sliderWrapperElem = document.createElement('div')),
       this.sliderWrapperElem.classList.add(l.sliderWrapper),
       this.sliderElem.appendChild(this.sliderWrapperElem),
@@ -281,7 +280,7 @@ class w {
       (this.menuElem.style.display = 'flex'),
       this.triggerEvent(c.Initialize),
       (this.activeSubmenu = this.slides[0].activate()),
-      this.navigateTo(this.defaultOpenTarget ?? this.slides[0], !1);
+      this.navigateTo(this.defaultOpenTarget ?? this.slides[0], !1));
   }
   get defaultOpenTarget() {
     const t = this.menuElem.dataset.openTarget ?? 'smdm-sm-no-default-provided';
@@ -296,7 +295,7 @@ class w {
       this.isOpen ? this.close(e) : this.show(e);
       return;
     }
-    t
+    (t
       ? ((i = 0),
         (this.lastFocusedElement = document.activeElement),
         setTimeout(() => {
@@ -306,12 +305,12 @@ class w {
       : ((i = this.options.position === E.Left ? '-100%' : '100%'),
         setTimeout(() => {
           var s;
-          this.slides.forEach((a) => !a.isActive && a.deactivate()),
+          (this.slides.forEach((a) => !a.isActive && a.deactivate()),
             (s = this.lastFocusedElement) == null || s.focus(),
-            this.menuElem.classList.remove(l.foldOpen);
+            this.menuElem.classList.remove(l.foldOpen));
         }, this.options.transitionDuration)),
       (this.isOpen = !!t),
-      this.moveElem(this.menuElem, i);
+      this.moveElem(this.menuElem, i));
   }
   toggle(t = !0) {
     if (this.isOpen) {
@@ -322,38 +321,38 @@ class w {
   }
   show(t = !0) {
     var e;
-    this.triggerEvent(c.Open),
+    (this.triggerEvent(c.Open),
       this.toggleVisibility(!0, t),
-      (e = document.querySelector('body')) == null || e.classList.add(l.open);
+      (e = document.querySelector('body')) == null || e.classList.add(l.open));
   }
   close(t = !0) {
     var e;
-    this.triggerEvent(c.Close),
+    (this.triggerEvent(c.Close),
       this.toggleVisibility(!1, t),
-      (e = document.querySelector('body')) == null || e.classList.remove(l.open);
+      (e = document.querySelector('body')) == null || e.classList.remove(l.open));
   }
   back(t = !1) {
     var s, a, n;
     const e = this.slides[0];
     let i = ((s = this.activeSubmenu) == null ? void 0 : s.parent) ?? e;
-    t &&
+    (t &&
       ((this.activeSubmenu =
         ((a = this.activeSubmenu) == null ? void 0 : a.getClosestNotFoldableSlide()) ?? e),
       (i = ((n = this.activeSubmenu) == null ? void 0 : n.parent) ?? e),
       this.closeFold()),
-      this.navigateTo(i);
+      this.navigateTo(i));
   }
   closeFold() {
-    this.slides.forEach((t) => {
+    (this.slides.forEach((t) => {
       t.appendTo(this.sliderWrapperElem);
     }),
-      this.menuElem.classList.remove(l.foldOpen);
+      this.menuElem.classList.remove(l.foldOpen));
   }
   openFold() {
-    this.slides.forEach((t) => {
+    (this.slides.forEach((t) => {
       t.isFoldable && t.appendTo(this.foldableWrapperElem);
     }),
-      this.menuElem.classList.add(l.foldOpen);
+      this.menuElem.classList.add(l.foldOpen));
   }
   navigateTo(t, e = !0) {
     e && !this.isOpen && this.show();
@@ -375,7 +374,7 @@ class w {
               .getAllParents()
               .map((b) => b.id)
               .includes((s == null ? void 0 : s.id) ?? '');
-    e &&
+    (e &&
       (this.triggerEvent(c.Navigate),
       d
         ? this.triggerEvent(c.Back)
@@ -383,18 +382,18 @@ class w {
           ? this.triggerEvent(c.Forward)
           : this.triggerEvent(c.NavigateTo)),
       this.updateMenuTitle(i, n),
-      this.setTabbingForFold(i, n, s, a);
+      this.setTabbingForFold(i, n, s, a));
     const u = [i, ...a];
     this.activateVisibleMenus(u, d, s, i);
     const m = this.getSlideLevel(i, d),
       T = -this.options.menuWidth * m;
-    this.moveElem(this.sliderWrapperElem, T, 'px'),
+    (this.moveElem(this.sliderWrapperElem, T, 'px'),
       this.hideControlsIfOnRootLevel(m),
       this.setBodyTagSlideLevel(m),
       this.setActiveSubmenu(i),
       setTimeout(() => {
-        e && i.focusFirstElem(), d && (s == null || s.deactivate());
-      }, this.options.transitionDuration);
+        (e && i.focusFirstElem(), d && (s == null || s.deactivate()));
+      }, this.options.transitionDuration));
   }
   setActiveSubmenu(t) {
     this.activeSubmenu = t;
@@ -427,16 +426,16 @@ class w {
   }
   activateVisibleMenus(t, e, i, s) {
     const a = t.map((n) => (n == null ? void 0 : n.id));
-    this.slides.forEach((n) => {
+    (this.slides.forEach((n) => {
       if (!a.includes(n.id)) {
         if (e && n.id === (i == null ? void 0 : i.id)) return;
-        n.deactivate(), n.disableTabbing();
+        (n.deactivate(), n.disableTabbing());
       }
     }),
       t.forEach((n) => {
         (n != null && n.isActive) || n == null || n.activate();
       }),
-      s.enableTabbing();
+      s.enableTabbing());
   }
   findNextMenu(t) {
     if (typeof t == 'string') {
@@ -477,10 +476,10 @@ class w {
         this.menuTitleDefaultText;
       const h = ((s = this.options) == null ? void 0 : s.submenuLinkAfter) ?? '',
         u = ((a = this.options) == null ? void 0 : a.submenuLinkBefore) ?? '';
-      t.canFold() && e && (d = ((n = e.anchorElem) == null ? void 0 : n.textContent) ?? d),
+      (t.canFold() && e && (d = ((n = e.anchorElem) == null ? void 0 : n.textContent) ?? d),
         h && (d = d.replace(h, '')),
         u && (d = d.replace(u, '')),
-        (this.menuTitle.innerText = d.trim());
+        (this.menuTitle.innerText = d.trim()));
     }
   }
   getTargetMenuFromIdentifier(t) {
@@ -498,10 +497,10 @@ class w {
     const e = this.options.dynamicOpenTarget
       ? this.getTargetMenuDynamically()
       : this.defaultOpenTarget;
-    e && this.navigateTo(e), this.show(t);
+    (e && this.navigateTo(e), this.show(t));
   }
   initEventHandlers() {
-    this.menuElem.addEventListener('transitionend', this.onTransitionEnd.bind(this)),
+    (this.menuElem.addEventListener('transitionend', this.onTransitionEnd.bind(this)),
       this.sliderElem.addEventListener('transitionend', this.onTransitionEnd.bind(this)),
       this.options.closeOnClickOutside &&
         document.addEventListener('click', (t) => {
@@ -512,7 +511,7 @@ class w {
             !((e = t.target) != null && e.closest('.' + l.control)) &&
             this.close();
         }),
-      this.initKeybindings();
+      this.initKeybindings());
   }
   onTransitionEnd(t) {
     (t.target !== this.menuElem &&
@@ -527,10 +526,10 @@ class w {
       const e = document.activeElement;
       switch (t.key) {
         case this.options.keyClose:
-          t.preventDefault(), this.close();
+          (t.preventDefault(), this.close());
           break;
         case this.options.keyOpen:
-          t.preventDefault(), this.show();
+          (t.preventDefault(), this.show());
           break;
         case 'Enter':
           e != null && e.classList.contains(l.decorator) && e.click();
@@ -545,10 +544,10 @@ class w {
     this.menuElem.dispatchEvent(s);
   }
   markSelectedItem(t) {
-    this.menuElem.querySelectorAll('.' + l.activeItem).forEach((e) => {
+    (this.menuElem.querySelectorAll('.' + l.activeItem).forEach((e) => {
       e.classList.remove(l.activeItem);
     }),
-      t.classList.add(l.activeItem);
+      t.classList.add(l.activeItem));
   }
   moveElem(t, e, i = '%') {
     setTimeout(() => {
@@ -558,7 +557,7 @@ class w {
     }, 0);
   }
   initMenu() {
-    this.runWithoutAnimation(() => {
+    (this.runWithoutAnimation(() => {
       switch (this.options.position) {
         case E.Left:
           Object.assign(this.menuElem.style, {
@@ -572,27 +571,27 @@ class w {
           break;
       }
     }),
-      this.menuElem.classList.add(this.options.position);
+      this.menuElem.classList.add(this.options.position));
     const t = this.menuElem.querySelector('ul');
-    t && this.slides.push(new p(t, this.options)),
+    (t && this.slides.push(new p(t, this.options)),
       this.menuElem.addEventListener('keydown', (e) => {
         var s;
         const i = this.menuElem.querySelector(
           `.${l.controls} .${l.control}:not([disabled]):not([tabindex="-1"])`,
         );
         F(e, ((s = this.activeSubmenu) == null ? void 0 : s.menuElem) ?? this.menuElem, i);
-      });
+      }));
   }
   runWithoutAnimation(t) {
     const e = [this.menuElem, this.sliderElem];
-    e.forEach((i) => (i.style.transition = 'none')),
+    (e.forEach((i) => (i.style.transition = 'none')),
       t(),
       this.menuElem.offsetHeight,
       e.forEach((i) => i.style.removeProperty('transition')),
-      (this.isAnimating = !1);
+      (this.isAnimating = !1));
   }
   initSlides() {
-    this.menuElem.querySelectorAll('a').forEach((t, e) => {
+    (this.menuElem.querySelectorAll('a').forEach((t, e) => {
       if (t.parentElement === null) return;
       const i = t.parentElement.querySelector('ul');
       if (!i) return;
@@ -601,7 +600,7 @@ class w {
     }),
       this.slides.forEach((t) => {
         t.appendTo(this.sliderWrapperElem);
-      });
+      }));
   }
   get onlyNavigateDecorator() {
     return this.options.onlyNavigateDecorator;
@@ -625,11 +624,13 @@ document.addEventListener('click', (o) => {
   if (!e || !t(e)) return;
   const i = e.getAttribute('data-target'),
     s =
-      !i || i === 'this' ? k(e, `.${r}`) : document.getElementById(i) ?? document.querySelector(i);
+      !i || i === 'this'
+        ? k(e, `.${r}`)
+        : (document.getElementById(i) ?? document.querySelector(i));
   if (!s) throw new Error(`Unable to find menu ${i}`);
   const a = s._slideMenu;
-  a && !a.onlyNavigateDecorator && o.preventDefault(),
-    a && a.onlyNavigateDecorator && e.matches(`.${l.decorator}`) && o.preventDefault();
+  (a && !a.onlyNavigateDecorator && o.preventDefault(),
+    a && a.onlyNavigateDecorator && e.matches(`.${l.decorator}`) && o.preventDefault());
   const n = e.getAttribute('data-action'),
     d = e.getAttribute('data-arg'),
     h = { false: !1, true: !0, null: null, undefined: void 0 },

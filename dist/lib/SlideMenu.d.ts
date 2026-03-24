@@ -10,6 +10,7 @@ export declare class SlideMenu {
     private isAnimating;
     private lastAction;
     private readonly slides;
+    private readonly sortedSlides;
     private readonly options;
     private readonly menuTitleDefaultText;
     private readonly menuElem;
@@ -17,9 +18,21 @@ export declare class SlideMenu {
     private readonly menuTitle;
     private readonly sliderWrapperElem;
     private readonly foldableWrapperElem;
+    private resizeObserver;
+    private readonly boundOnTransitionEnd;
+    private outsideClickHandler;
+    private keydownHandler;
+    private menuKeydownHandler;
+    private visibilityTimeoutId;
+    private navigateTimeoutId;
     constructor(elem?: HTMLElement | null, options?: Partial<SlideMenuOptions>);
     private get defaultOpenTarget();
+    private get rootSlide();
     get isFoldOpen(): boolean;
+    /**
+     * Clean up all event listeners, observers, and pending timeouts
+     */
+    destroy(): void;
     debugLog(...args: any[]): void;
     /**
      * Toggle the menu
@@ -50,7 +63,6 @@ export declare class SlideMenu {
      * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
      */
     navigateTo(target: HTMLElement | Slide | string, runInForeground?: boolean): void;
-    private setActiveSubmenu;
     private setBodyTagSlideLevel;
     private setTabbing;
     private activateMenus;
@@ -59,9 +71,7 @@ export declare class SlideMenu {
     private setSlideLevel;
     private updateMenuTitle;
     /**
-     *
-     * @param targetMenuIdHrefOrSelector a selector or Slide ID or Slug of Href
-     * @returns
+     * @param targetMenuIdAnchorHrefOrSelector a selector or Slide ID or Slug of Href
      */
     private getTargetSlideByIdentifier;
     /**
