@@ -1,54 +1,63 @@
-:active,
-:focus {
-  outline: none !important;
+:root {
+  --color-primary: #2e6da4;
+  --color-primary-dark: #1e4f7a;
+  --color-bg-page: #f5f5f5;
 }
+
 html {
   font-size: 20px;
 }
+
 body {
   font-family: Lato, sans-serif;
   line-height: 1.4;
-  color: rgba(0, 0, 0, 0.94);
+  color: rgba(0, 0, 0, 0.87);
+  background-color: var(--color-bg-page);
 }
+
 h1 {
   font-size: 1.8rem;
   font-weight: 700;
 }
-h1 small {
-  margin-left: 0.3rem;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 60%;
-}
+
 h2 {
   margin-top: 1.5rem;
   margin-bottom: 1rem;
   font-size: 1rem;
 }
+
 a {
   text-decoration: none;
-  color: #336184;
+  color: var(--color-primary);
 }
+
 .btn,
 a {
   transition: background-color 0.15s ease-in-out;
   will-change: background-color;
 }
+
 p {
   margin: 0 0 0.5rem;
 }
+
 p:last-of-type {
   margin: 0 0 2rem;
 }
+
 footer {
   margin-top: 2rem;
   font-size: 90%;
 }
+
 footer a {
   font-style: italic;
 }
+
 footer path {
-  fill: #9d252d;
+  fill: var(--color-primary);
 }
+
 .btn {
   padding: 0.6rem 0.8rem 0.64rem;
   border: none;
@@ -58,95 +67,72 @@ footer path {
   font-size: 85%;
   line-height: 1;
 }
+
 .icon {
   height: 0.6rem;
-  margin: 0 0.1rem;
+  margin: 0 0 0.1rem;
+  vertical-align: middle;
 }
+
 main {
   display: block;
   width: 90%;
   margin: 2.5rem auto;
 }
+
 main .btn {
   width: 100%;
   display: block;
   margin: 0 0.25rem 0.75rem 0;
-  background-color: #2e4b61;
+  background-color: var(--color-primary);
   border-radius: 0.2rem;
   font-size: 70%;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
+
 @media (min-width: 768px) {
   main {
     max-width: 40rem;
   }
+
   main .btn {
     width: auto;
     display: inline-block;
   }
+
   main .btn:hover {
-    background-color: #213545;
-  }
-  main .btn-danger {
-    background-color: #9d252d;
-  }
-  main .btn-danger:hover {
-    background-color: #7c1d23;
+    background-color: var(--color-primary-dark);
   }
 }
+
 main #events {
   font-family: monospace;
   font-size: 80%;
 }
+
+/* Integration demo: host-project overrides for .slide-menu styling.
+   Note: do NOT set a fixed width here — let the library control width
+   via --smdm-sm-menu-width so fold layout works correctly. */
 .slide-menu {
-  width: 340px;
-  background-color: #213545;
+  --smdm-sm-menu-width: 340px;
+  line-height: 1.4;
+  font-size: 0.8rem;
 }
+
 .slide-menu,
 .slide-menu a {
-  font-size: 0.8rem;
   color: #fff;
 }
+
 .slide-menu a {
-  padding: 0.9rem 1.5rem;
-  border-bottom: 1px solid #14202a;
   text-decoration: none;
 }
+
 .slide-menu a:hover {
-  background-color: #172531;
+  background-color: var(--smdm-sm-color-hover);
 }
-.slide-menu .controls {
-  display: flex;
-  margin-bottom: 1rem;
-}
-.slide-menu .btn {
-  padding: 0.75rem 1.5rem;
-  flex: 1 0 auto;
-  font-size: 90%;
-  color: #fff;
-  background-color: #172531;
-  text-transform: uppercase;
-}
-.slide-menu .btn:first-of-type {
-  text-align: left;
-}
-.slide-menu .btn:first-of-type:before {
-  content: '⮜';
-  margin-right: 0.5rem;
-}
-.slide-menu .btn:last-of-type {
-  text-align: right;
-}
-.slide-menu .btn:last-of-type:before {
-  content: '✕';
-  margin-right: 0.5rem;
-}
+
 .slide-menu .slide-menu__backlink {
   text-transform: uppercase;
-}
-#test-menu-left p {
-  font-size: 110%;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
 }

@@ -1,7 +1,7 @@
 name: slide-menu
 type: php
-docroot: "dist"
-php_version: "8.5"
+docroot: 'dist'
+php_version: '8.5'
 webserver_type: nginx-fpm
 xdebug_enabled: false
 additional_hostnames:
@@ -9,14 +9,15 @@ additional_hostnames:
   - slide-menu.cypress
 additional_fqdns: []
 database:
-    type: mariadb
-    version: "10.4"
+  type: mariadb
+  version: '10.4'
 use_dns_when_possible: true
-composer_version: "2"
+composer_version: '2'
 web_environment: []
-nodejs_version: "24"
+nodejs_version: '24'
 
-webimage_extra_packages: ["chromium"] # for pa11y
+webimage_extra_packages: ['chromium'] # for pa11y
+
 
 # Key features of DDEV's config.yaml:
 

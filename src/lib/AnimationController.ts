@@ -31,9 +31,13 @@ export class AnimationController {
 
   /**
    * Start the slide animation (the CSS transition) for `elem` by applying a translateX.
+   * Records `action` as the last action so `onTransitionEnd` can fire the `-after` event.
    * The inner setTimeout flushes current style recalculations before triggering the transition.
    */
-  moveElem(elem: HTMLElement, offset: string | number, unit: string = '%'): void {
+  moveElem(elem: HTMLElement, offset: string | number, unit: string = '%', action?: Action): void {
+    if (action !== undefined) {
+      this.lastAction = action;
+    }
     setTimeout(() => {
       if (!offset.toString().includes(unit)) {
         offset += unit;

@@ -5,24 +5,37 @@ export class Slide {
     get isActive() {
         return this.active;
     }
-    constructor(menuElem, options, anchorElem) {
-        var _a, _b, _c, _d, _e;
+    /**
+     * Construction phase: establishes identity and relationships only — no DOM writes except
+     * setting the element's id (needed for aria-controls wiring in mount()).
+     * Call mount() afterwards to apply all DOM decoration.
+     */
+    constructor(menuElem, options, anchorElem, slidesByElem) {
+        var _a, _b, _c, _d;
         this.menuElem = menuElem;
         this.options = options;
         this.anchorElem = anchorElem;
         this.isFoldable = false;
         this.active = false;
-        this.ref = '/';
         this.id = menuElem.id ? menuElem.id : 'smdm-' + number;
         menuElem.id = this.id;
         number++;
         this.name = (_b = (_a = this.anchorElem) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : '';
-        this.parentMenuElem = ((_d = (_c = anchorElem === null || anchorElem === void 0 ? void 0 : anchorElem.parentElement) === null || _c === void 0 ? void 0 : _c.closest('ul')) !== null && _d !== void 0 ? _d : undefined);
-        this.parent = (_e = this.parentMenuElem) === null || _e === void 0 ? void 0 : _e._slide;
+        this.ref = anchorElem ? anchorElem.href.replace(window.location.origin, '') : '/';
+        this.parentMenuElem = (_d = (_c = anchorElem === null || anchorElem === void 0 ? void 0 : anchorElem.parentElement) === null || _c === void 0 ? void 0 : _c.closest('ul')) !== null && _d !== void 0 ? _d : undefined;
+        this.parent = this.parentMenuElem ? slidesByElem === null || slidesByElem === void 0 ? void 0 : slidesByElem.get(this.parentMenuElem) : undefined;
+        this.isFoldable = !!(anchorElem === null || anchorElem === void 0 ? void 0 : anchorElem.classList.contains(CLASSES.hasFoldableSubmenu));
+    }
+    /**
+     * DOM decoration phase: adds CSS classes, injects back-link and navigator button elements,
+     * and sets data-action attributes. Called by SlideMenu after registering the slide in its
+     * WeakMap so that sibling/child mounts can look up the correct parent instance.
+     */
+    mount() {
+        const { anchorElem, menuElem, options } = this;
         if (anchorElem) {
-            anchorElem === null || anchorElem === void 0 ? void 0 : anchorElem.classList.add(CLASSES.hasSubMenu);
-            this.ref = anchorElem.href.replace(window.location.origin, '');
-            if (!this.options.navigationButtons) {
+            anchorElem.classList.add(CLASSES.hasSubMenu);
+            if (!options.navigationButtons) {
                 anchorElem.dataset.action = Action.NavigateTo;
                 anchorElem.dataset.arg = this.id;
                 anchorElem.role = 'button';
@@ -31,7 +44,6 @@ export class Slide {
             }
         }
         menuElem.classList.add(CLASSES.submenu);
-        // menuElem.role = 'menu';
         menuElem.dataset.smdmId = this.id;
         menuElem.querySelectorAll('li').forEach((link) => {
             link.classList.add(CLASSES.listItem);
@@ -39,7 +51,6 @@ export class Slide {
         menuElem.querySelectorAll('a').forEach((link) => {
             link.classList.add(CLASSES.item);
         });
-        this.isFoldable = !!(anchorElem === null || anchorElem === void 0 ? void 0 : anchorElem.classList.contains(CLASSES.hasFoldableSubmenu));
         if (this.isFoldable) {
             menuElem.classList.add(CLASSES.foldableSubmenu);
         }
@@ -47,7 +58,7 @@ export class Slide {
             this.addBackLink(options);
         }
         this.addNavigatorButton(options);
-        menuElem._slide = this;
+        return this;
     }
     addBackLink(options = this.options) {
         var _a, _b, _c, _d;
@@ -147,10 +158,6 @@ export class Slide {
     hasParent(possibleParentMenu) {
         return this.getAllParents().some((p) => p.id === (possibleParentMenu === null || possibleParentMenu === void 0 ? void 0 : possibleParentMenu.id));
     }
-    /**
-     *
-     * @returns
-     */
     getAllParents() {
         const parents = [];
         let parent = this.parent;

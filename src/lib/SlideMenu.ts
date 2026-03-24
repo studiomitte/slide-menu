@@ -35,7 +35,6 @@ export class SlideMenu {
   private activeSubmenu: Slide | undefined;
   private lastFocusedElement: Element | null = null;
   private isOpen: boolean = false;
-  private lastAction: Action | null = null;
 
   private readonly slides: Slide[] = [];
   private readonly sortedSlides: Slide[] = [];
@@ -47,6 +46,7 @@ export class SlideMenu {
   private readonly options: SlideMenuOptions;
 
   private readonly menuTitleDefaultText: string = 'Menu';
+  private readonly cachedDefaultOpenTarget: Slide | undefined = undefined;
 
   private readonly menuElem: MenuHTMLElement;
   private readonly sliderElem: HTMLElement;
@@ -61,7 +61,7 @@ export class SlideMenu {
   private navigateTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
   public constructor(elem?: HTMLElement | null, options?: Partial<SlideMenuOptions>) {
-    if (elem === null) {
+    if (!elem) {
       throw new Error('Argument `elem` must be a valid HTML node');
     }
 
@@ -124,6 +124,11 @@ export class SlideMenu {
     );
 
     this.initMenu();
+
+    if (this.slides.length === 0) {
+      throw new Error('SlideMenu: no <ul> found inside the menu element. A root <ul> is required.');
+    }
+
     this.initSlides();
 
     const hasFoldable = this.slides.some((s) => s.isFoldable);
@@ -136,16 +141,15 @@ export class SlideMenu {
         )
       : new NoopFoldController();
 
-    if (hasFoldable) {
-      this.initResizeObserver();
-    }
-
     this.sortedSlides = this.slides.slice().sort((a, b) => {
       const depthA = a.ref.split('/').length;
       const depthB = b.ref.split('/').length;
       if (depthB !== depthA) return depthB - depthA;
       return b.ref.length - a.ref.length;
     });
+
+    // Cache the default open target once — resolving it requires sortedSlides to be ready
+    this.cachedDefaultOpenTarget = this.resolveDefaultOpenTarget();
 
     // Wire up KeyboardController
     this.keyboard = new KeyboardController(
@@ -165,7 +169,13 @@ export class SlideMenu {
 
     // Set the default open target and activate it
     this.activeSubmenu = this.rootSlide.activate();
-    this.navigateTo(this.defaultOpenTarget ?? this.rootSlide, false);
+    this.navigateTo(this.cachedDefaultOpenTarget ?? this.rootSlide, false);
+
+    // Start observing viewport changes only after activeSubmenu is initialised,
+    // because the ResizeObserver callback fires synchronously on the first observe() call.
+    if (hasFoldable) {
+      this.initResizeObserver();
+    }
 
     this.menuElem.setAttribute('inert', 'true');
     this.slides.forEach((menu) => {
@@ -176,7 +186,7 @@ export class SlideMenu {
     this.triggerEvent(Action.Initialize);
   }
 
-  private get defaultOpenTarget(): Slide | undefined {
+  private resolveDefaultOpenTarget(): Slide | undefined {
     const defaultTargetSelector =
       this.menuElem.dataset.openDefault ??
       this.menuElem.dataset.defaultTarget ??
@@ -217,7 +227,7 @@ export class SlideMenu {
     delete (this.menuElem as Partial<MenuHTMLElement>)._slideMenu;
   }
 
-  public debugLog(...args: any[]): void {
+  private debugLog(...args: any[]): void {
     if (this.options.debug) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       console.log(...args);
@@ -266,7 +276,7 @@ export class SlideMenu {
 
     this.isOpen = !!show;
 
-    this.animation.moveElem(this.menuElem, offset);
+    this.animation.moveElem(this.menuElem, offset, '%', show ? Action.Open : Action.Close);
   }
 
   /**
@@ -285,7 +295,7 @@ export class SlideMenu {
     const target =
       (this.options.dynamicOpenDefault
         ? this.getTargetSlideDynamically()
-        : this.defaultOpenTarget) ?? this.activeSubmenu;
+        : this.cachedDefaultOpenTarget) ?? this.activeSubmenu;
 
     this.menuElem.removeAttribute('inert');
 
@@ -593,9 +603,6 @@ export class SlideMenu {
    * Trigger a custom event to support callbacks
    */
   private triggerEvent(action: Action, afterAnimation: boolean = false): void {
-    this.lastAction = action;
-    this.animation.setLastAction(action);
-
     const name = `sm.${action}${afterAnimation ? '-after' : ''}`;
     const event = new CustomEvent(name);
 
@@ -630,8 +637,6 @@ export class SlideMenu {
           break;
       }
     });
-
-    this.menuElem.classList.add(this.options.position);
 
     const rootMenu = this.menuElem.querySelector('ul') as HTMLElement | null;
     if (rootMenu) {

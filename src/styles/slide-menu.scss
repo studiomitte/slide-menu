@@ -15,6 +15,9 @@
   --smdm-sm-menu-level: 0;
   --smdm-sm-transition-duration: 300ms;
   --smdm-sm-min-width-fold: 640px;
+
+  // Optional override — set to a length to give foldable panels a different width than the slider
+  // --smdm-sm-foldable-width: 480px;
 }
 
 // // If screen is larger, set to JS configured menu width
@@ -28,6 +31,7 @@
   // Calculated per-instance so each .slide-menu uses its own JS-set vars
   --smdm-sm-calc-menu-width: var(--smdm-sm-menu-width);
   --smdm-sm-calc-slide-width: min(100vw, var(--smdm-sm-calc-menu-width));
+  --smdm-sm-calc-foldable-width: var(--smdm-sm-foldable-width, var(--smdm-sm-calc-slide-width));
   --smdm-sm-calc-wrapper-translation: calc(
     var(--smdm-sm-calc-slide-width) * var(--smdm-sm-menu-level) * -1
   );
@@ -94,7 +98,7 @@
 
   &__submenu {
     display: none;
-    width: var(--smdm-sm-calc-menu-width);
+    width: var(--smdm-sm-calc-slide-width);
     margin: 0;
     padding-left: 0;
     list-style: none;
@@ -155,6 +159,7 @@
 
   &__submenu--foldable {
     background-color: var(--smdm-sm-color-bg);
+    width: var(--smdm-sm-calc-foldable-width);
     height: 100vh;
     overflow-x: auto;
     // display: none;
@@ -173,6 +178,11 @@
   &__foldable__wrapper {
     display: none;
     overflow-y: auto;
+  }
+
+  &--fold-open {
+    // Override any host-project width so the container expands to fit slider + foldable panels
+    width: fit-content !important;
   }
 
   &--fold-open &__foldable__wrapper {

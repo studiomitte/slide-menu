@@ -7,33 +7,33 @@ export declare class SlideMenu {
     private activeSubmenu;
     private lastFocusedElement;
     private isOpen;
-    private isAnimating;
-    private lastAction;
     private readonly slides;
     private readonly sortedSlides;
+    private readonly slidesByElem;
+    private readonly fold;
+    private readonly animation;
+    private readonly keyboard;
     private readonly options;
     private readonly menuTitleDefaultText;
+    private readonly cachedDefaultOpenTarget;
     private readonly menuElem;
     private readonly sliderElem;
     private readonly menuTitle;
     private readonly sliderWrapperElem;
     private readonly foldableWrapperElem;
     private resizeObserver;
-    private readonly boundOnTransitionEnd;
     private outsideClickHandler;
-    private keydownHandler;
-    private menuKeydownHandler;
     private visibilityTimeoutId;
     private navigateTimeoutId;
     constructor(elem?: HTMLElement | null, options?: Partial<SlideMenuOptions>);
-    private get defaultOpenTarget();
+    private resolveDefaultOpenTarget;
     private get rootSlide();
     get isFoldOpen(): boolean;
     /**
      * Clean up all event listeners, observers, and pending timeouts
      */
     destroy(): void;
-    debugLog(...args: any[]): void;
+    private debugLog;
     /**
      * Toggle the menu
      */
@@ -57,8 +57,6 @@ export declare class SlideMenu {
      * Navigate one menu hierarchy back if possible
      */
     back(closeFold?: boolean): void;
-    private closeFold;
-    private openFold;
     /**
      * Navigate to a specific submenu of link on any level (useful to open the correct hierarchy directly), if no submenu is found opens the submenu of link directly
      */
@@ -78,25 +76,20 @@ export declare class SlideMenu {
      * Set up all event handlers
      */
     private initEventHandlers;
-    private onTransitionEnd;
-    private initKeybindings;
     /**
      * Trigger a custom event to support callbacks
      */
     private triggerEvent;
     markSelectedItem(anchor: Element): void;
     /**
-     * Start the slide animation (the CSS transition)
-     */
-    private moveElem;
-    /**
      * Initialize the menu
      */
     private initMenu;
     /**
-     * Pause the CSS transitions, to apply CSS changes directly without an animation
+     * Set up the ResizeObserver that opens/closes the fold at the minWidthFold breakpoint.
+     * Only called when the menu actually has foldable items.
      */
-    private runWithoutAnimation;
+    private initResizeObserver;
     /**
      * Enhance the markup of menu items which contain a submenu and move them into the slider
      */

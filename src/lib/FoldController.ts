@@ -38,7 +38,9 @@ export class ActiveFoldController implements FoldController {
 
   close(): void {
     this.slides.forEach((slide) => {
-      slide.appendTo(this.sliderWrapperElem);
+      if (slide.isFoldable) {
+        slide.appendTo(this.sliderWrapperElem);
+      }
     });
     this.menuElem.classList.remove(CLASSES.foldOpen);
     this._isOpen = false;
