@@ -3,14 +3,10 @@ import { focusFirstTabAbleElemIn, validateQuery } from './utils/dom.js';
 
 let number = 0;
 
-export interface SlideHTMLElement extends HTMLElement {
-  _slide: Slide;
-}
-
 export class Slide {
   public readonly id: string;
   public readonly isFoldable: boolean = false;
-  public readonly parentMenuElem?: SlideHTMLElement;
+  public readonly parentMenuElem?: HTMLElement;
   public readonly name: string;
   public readonly ref: string;
 
@@ -22,27 +18,40 @@ export class Slide {
     return this.active;
   }
 
+  /**
+   * Construction phase: establishes identity and relationships only — no DOM writes except
+   * setting the element's id (needed for aria-controls wiring in mount()).
+   * Call mount() afterwards to apply all DOM decoration.
+   */
   constructor(
-    public readonly menuElem: SlideHTMLElement,
+    public readonly menuElem: HTMLElement,
     public readonly options: SlideMenuOptions,
     public readonly anchorElem?: HTMLAnchorElement,
+    slidesByElem?: WeakMap<HTMLElement, Slide>,
   ) {
-    this.ref = '/';
     this.id = menuElem.id ? menuElem.id : 'smdm-' + number;
     menuElem.id = this.id;
     number++;
 
     this.name = this.anchorElem?.textContent ?? '';
-    this.parentMenuElem = (anchorElem?.parentElement?.closest('ul') ?? undefined) as unknown as
-      | SlideHTMLElement
-      | undefined;
-    this.parent = this.parentMenuElem?._slide;
+    this.ref = anchorElem ? anchorElem.href.replace(window.location.origin, '') : '/';
+    this.parentMenuElem = anchorElem?.parentElement?.closest('ul') ?? undefined;
+    this.parent = this.parentMenuElem ? slidesByElem?.get(this.parentMenuElem) : undefined;
+    this.isFoldable = !!anchorElem?.classList.contains(CLASSES.hasFoldableSubmenu);
+  }
+
+  /**
+   * DOM decoration phase: adds CSS classes, injects back-link and navigator button elements,
+   * and sets data-action attributes. Called by SlideMenu after registering the slide in its
+   * WeakMap so that sibling/child mounts can look up the correct parent instance.
+   */
+  public mount(): this {
+    const { anchorElem, menuElem, options } = this;
 
     if (anchorElem) {
-      anchorElem?.classList.add(CLASSES.hasSubMenu);
-      this.ref = anchorElem.href.replace(window.location.origin, '');
+      anchorElem.classList.add(CLASSES.hasSubMenu);
 
-      if (!this.options.navigationButtons) {
+      if (!options.navigationButtons) {
         anchorElem.dataset.action = Action.NavigateTo;
         anchorElem.dataset.arg = this.id;
         anchorElem.role = 'button';
@@ -52,7 +61,6 @@ export class Slide {
     }
 
     menuElem.classList.add(CLASSES.submenu);
-    // menuElem.role = 'menu';
     menuElem.dataset.smdmId = this.id;
     menuElem.querySelectorAll('li').forEach((link) => {
       link.classList.add(CLASSES.listItem);
@@ -61,7 +69,6 @@ export class Slide {
       link.classList.add(CLASSES.item);
     });
 
-    this.isFoldable = !!anchorElem?.classList.contains(CLASSES.hasFoldableSubmenu);
     if (this.isFoldable) {
       menuElem.classList.add(CLASSES.foldableSubmenu);
     }
@@ -72,7 +79,7 @@ export class Slide {
 
     this.addNavigatorButton(options);
 
-    menuElem._slide = this;
+    return this;
   }
 
   private addBackLink(
@@ -192,10 +199,6 @@ export class Slide {
     return this.getAllParents().some((p) => p.id === possibleParentMenu?.id);
   }
 
-  /**
-   *
-   * @returns
-   */
   public getAllParents(): Slide[] {
     const parents: Slide[] = [];
 

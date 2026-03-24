@@ -1,4 +1,4 @@
-import { Slide, SlideHTMLElement } from './Slide.js';
+import { Slide } from './Slide.js';
 import { Action, SlideMenuOptions, MenuPosition, CLASSES, NAMESPACE } from './SlideMenuOptions.js';
 import { parentsOne, trapFocus } from './utils/dom.js';
 
@@ -37,6 +37,7 @@ export class SlideMenu {
 
   private readonly slides: Slide[] = [];
   private readonly sortedSlides: Slide[] = [];
+  private readonly slidesByElem = new WeakMap<HTMLElement, Slide>();
 
   private readonly options: SlideMenuOptions;
 
@@ -679,9 +680,12 @@ export class SlideMenu {
 
     this.menuElem.classList.add(this.options.position);
 
-    const rootMenu = this.menuElem.querySelector('ul') as unknown as SlideHTMLElement | null;
+    const rootMenu = this.menuElem.querySelector('ul') as HTMLElement | null;
     if (rootMenu) {
-      this.slides.push(new Slide(rootMenu, this.options));
+      const rootSlide = new Slide(rootMenu, this.options, undefined, this.slidesByElem);
+      this.slidesByElem.set(rootSlide.menuElem, rootSlide);
+      rootSlide.mount();
+      this.slides.push(rootSlide);
     }
 
     this.menuKeydownHandler = (event: KeyboardEvent) => {
@@ -764,15 +768,15 @@ export class SlideMenu {
         return;
       }
 
-      const submenu = anchor.parentElement.querySelector(
-        'ul',
-      ) as unknown as SlideHTMLElement | null;
+      const submenu = anchor.parentElement.querySelector('ul') as HTMLElement | null;
 
       if (!submenu) {
         return;
       }
 
-      const menuSlide = new Slide(submenu, this.options, anchor);
+      const menuSlide = new Slide(submenu, this.options, anchor, this.slidesByElem);
+      this.slidesByElem.set(menuSlide.menuElem, menuSlide);
+      menuSlide.mount();
       this.slides.push(menuSlide);
     });
 
