@@ -429,8 +429,8 @@ describe('slide menu', () => {
   // the trap must cover the whole menu: content before the controls and content after the slides
   // (narrow viewport: below minWidthFold the slides slide instead of fold, like the mobile menu of a site)
   describe('focus trap on slide level', () => {
-    before(() => cy.viewport(500, 900));
-    after(() => cy.viewport(1280, 720));
+    // Cypress resets the viewport before every test
+    beforeEach(() => cy.viewport(500, 900));
 
     it('should reach switch and footer inside the focus trap', () => {
       cy.visit(frontend + '/demo/test-config-default.html');
@@ -466,6 +466,70 @@ describe('slide menu', () => {
       cy.focused().should('have.attr', 'data-cypress', 'menu-footer-button');
 
       // forward from the footer must land on the switch
+      cy.realPress('Tab');
+      cy.focused().should('have.attr', 'data-cypress', 'menu-switch');
+    });
+
+    // a footer dropdown opens later and adds tabbable items, the trap ends must follow
+    it('should include footer items that open later and drop them when closed again', () => {
+      cy.visit(frontend + '/demo/test-config-default.html');
+
+      cy.get('[data-cypress="open-menu"]').should('be.visible').click();
+      cy.get('.slide-menu').should('be.visible');
+
+      cy.wait(500);
+
+      // closed: the list is not part of the cycle, the footer button is the last element
+      cy.get('[data-cypress="menu-switch"]').focus();
+      cy.realPress(['Shift', 'Tab']);
+      cy.focused().should('have.attr', 'data-cypress', 'menu-footer-button');
+
+      // open: the last list link is the new last element
+      cy.get('[data-cypress="menu-footer-button"]').click();
+      cy.get('[data-cypress="menu-footer-list"]').should('be.visible');
+
+      cy.get('[data-cypress="menu-switch"]').focus();
+      cy.realPress(['Shift', 'Tab']);
+      cy.focused().should('have.attr', 'data-cypress', 'footer-link-2');
+
+      cy.realPress('Tab');
+      cy.focused().should('have.attr', 'data-cypress', 'menu-switch');
+
+      // the new items are reachable in order
+      cy.get('[data-cypress="menu-footer-button"]').focus();
+      cy.realPress('Tab');
+      cy.focused().should('have.attr', 'data-cypress', 'footer-link-1');
+      cy.realPress('Tab');
+      cy.focused().should('have.attr', 'data-cypress', 'footer-link-2');
+      cy.realPress('Tab');
+      cy.focused().should('have.attr', 'data-cypress', 'menu-switch');
+
+      // closed again: the footer button is the last element again
+      cy.get('[data-cypress="menu-footer-button"]').click();
+      cy.get('[data-cypress="menu-footer-list"]').should('not.be.visible');
+
+      cy.get('[data-cypress="menu-footer-button"]').focus();
+      cy.realPress('Tab');
+      cy.focused().should('have.attr', 'data-cypress', 'menu-switch');
+    });
+
+    // slideDown/slideUp keep display: block while height moves between 0 and full height
+    it('should ignore footer items that are clipped while the list slides open or shut', () => {
+      cy.visit(frontend + '/demo/test-config-default.html');
+
+      cy.get('[data-cypress="open-menu"]').should('be.visible').click();
+      cy.get('.slide-menu').should('be.visible');
+
+      cy.wait(500);
+
+      cy.get('[data-cypress="menu-footer-list"]').then(($list) => {
+        $list[0].style.cssText = 'display: block; height: 0; overflow: hidden';
+      });
+
+      cy.get('[data-cypress="menu-switch"]').focus();
+      cy.realPress(['Shift', 'Tab']);
+      cy.focused().should('have.attr', 'data-cypress', 'menu-footer-button');
+
       cy.realPress('Tab');
       cy.focused().should('have.attr', 'data-cypress', 'menu-switch');
     });

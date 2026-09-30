@@ -68,7 +68,7 @@ export function focusFirstTabAbleElemIn(elem: HTMLElement | null | undefined): v
   firstTabbaleElem?.focus();
 }
 
-export function isVisible(element: Element) {
+function isVisible(element: Element) {
   // @ts-expect-error // stop checking when reaching document
   for (let el = element; el && el !== document; el = el.parentNode) {
     // If current element has display property 'none', return false
@@ -81,12 +81,41 @@ export function isVisible(element: Element) {
 }
 
 /**
- * All elements in `root` that can take focus right now.
- * Skips elements inside an `inert` ancestor (inactive slides) and elements that are not displayed.
+ * Stricter than `isVisible`: also false for `visibility: hidden` and for content clipped away by a
+ * collapsed ancestor. Content that slides open or shut (height animated from/to 0 with
+ * `overflow: hidden`) is still `display: block` while it moves, but cannot take focus visibly.
+ */
+function isRendered(element: Element): boolean {
+  for (let el: Element | null = element; el; el = el.parentElement) {
+    const style = getComputedStyle(el);
+    if (style.display === 'none') {
+      return false;
+    }
+    // `visibility` is inherited, so the computed value of the element itself is enough
+    if (el === element && style.visibility === 'hidden') {
+      return false;
+    }
+    // Inline and `display: contents` boxes have no client size and do not clip
+    const hasBox = style.display !== 'inline' && style.display !== 'contents';
+    if (el !== element && hasBox) {
+      const clipsY = style.overflowY !== 'visible' && el.clientHeight === 0;
+      const clipsX = style.overflowX !== 'visible' && el.clientWidth === 0;
+      if (clipsX || clipsY) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/**
+ * All elements in `root` that can take focus right now. The list is built on every call, so
+ * content that appears later (for example a footer menu that slides open) is included.
+ * Skips elements inside an `inert` ancestor (inactive slides) and elements that are not rendered.
  */
 export function getTabbableElements(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(TAB_ABLE_SELECTOR)).filter(
-    (elem) => !elem.closest('[inert]') && isVisible(elem),
+    (elem) => !elem.closest('[inert]') && isRendered(elem),
   );
 }
 
