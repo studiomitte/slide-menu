@@ -120,6 +120,7 @@
     <div class="slide-menu__overlay"></div>
     <nav class="slide-menu" id="test-menu-left" data-open-default="#news-1-2-3">
       <div class="slide-menu__controls">
+        <a href="#switch" data-cypress="menu-switch">Switch</a>
         <button
           type="button"
           class="slide-menu__control slide-menu--invisible-on-root-level"
@@ -479,6 +480,20 @@
           </ul>
         </li>
       </ul>
+      <div class="slide-menu--additional-content" data-cypress="menu-footer">
+        <button
+          type="button"
+          data-cypress="menu-footer-button"
+          aria-controls="test-footer-list"
+          aria-expanded="false"
+        >
+          Footer action
+        </button>
+        <div id="test-footer-list" data-cypress="menu-footer-list" style="display: none">
+          <a href="#footer-1" data-cypress="footer-link-1">Footer link 1</a>
+          <a href="#footer-2" data-cypress="footer-link-2">Footer link 2</a>
+        </div>
+      </div>
     </nav>
 
     <script>
@@ -486,6 +501,22 @@
         console.log('SlideMenu is ready!');
         const menuLeftElem = document.getElementById('test-menu-left');
         const menuLeft = new SlideMenu(menuLeftElem);
+
+        // The constructor moves all children into the slider and puts the footer before the
+        // slides. Re-append it, so it is the last tabbable content (like a real page footer).
+        const slider = menuLeftElem.querySelector('.slide-menu__slider');
+        const footer = menuLeftElem.querySelector('[data-cypress="menu-footer"]');
+        if (slider && footer) slider.append(footer);
+
+        // Footer list opens later, like a dropdown in a real page (toggled instantly here,
+        // the tests set the in-between animation states themselves).
+        const footerButton = footer?.querySelector('button');
+        const footerList = footer?.querySelector('#test-footer-list');
+        footerButton?.addEventListener('click', () => {
+          const open = footerList.style.display === 'none';
+          footerList.style.display = open ? 'block' : 'none';
+          footerButton.setAttribute('aria-expanded', String(open));
+        });
       };
 
       if (window.SlideMenu) {
