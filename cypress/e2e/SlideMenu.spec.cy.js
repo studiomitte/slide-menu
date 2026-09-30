@@ -426,6 +426,51 @@ describe('slide menu', () => {
     cy.focused().should('exist').closest('.slide-menu').should('not.exist');
   });
 
+  // the trap must cover the whole menu: content before the controls and content after the slides
+  // (narrow viewport: below minWidthFold the slides slide instead of fold, like the mobile menu of a site)
+  describe('focus trap on slide level', () => {
+    before(() => cy.viewport(500, 900));
+    after(() => cy.viewport(1280, 720));
+
+    it('should reach switch and footer inside the focus trap', () => {
+      cy.visit(frontend + '/demo/test-config-default.html');
+
+      cy.get('[data-cypress="open-menu"]').should('be.visible').click();
+      cy.get('.slide-menu').should('be.visible');
+
+      cy.wait(500);
+
+      const seen = new Set();
+      const collect = () =>
+        cy.focused().then(($el) => {
+          const id = $el.attr('data-cypress');
+          if (id) seen.add(id);
+        });
+
+      // forward cycle
+      for (let i = 0; i < 40; i++) {
+        cy.realPress('Tab');
+        cy.wait(50);
+        cy.focused().closest('.slide-menu').should('exist');
+        collect();
+      }
+
+      cy.then(() => {
+        expect(seen.has('menu-switch'), 'switch reached with Tab').to.equal(true);
+        expect(seen.has('menu-footer-button'), 'footer reached with Tab').to.equal(true);
+      });
+
+      // backward from the first tabbable element must land on the footer
+      cy.get('[data-cypress="menu-switch"]').focus();
+      cy.realPress(['Shift', 'Tab']);
+      cy.focused().should('have.attr', 'data-cypress', 'menu-footer-button');
+
+      // forward from the footer must land on the switch
+      cy.realPress('Tab');
+      cy.focused().should('have.attr', 'data-cypress', 'menu-switch');
+    });
+  });
+
   // check if trapping focus is working on slides
   it.skip('should trap focus inside menu with slides', () => {
     cy.visit(frontend + '/demo/test-config-default.html');

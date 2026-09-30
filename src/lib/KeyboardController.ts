@@ -87,12 +87,10 @@ export class KeyboardController {
         event.target.click();
       }
 
-      // WCAG — trap focus inside the open menu
-      const firstControl = menuElem.querySelector(
-        `.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`,
-      ) as HTMLElement | undefined;
-
-      trapFocus(event, this.callbacks.getActiveSubmenu()?.menuElem ?? menuElem, firstControl);
+      // WCAG — trap focus inside the open menu. The scope is the whole menu, not the active
+      // slide: controls and custom content (e.g. a footer) live outside the slide lists.
+      // Inactive slides are `inert`, so they drop out of the tab cycle by themselves.
+      trapFocus(event, menuElem);
     };
 
     menuElem.addEventListener('keydown', this.menuKeydownHandler);

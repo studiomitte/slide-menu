@@ -68,7 +68,7 @@ export function focusFirstTabAbleElemIn(elem: HTMLElement | null | undefined): v
   firstTabbaleElem?.focus();
 }
 
-function isVisible(element: Element) {
+export function isVisible(element: Element) {
   // @ts-expect-error // stop checking when reaching document
   for (let el = element; el && el !== document; el = el.parentNode) {
     // If current element has display property 'none', return false
@@ -80,34 +80,42 @@ function isVisible(element: Element) {
   return true;
 }
 
+/**
+ * All elements in `root` that can take focus right now.
+ * Skips elements inside an `inert` ancestor (inactive slides) and elements that are not displayed.
+ */
+export function getTabbableElements(root: HTMLElement): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(TAB_ABLE_SELECTOR)).filter(
+    (elem) => !elem.closest('[inert]') && isVisible(elem),
+  );
+}
+
 export function trapFocus(
   event: KeyboardEvent,
   targetElement: HTMLElement,
   firstElement?: HTMLElement,
   lastElement?: HTMLElement,
 ) {
-  const focusableElements = targetElement.querySelectorAll(TAB_ABLE_SELECTOR);
+  if (event.key !== 'Tab') {
+    return;
+  }
+
+  const focusableElements = getTabbableElements(targetElement);
   const firstFocusableElement = firstElement ?? focusableElements[0];
   const lastFocusableElement = lastElement ?? focusableElements[focusableElements.length - 1];
 
-  const isTabPressed = event.key === 'Tab';
-
-  if (!isTabPressed) {
+  if (!firstFocusableElement || !lastFocusableElement) {
     return;
   }
 
   if (event.shiftKey) {
     if (document.activeElement === firstFocusableElement) {
-      // @ts-ignore
       lastFocusableElement.focus();
       event.preventDefault();
     }
-  } else {
-    if (document.activeElement === lastFocusableElement) {
-      // @ts-ignore
-      firstFocusableElement.focus();
-      event.preventDefault();
-    }
+  } else if (document.activeElement === lastFocusableElement) {
+    firstFocusableElement.focus();
+    event.preventDefault();
   }
 }
 
