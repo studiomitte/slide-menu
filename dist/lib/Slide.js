@@ -149,14 +149,14 @@ export class Slide {
     getClosestUnfoldableSlide() {
         return this.isFoldable ? this.getAllParents().find((p) => !p.isFoldable) : this;
     }
-    getAllFoldableParents() {
-        return this.isFoldable ? this.getAllParents().filter((p) => p.isFoldable) : [];
+    getAllFoldableParents(parents = this.getAllParents()) {
+        return this.isFoldable ? parents.filter((p) => p.isFoldable) : [];
     }
-    getFirstUnfoldableParent() {
-        return this.getAllParents().find((p) => !p.canFold());
+    getFirstUnfoldableParent(parents = this.getAllParents()) {
+        return parents.find((p) => !p.canFold());
     }
-    hasParent(possibleParentMenu) {
-        return this.getAllParents().some((p) => p.id === (possibleParentMenu === null || possibleParentMenu === void 0 ? void 0 : possibleParentMenu.id));
+    hasParent(possibleParentMenu, parents = this.getAllParents()) {
+        return parents.some((p) => p.id === (possibleParentMenu === null || possibleParentMenu === void 0 ? void 0 : possibleParentMenu.id));
     }
     getAllParents() {
         const parents = [];

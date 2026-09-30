@@ -33,9 +33,9 @@ export declare class Slide {
     disableTabbing(): void;
     appendTo(elem: HTMLElement): this;
     getClosestUnfoldableSlide(): Slide | undefined;
-    getAllFoldableParents(): Slide[];
-    getFirstUnfoldableParent(): Slide | undefined;
-    hasParent(possibleParentMenu: Slide | undefined): boolean;
+    getAllFoldableParents(parents?: Slide[]): Slide[];
+    getFirstUnfoldableParent(parents?: Slide[]): Slide | undefined;
+    hasParent(possibleParentMenu: Slide | undefined, parents?: Slide[]): boolean;
     getAllParents(): Slide[];
     /**
      * Focus the first tabbable element in the menu

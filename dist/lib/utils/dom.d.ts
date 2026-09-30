@@ -5,6 +5,12 @@ export declare function parentsOne(elem: Node, selector: string): HTMLElement | 
 export declare function getDistanceFromTop(element: Element): number;
 export declare const TAB_ABLE_SELECTOR = "a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type=\"text\"]:not([disabled]), input[type=\"radio\"]:not([disabled]), input[type=\"checkbox\"]:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex=\"-1\"]):not([disabled])";
 export declare function focusFirstTabAbleElemIn(elem: HTMLElement | null | undefined): void;
+/**
+ * All elements in `root` that can take focus right now. The list is built on every call, so
+ * content that appears later (for example a footer menu that slides open) is included.
+ * Skips elements inside an `inert` ancestor (inactive slides) and elements that are not rendered.
+ */
+export declare function getTabbableElements(root: HTMLElement): HTMLElement[];
 export declare function trapFocus(event: KeyboardEvent, targetElement: HTMLElement, firstElement?: HTMLElement, lastElement?: HTMLElement): void;
 export declare function alignTop(elem: HTMLElement): void;
 export declare function validateQuery(str: string): boolean;

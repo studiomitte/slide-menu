@@ -61,27 +61,60 @@ function isVisible(element) {
     }
     return true;
 }
+/**
+ * Stricter than `isVisible`: also false for `visibility: hidden` and for content clipped away by a
+ * collapsed ancestor. Content that slides open or shut (height animated from/to 0 with
+ * `overflow: hidden`) is still `display: block` while it moves, but cannot take focus visibly.
+ */
+function isRendered(element) {
+    for (let el = element; el; el = el.parentElement) {
+        const style = getComputedStyle(el);
+        if (style.display === 'none') {
+            return false;
+        }
+        // `visibility` is inherited, so the computed value of the element itself is enough
+        if (el === element && style.visibility === 'hidden') {
+            return false;
+        }
+        // Inline and `display: contents` boxes have no client size and do not clip
+        const hasBox = style.display !== 'inline' && style.display !== 'contents';
+        if (el !== element && hasBox) {
+            const clipsY = style.overflowY !== 'visible' && el.clientHeight === 0;
+            const clipsX = style.overflowX !== 'visible' && el.clientWidth === 0;
+            if (clipsX || clipsY) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+/**
+ * All elements in `root` that can take focus right now. The list is built on every call, so
+ * content that appears later (for example a footer menu that slides open) is included.
+ * Skips elements inside an `inert` ancestor (inactive slides) and elements that are not rendered.
+ */
+export function getTabbableElements(root) {
+    return Array.from(root.querySelectorAll(TAB_ABLE_SELECTOR)).filter((elem) => !elem.closest('[inert]') && isRendered(elem));
+}
 export function trapFocus(event, targetElement, firstElement, lastElement) {
-    const focusableElements = targetElement.querySelectorAll(TAB_ABLE_SELECTOR);
+    if (event.key !== 'Tab') {
+        return;
+    }
+    const focusableElements = getTabbableElements(targetElement);
     const firstFocusableElement = firstElement !== null && firstElement !== void 0 ? firstElement : focusableElements[0];
     const lastFocusableElement = lastElement !== null && lastElement !== void 0 ? lastElement : focusableElements[focusableElements.length - 1];
-    const isTabPressed = event.key === 'Tab';
-    if (!isTabPressed) {
+    if (!firstFocusableElement || !lastFocusableElement) {
         return;
     }
     if (event.shiftKey) {
         if (document.activeElement === firstFocusableElement) {
-            // @ts-ignore
             lastFocusableElement.focus();
             event.preventDefault();
         }
     }
-    else {
-        if (document.activeElement === lastFocusableElement) {
-            // @ts-ignore
-            firstFocusableElement.focus();
-            event.preventDefault();
-        }
+    else if (document.activeElement === lastFocusableElement) {
+        firstFocusableElement.focus();
+        event.preventDefault();
     }
 }
 export function alignTop(elem) {

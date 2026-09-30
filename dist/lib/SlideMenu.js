@@ -276,13 +276,13 @@ export class SlideMenu {
         const nextMenu = this.findNextMenu(target);
         const previousMenu = this.activeSubmenu;
         const parents = nextMenu.getAllParents();
-        const firstUnfoldableParent = nextMenu.getFirstUnfoldableParent();
-        const visibleSlides = new Set([nextMenu, ...nextMenu.getAllFoldableParents()]);
+        const firstUnfoldableParent = nextMenu.getFirstUnfoldableParent(parents);
+        const visibleSlides = new Set([nextMenu, ...nextMenu.getAllFoldableParents(parents)]);
         if (firstUnfoldableParent) {
             visibleSlides.add(firstUnfoldableParent);
         }
         const isNavigatingBack = previousMenu === null || previousMenu === void 0 ? void 0 : previousMenu.hasParent(nextMenu);
-        const isNavigatingForward = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.hasParent(previousMenu);
+        const isNavigatingForward = nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.hasParent(previousMenu, parents);
         if (runInForeground) {
             this.triggerEvent(Action.Navigate);
             if (isNavigatingBack) {
@@ -332,7 +332,7 @@ export class SlideMenu {
         if (nextMenu.canFold()) {
             this.fold.open();
             // Enable Tabbing for foldable Parents
-            nextMenu.getAllParents().forEach((menu) => {
+            parents.forEach((menu) => {
                 if (menu.canFold()) {
                     menu.enableTabbing();
                 }
@@ -398,7 +398,7 @@ export class SlideMenu {
         }
     }
     hideControlsIfOnRootLevel(level) {
-        const controlsToHideIfOnRootLevel = document.querySelectorAll(`.${CLASSES.control}.${CLASSES.hiddenOnRoot}, .${CLASSES.control}.${CLASSES.invisibleOnRoot}`);
+        const controlsToHideIfOnRootLevel = this.menuElem.querySelectorAll(`.${CLASSES.control}.${CLASSES.hiddenOnRoot}, .${CLASSES.control}.${CLASSES.invisibleOnRoot}`);
         if (level === 0) {
             controlsToHideIfOnRootLevel.forEach((elem) => {
                 elem.setAttribute('tabindex', '-1');
@@ -411,7 +411,7 @@ export class SlideMenu {
         }
     }
     setSlideLevel(nextMenu, isNavigatingBack = false) {
-        const activeNum = Array.from(this.sliderWrapperElem.querySelectorAll(`.${CLASSES.active}, .${CLASSES.current}`)).length;
+        const activeNum = this.slides.filter((slide) => slide.isActive && !slide.isFoldable).length;
         const navDecrement = !(nextMenu === null || nextMenu === void 0 ? void 0 : nextMenu.canFold()) ? Number(isNavigatingBack) : 0;
         const level = Math.max(1, activeNum) - 1 - navDecrement;
         this.setBodyTagSlideLevel(level);

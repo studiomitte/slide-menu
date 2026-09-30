@@ -56,7 +56,6 @@ export class KeyboardController {
     initMenuKeybindings() {
         const menuElem = this.callbacks.getMenuElem();
         this.menuKeydownHandler = (event) => {
-            var _a, _b;
             // WCAG — anchor[role="button"] elements must respond to Space
             if (event.key === ' ' &&
                 event.target instanceof HTMLAnchorElement &&
@@ -64,9 +63,10 @@ export class KeyboardController {
                 event.preventDefault();
                 event.target.click();
             }
-            // WCAG — trap focus inside the open menu
-            const firstControl = menuElem.querySelector(`.${CLASSES.controls} .${CLASSES.control}:not([disabled]):not([tabindex="-1"])`);
-            trapFocus(event, (_b = (_a = this.callbacks.getActiveSubmenu()) === null || _a === void 0 ? void 0 : _a.menuElem) !== null && _b !== void 0 ? _b : menuElem, firstControl);
+            // WCAG — trap focus inside the open menu. The scope is the whole menu, not the active
+            // slide: controls and custom content (e.g. a footer) live outside the slide lists.
+            // Inactive slides are `inert`, so they drop out of the tab cycle by themselves.
+            trapFocus(event, menuElem);
         };
         menuElem.addEventListener('keydown', this.menuKeydownHandler);
     }
