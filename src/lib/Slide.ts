@@ -187,16 +187,19 @@ export class Slide {
     return this.isFoldable ? this.getAllParents().find((p) => !p.isFoldable) : this;
   }
 
-  public getAllFoldableParents(): Slide[] {
-    return this.isFoldable ? this.getAllParents().filter((p) => p.isFoldable) : [];
+  public getAllFoldableParents(parents: Slide[] = this.getAllParents()): Slide[] {
+    return this.isFoldable ? parents.filter((p) => p.isFoldable) : [];
   }
 
-  public getFirstUnfoldableParent(): Slide | undefined {
-    return this.getAllParents().find((p) => !p.canFold());
+  public getFirstUnfoldableParent(parents: Slide[] = this.getAllParents()): Slide | undefined {
+    return parents.find((p) => !p.canFold());
   }
 
-  public hasParent(possibleParentMenu: Slide | undefined): boolean {
-    return this.getAllParents().some((p) => p.id === possibleParentMenu?.id);
+  public hasParent(
+    possibleParentMenu: Slide | undefined,
+    parents: Slide[] = this.getAllParents(),
+  ): boolean {
+    return parents.some((p) => p.id === possibleParentMenu?.id);
   }
 
   public getAllParents(): Slide[] {

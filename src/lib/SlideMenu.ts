@@ -367,14 +367,14 @@ export class SlideMenu {
     const nextMenu: Slide = this.findNextMenu(target);
     const previousMenu = this.activeSubmenu;
     const parents = nextMenu.getAllParents();
-    const firstUnfoldableParent = nextMenu.getFirstUnfoldableParent();
-    const visibleSlides = new Set([nextMenu, ...nextMenu.getAllFoldableParents()]);
+    const firstUnfoldableParent = nextMenu.getFirstUnfoldableParent(parents);
+    const visibleSlides = new Set([nextMenu, ...nextMenu.getAllFoldableParents(parents)]);
     if (firstUnfoldableParent) {
       visibleSlides.add(firstUnfoldableParent);
     }
 
     const isNavigatingBack = previousMenu?.hasParent(nextMenu);
-    const isNavigatingForward = nextMenu?.hasParent(previousMenu);
+    const isNavigatingForward = nextMenu?.hasParent(previousMenu, parents);
 
     if (runInForeground) {
       this.triggerEvent(Action.Navigate);
@@ -439,7 +439,7 @@ export class SlideMenu {
       this.fold.open();
 
       // Enable Tabbing for foldable Parents
-      nextMenu.getAllParents().forEach((menu) => {
+      parents.forEach((menu) => {
         if (menu.canFold()) {
           menu.enableTabbing();
         }
@@ -519,7 +519,7 @@ export class SlideMenu {
   }
 
   private hideControlsIfOnRootLevel(level: number): void {
-    const controlsToHideIfOnRootLevel = document.querySelectorAll(
+    const controlsToHideIfOnRootLevel = this.menuElem.querySelectorAll(
       `.${CLASSES.control}.${CLASSES.hiddenOnRoot}, .${CLASSES.control}.${CLASSES.invisibleOnRoot}`,
     );
 
@@ -535,9 +535,7 @@ export class SlideMenu {
   }
 
   private setSlideLevel(nextMenu?: Slide, isNavigatingBack: boolean = false): number {
-    const activeNum = Array.from(
-      this.sliderWrapperElem.querySelectorAll(`.${CLASSES.active}, .${CLASSES.current}`),
-    ).length;
+    const activeNum = this.slides.filter((slide) => slide.isActive && !slide.isFoldable).length;
     const navDecrement = !nextMenu?.canFold() ? Number(isNavigatingBack) : 0;
     const level = Math.max(1, activeNum) - 1 - navDecrement;
     this.setBodyTagSlideLevel(level);

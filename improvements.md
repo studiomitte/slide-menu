@@ -234,17 +234,17 @@ Recommendations
 | 1   | undefined guard                        | ✅ Fixed |
 | 2   | Double setLastAction                   | ✅ Fixed |
 | 3   | Timeout race (focus)                   | ⬜ Open  |
-| 4   | DOM query for level                    | ⬜ Open  |
+| 4   | DOM query for level                    | ✅ Fixed |
 | 5   | Duplicate classList.add                | ✅ Fixed |
 | 6   | defaultOpenTarget re-computed          | ✅ Fixed |
-| 7   | hideControlsIfOnRootLevel global scope | ⬜ Open  |
+| 7   | hideControlsIfOnRootLevel global scope | ✅ Fixed |
 | 8   | Dead lastAction field                  | ✅ Fixed |
 | 9   | FoldController.close re-appends all    | ✅ Fixed |
 | 10  | Double show() in open()                | ⬜ Open  |
 | 11  | toggleVisibility re-entrancy           | ⬜ Open  |
 | 12  | Unguarded module-level side effects    | ⬜ Open  |
 | 13  | window.innerWidth in Slide             | ⬜ Open  |
-| 14  | Redundant getAllParents calls          | ⬜ Open  |
+| 14  | Redundant getAllParents calls          | ✅ Fixed |
 | 15  | Direction dead export                  | ⬜ Open  |
 | 16  | debugLog public                        | ✅ Fixed |
 | 17  | Slide.options full bag                 | ⬜ Open  |
